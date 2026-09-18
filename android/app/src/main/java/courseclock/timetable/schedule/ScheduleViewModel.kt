@@ -46,6 +46,13 @@ class ScheduleViewModel(application: Application) : AndroidViewModel(application
      */
     fun isTableReady(): Boolean = ::table.isInitialized
 
+    /**
+     * 就绪时返回当前课表，否则 null。需要读 [table] 的 UI 入口一律走这里拿，
+     * 不要直接摸 lateinit —— 两个"表不存在"的窗口（冷启动加载中、库里一张表都没有）
+     * 里直接读会抛 UninitializedPropertyAccessException。
+     */
+    fun tableOrNull(): TableBean? = if (::table.isInitialized) table else null
+
     fun isTimeListReady(): Boolean = ::timeList.isInitialized
 
     /**

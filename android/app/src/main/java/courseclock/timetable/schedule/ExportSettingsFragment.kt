@@ -22,12 +22,13 @@ class ExportSettingsFragment : BaseDialogFragment() {
 
     private val viewModel by activityViewModels<ScheduleViewModel>()
 
+    /**
+     * 导出文件名的默认名。课表可能尚未就绪（见 ScheduleViewModel.tableOrNull）：
+     * 拿不到名字就退回「我的课表」，不裸读 lateinit —— 这个 Fragment 的展示入口
+     * 已经有 requireTable 把关，这里是对同一契约的容错兜底。
+     */
     val tableName by lazy(LazyThreadSafetyMode.NONE) {
-        if (viewModel.table.tableName == "") {
-            "我的课表"
-        } else {
-            viewModel.table.tableName
-        }
+        viewModel.tableOrNull()?.tableName?.takeIf { it.isNotEmpty() } ?: "我的课表"
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

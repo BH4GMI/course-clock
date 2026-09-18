@@ -1,5 +1,50 @@
 # Bug 排查与修改手册
 
+## 2026-09-19：空状态（无课表）下主界面入口必崩
+
+- 触发：全新安装（或把课表删光）后，首页右下角「+」一点即崩——真机（Android 15 / HyperOS）
+  实测 `kotlin.UninitializedPropertyAccessException: lateinit property table has not been
+  initialized`，崩溃点 `ScheduleActivity.initEvent` 的 addBtn 监听。这是发布前实机验证发现的
+  缺陷，与 R8 无关（同一行为在未混淆构建上同样存在）。
+
+### 根因
+
+- `ScheduleViewModel.table` 是 `lateinit var`：库里有默认课表时由 `initView` 的协程赋值。
+  全新安装**一张表都没有**，`getDefaultTable()` 返回 null、协程提前 return，`table` 永远不会
+  初始化——而主界面一堆点击监听直接裸读它。同一类裸读散布在：加号加课、顶栏日期行
+  （周数面板 `showWeekPicker`）、分享导出（面板内 `ExportSettingsFragment.tableName` 的
+  lazy）、底部面板「修改当前周 / 上课时间 / 更换背景 / 已添课程」四个入口、抽屉「课程管理」、
+  侧栏表列表的设置项与切表。此前只有抽屉「课程管理」一处有 `isTableReady()` 手工守卫。
+- 契约层面的问题是：**「课表可能不存在」这件事只被三处调用点各自知道**，其余入口默认它
+  永远就绪。修复必须让"读课表先过闸门"成为唯一路径，而不是再补几处 if。
+
+### 修复（契约层：统一闸门，一处定义）
+
+- `ScheduleViewModel` 新增 `tableOrNull(): TableBean?`——需要读 `table` 的 UI 一律从它拿，
+  不再直接摸 lateinit；`isTableReady()` 保留（Fragment 侧三处仍在用）。
+- `ScheduleActivity` 新增 `requireTable(action: (TableBean) -> Unit)` 闸门：就绪时把
+  `table` 交给回调（调用方不许再回头读 `viewModel.table`）；未就绪时区分两种状态给提示——
+  `initView` 已确认一张表都没有（新增 `tableMissing` 标记）时提示「还没有课表，先导入或新建
+  一张吧~」，加载窗口内提示「课表还在加载，稍等一下再试~」。上述全部 8 类入口（含原先
+  手写守卫的抽屉行，顺带去掉重复逻辑）统一改走闸门。
+- `ExportSettingsFragment.tableName` 的 lazy 改走 `tableOrNull()` 容错（拿不到名字退回
+  「我的课表」）：它的展示入口已有闸门把关，这里是同一契约的兜底，防止未来新增入口绕过。
+
+### 验证
+
+- 新增 `EmptyStateEntryGuardTest`（Robolectric，真 Activity + 空 Room 库）：
+  - 空状态下逐个 `performClick` 上述全部入口——守卫失效时 `performClick` 会把
+    `UninitializedPropertyAccessException` 直接抛出来；同时断言没有页面被拉起、
+    「还没有课表」引导文字真实出现在窗口上。
+  - 反向用例：播种一张课表后轮询点「+」，必须在限时内拉起 `AddCourseActivity`——
+    钉住闸门不会把正常路径也拦住。
+  - 注意（测试写法）：`AppDatabase` 是单例，**同一测试类的各方法共享同一个库文件**，
+    用例必须先 `clearAllTables()` + `clearAllTimeTables()` 清场，且课表对时间表有外键，
+    播种课表前要先播 `TimeTableBean(id = 1)`。
+- 真机复测（Wi-Fi adb 连接的实机，空状态）：+、顶栏日期行、分享、底部面板四入口全部点击，
+  `logcat -s AndroidRuntime:E` 无任何输出、进程 PID 全程不变；提示文案由单测钉住。
+- 全量单测（`:app:testDebugUnitTest`）通过。
+
 ## 2026-09-18：背景图资源生命周期与日视图小部件多实例身份
 
 - 触发：在不影响体验（日视图下课提醒保持每分钟更新、课程通知保持准时）的前提下优化健壮性、

@@ -86,6 +86,12 @@ class ScheduleActivity : BaseActivity() {
     /** 被首次声明挡下的导入引导（见 [introPending]）：声明一讲完就补弹。 */
     private var importPromptDeferred = false
 
+    /**
+     * initView 已确认**一张课表都没有**（全新安装 / 用户删光了），区别于"表还在加载"。
+     * [requireTable] 据此把提示分成两种：前者引导去导入/新建，后者请用户稍候。
+     */
+    private var tableMissing = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (getPrefer().getBoolean(Const.KEY_HIDE_NAV_BAR, false)) {
@@ -135,10 +141,35 @@ class ScheduleActivity : BaseActivity() {
         }
     }
 
-    /** 从底部滑出周数面板（设计稿 2）。 */
-    private fun showWeekPicker() {
-        WeekPickerFragment.newInstance(viewModel.table.maxWeek, viewModel.selectedWeek)
+    /** 从底部滑出周数面板（设计稿 2）。maxWeek 由 [requireTable] 就绪后传入。 */
+    private fun showWeekPicker(maxWeek: Int) {
+        WeekPickerFragment.newInstance(maxWeek, viewModel.selectedWeek)
                 .show(supportFragmentManager, "weekPicker")
+    }
+
+    /**
+     * 所有「没有课表就不该发生」的动作的统一闸门。
+     *
+     * `viewModel.table` 是 lateinit：表还没从库里读出来（冷启动的加载窗口）或一张表都没有
+     * （全新安装 / 删光了）时它不存在，直接读必抛 UninitializedPropertyAccessException。
+     * 这类入口原先各自裸读 —— 加号加课、顶栏日期行（周数面板）、底部面板的当前周/上课时间/
+     * 背景/课程入口、分享导出、抽屉「课程管理」、侧栏表列表的设置与切表 —— 空状态下全都是
+     * 一点就崩。
+     *
+     * 闸门就绪时把 table 交给 [action]，调用方不许再回头读 `viewModel.table`；
+     * 未就绪时按 [tableMissing] 给出对应的提示并拦下动作。
+     */
+    private fun requireTable(action: (TableBean) -> Unit) {
+        if (tableMissing) {
+            ui.content.longSnack("还没有课表，先导入或新建一张吧~")
+            return
+        }
+        val table = viewModel.tableOrNull()
+        if (table == null) {
+            ui.content.longSnack("课表还在加载，稍等一下再试~")
+            return
+        }
+        action(table)
     }
 
     private fun initTheme() {
@@ -223,16 +254,18 @@ class ScheduleActivity : BaseActivity() {
         adapter.setOnItemChildClickListener { _, view, _ ->
             when (view.id) {
                 R.id.menu_setting -> {
-                    startActivityForResult(Intent(this,
-                            ScheduleSettingsActivity::class.java).apply {
-                        putExtra("tableData", viewModel.table)
-                    }, Const.REQUEST_CODE_SCHEDULE_SETTING)
+                    requireTable { table ->
+                        startActivityForResult(Intent(this,
+                                ScheduleSettingsActivity::class.java).apply {
+                            putExtra("tableData", table)
+                        }, Const.REQUEST_CODE_SCHEDULE_SETTING)
+                    }
                 }
             }
         }
         adapter.setOnItemClickListener { _, _, position ->
-            if (position < data.size) {
-                if (data[position].id != viewModel.table.id) {
+            requireTable { table ->
+                if (position < data.size && data[position].id != table.id) {
                     launch {
                         viewModel.changeDefaultTable(data[position].id)
                         refreshAfterDefaultTableChanged()
@@ -278,26 +311,34 @@ class ScheduleActivity : BaseActivity() {
             startActivityForResult(
                     Intent(this, ScheduleManageActivity::class.java), Const.REQUEST_CODE_SCHEDULE_SETTING)
         }
+        // 这三个入口都要把**当前课表**带去设置页定位到对应条目：没有课表时定位无从谈起，
+        // 统一走 requireTable（空状态下点这几个原先会读 lateinit 必崩）。
         ui.changeWeekBtn.setOnClickListener {
-            startActivityForResult(Intent(this,
-                    ScheduleSettingsActivity::class.java).apply {
-                putExtra("tableData", viewModel.table)
-                putExtra("settingItem", "当前周")
-            }, Const.REQUEST_CODE_SCHEDULE_SETTING)
+            requireTable { table ->
+                startActivityForResult(Intent(this,
+                        ScheduleSettingsActivity::class.java).apply {
+                    putExtra("tableData", table)
+                    putExtra("settingItem", "当前周")
+                }, Const.REQUEST_CODE_SCHEDULE_SETTING)
+            }
         }
         ui.timeBtn.setOnClickListener {
-            startActivityForResult(Intent(this,
-                    ScheduleSettingsActivity::class.java).apply {
-                putExtra("tableData", viewModel.table)
-                putExtra("settingItem", "上课时间")
-            }, Const.REQUEST_CODE_SCHEDULE_SETTING)
+            requireTable { table ->
+                startActivityForResult(Intent(this,
+                        ScheduleSettingsActivity::class.java).apply {
+                    putExtra("tableData", table)
+                    putExtra("settingItem", "上课时间")
+                }, Const.REQUEST_CODE_SCHEDULE_SETTING)
+            }
         }
         ui.changeBgBtn.setOnClickListener {
-            startActivityForResult(Intent(this,
-                    ScheduleSettingsActivity::class.java).apply {
-                putExtra("tableData", viewModel.table)
-                putExtra("settingItem", "课程表背景")
-            }, Const.REQUEST_CODE_SCHEDULE_SETTING)
+            requireTable { table ->
+                startActivityForResult(Intent(this,
+                        ScheduleSettingsActivity::class.java).apply {
+                    putExtra("tableData", table)
+                    putExtra("settingItem", "课程表背景")
+                }, Const.REQUEST_CODE_SCHEDULE_SETTING)
+            }
         }
         // 「捷径 → 上课提醒」：不经过桌面小部件的入口，直接把用户送到设置页的提醒分组。
         // 用普通 startActivity 而不是 startActivityForResult：提醒设置不改变课表数据，
@@ -310,16 +351,18 @@ class ScheduleActivity : BaseActivity() {
         // 多课表里现在能直接切换默认表，所以这两个入口都要带结果启动：
         // 返回时经 REQUEST_CODE_SCHEDULE_SETTING 分支 initView() 重载，否则主页还是旧表。
         ui.courseBtn.setOnClickListener {
-            startActivityForResult(Intent(this, ScheduleManageActivity::class.java).apply {
-                putExtra("selectedTable", TableSelectBean(
-                        id = viewModel.table.id,
-                        background = viewModel.table.background,
-                        tableName = viewModel.table.tableName,
-                        maxWeek = viewModel.table.maxWeek,
-                        nodes = viewModel.table.nodes,
-                        type = viewModel.table.type
-                ))
-            }, Const.REQUEST_CODE_SCHEDULE_SETTING)
+            requireTable { table ->
+                startActivityForResult(Intent(this, ScheduleManageActivity::class.java).apply {
+                    putExtra("selectedTable", TableSelectBean(
+                            id = table.id,
+                            background = table.background,
+                            tableName = table.tableName,
+                            maxWeek = table.maxWeek,
+                            nodes = table.nodes,
+                            type = table.type
+                    ))
+                }, Const.REQUEST_CODE_SCHEDULE_SETTING)
+            }
         }
     }
 
@@ -415,24 +458,19 @@ class ScheduleActivity : BaseActivity() {
 
         ui.navRowCourse.setOnClickListener {
             Haptics.tap(ui.navRowCourse)
-            // 抽屉随手就能展开，而课表要等 initView 的协程读完库才有（`table` 是 lateinit）：
-            // 没就绪就跳，下一行读 `viewModel.table` 会直接抛未初始化异常。
-            // 原来那句 `postDelayed(360)` 只是把这个窗口掩盖小了，并没有消除它 ——
-            // 现在改成立刻跳转，就必须显式挡住。
-            if (!viewModel.isTableReady()) {
-                ui.drawerLayout.closeDrawer(GravityCompat.START)
-                ui.content.longSnack("课表还在加载，稍等一下再试~")
-                return@setOnClickListener
-            }
-            goFromDrawer {
+            // 抽屉随手就能展开，而课表要等 initView 的协程读完库才有（`table` 是 lateinit）。
+            // 没就绪/没有课表时统一由 requireTable 拦下并给对应提示，原先那句
+            // `postDelayed(360)` 只是把加载窗口掩盖小了，并没有消除它。
+            ui.drawerLayout.closeDrawer(GravityCompat.START, false)
+            requireTable { table ->
                 startActivityForResult(Intent(this, ScheduleManageActivity::class.java).apply {
                     putExtra("selectedTable", TableSelectBean(
-                            id = viewModel.table.id,
-                            background = viewModel.table.background,
-                            tableName = viewModel.table.tableName,
-                            maxWeek = viewModel.table.maxWeek,
-                            nodes = viewModel.table.nodes,
-                            type = viewModel.table.type
+                            id = table.id,
+                            background = table.background,
+                            tableName = table.tableName,
+                            maxWeek = table.maxWeek,
+                            nodes = table.nodes,
+                            type = table.type
                     ))
                 }, Const.REQUEST_CODE_SCHEDULE_SETTING)
             }
@@ -530,11 +568,14 @@ class ScheduleActivity : BaseActivity() {
     private fun initEvent() {
         ui.addBtn.setOnClickListener {
             Haptics.tap(ui.addBtn)
-            start<AddCourseActivity> {
-                putExtra("tableId", viewModel.table.id)
-                putExtra("maxWeek", viewModel.table.maxWeek)
-                putExtra("nodes", viewModel.table.nodes)
-                putExtra("id", -1)
+            // 没有课表就没有可加课的表：全新安装点这个 + 号原先直接读 lateinit 必崩。
+            requireTable { table ->
+                start<AddCourseActivity> {
+                    putExtra("tableId", table.id)
+                    putExtra("maxWeek", table.maxWeek)
+                    putExtra("nodes", table.nodes)
+                    putExtra("id", -1)
+                }
             }
         }
 
@@ -566,7 +607,9 @@ class ScheduleActivity : BaseActivity() {
 
         ui.shareBtn.setOnClickListener {
             Haptics.tap(ui.shareBtn)
-            ExportSettingsFragment().show(supportFragmentManager, null)
+            // 导出的每一份内容（时间表、课表、课程）都以当前课表为依据：没有课表就没有
+            // 可导出的东西，放行这个面板只会让下一步「选导出位置」读 lateinit 必崩。
+            requireTable { ExportSettingsFragment().show(supportFragmentManager, null) }
         }
 
         ui.importBtn.setOnClickListener {
@@ -580,7 +623,8 @@ class ScheduleActivity : BaseActivity() {
         for (entry in listOf(ui.dateView, ui.weekView, ui.weekDayView)) {
             entry.setOnClickListener {
                 Haptics.tap(entry)
-                showWeekPicker()
+                // 周数面板要按课表的周数建按钮：没有课表就没有可展示的面板。
+                requireTable { showWeekPicker(it.maxWeek) }
             }
         }
 
@@ -727,9 +771,13 @@ class ScheduleActivity : BaseActivity() {
             // 一张课表都没有（用户把课表删光了）时，后面所有初始化都没有依据 ——
             // 直接引导导入并结束，不要拿 null 去渲染界面和列表。
             val table = viewModel.getDefaultTable() ?: run {
+                // 记下「没有课表」这一状态：requireTable 据此把提示从「还在加载」换成
+                // 「先导入或新建」—— 两种状态对用户是两件不同的事，出口也不同。
+                tableMissing = true
                 showImportPrompt()
                 return@launch
             }
+            tableMissing = false
             viewModel.table = table
             viewModel.currentWeek = CourseUtils.countWeek(viewModel.table.startDate, viewModel.table.sundayFirst)
             viewModel.selectedWeek = viewModel.currentWeek
