@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  课程管理里的课程卡（设计稿 8）：88dp 高、圆角 20，底色是这门课的颜色（低透明度），
+  和课表里的色块一一对应。三行：课程名 / 教师 · 教室 / 周几第几节。
+  底色与第三行文字的颜色都在适配器里按 course.color 染（parseCourseColor，畸形值退回调色板）。
+-->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cv_course"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="96dp"
+    android:layout_gravity="center"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardCornerRadius="@dimen/group_radius"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp"
+    tools:layout_width="160dp">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:paddingTop="14dp"
+        android:paddingBottom="14dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_course_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="2"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            tools:text="高等数学" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_course_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            tools:text="张伟 · A-201" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_course_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:ellipsize="end"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:textSize="13sp"
+            tools:text="周一 第 1 - 2节" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</com.google.android.material.card.MaterialCardView>

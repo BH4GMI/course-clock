@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  底部面板（设计稿里的"从底部滑出的圆角面板"）。
+
+  面板的行为（上滑入场、下按住往下拖就能关、拖一半松手回弹、遮罩联动）由 BaseDialogFragment
+  继承的 BottomSheetDialogFragment 提供，这里只负责**外观**：一层 page_background 的圆角底 +
+  一条把手 + 一张同色卡片（卡片里才是各个页面的内容）。
+
+  为什么要自己画底：BottomSheetDialog 那层 `design_bottom_sheet` 自带一层表面色底，而且是在
+  内容挂载之后才由 Material 套上的，代码里改不掉（详见 bg_bottom_sheet_panel.xml）。露出它会在
+  把手位置多一条白横带。面板底色是 page_background（灰），所以每个页面里的选项卡要用
+  card_background（白）才看得出来。
+-->
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet_panel"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="32dp"
+        android:layout_height="4.5dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:alpha="0.6"
+        android:background="@drawable/bg_sheet_handle" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/base_card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@color/page_background"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.App.BottomSheet"
+        app:strokeWidth="0dp" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>

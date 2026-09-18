@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  右下角的「+」按钮。这是**多课表管理**那一屏用的（新建课表）；课程管理这一屏已经把它拿掉了
+  —— 那边最后一格就是虚线框的「添加课程」，一个页面里不该有两个"加号"、还干着两件事。
+
+  两个页签共用 fragment_list_manage.xml，所以按钮不再长在那个布局里（否则课程管理屏也会带上它），
+  由 ScheduleManageFragment 在运行时挂到根布局上。外观与改造前逐值一致。
+
+  外层 FrameLayout 只占按钮那一块（wrap_content + layout_gravity="end|bottom"），
+  不是 match_parent —— 后者会铺满整屏、把列表的触摸全吃掉（列表从此点不动）。
+  FrameLayout 自身不点击，落在它空白处的触摸照旧穿给下面的列表。
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="end|bottom"
+    android:layout_margin="16dp">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/fab_add"
+        android:layout_width="56dp"
+        android:layout_height="67dp"
+        android:fontFamily="@font/iconfont"
+        android:includeFontPadding="false"
+        android:text="@string/icon_add"
+        android:textSize="25sp"
+        app:cornerRadius="48dp" />
+
+</FrameLayout>

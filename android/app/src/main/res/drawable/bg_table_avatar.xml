@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  多课表卡片左侧色块的底（设计稿 7：64dp、圆角 16dp，里面写表名首字和周数区间）。
+  底色由代码按「当前表 = 主题强调色，其他表 = 课程调色板」染色，这里只定形状；
+  染色方式与课程详情的 v_color_bar 一致（background.mutate().setTint），不另造颜色资源。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <solid android:color="@android:color/white" />
+    <corners android:radius="8dp" />
+</shape>

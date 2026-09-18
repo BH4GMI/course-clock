@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「进入新页面」的箭头（设计稿里明确区分两种箭头：这个表示点进去还有一页）。
+  设置页、导入课程、关于都用它；就地选择的那种用 ic_chevron_updown。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M9.5,5.5 L16,12 L9.5,18.5"
+        android:strokeColor="@color/text_secondary"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="1.8" />
+</vector>

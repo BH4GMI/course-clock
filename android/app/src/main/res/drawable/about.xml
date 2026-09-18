@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  侧边栏「关于」图标：圆环 + i。描边画法。
+  侧边栏没有设 itemIconTint，图标按原样显示，所以必须自带深色，不能是纯白剪影。
+  源：design/about.svg
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FF233A6B"
+        android:strokeWidth="1.8"
+        android:pathData="M12,3a9,9 0 1 1 0,18a9,9 0 1 1 0,-18z" />
+    <path
+        android:fillColor="#FF233A6B"
+        android:pathData="M10.9,7.4a1.1,1.1 0 1 1 2.2,0a1.1,1.1 0 1 1 -2.2,0z" />
+    <path
+        android:fillColor="#FF233A6B"
+        android:pathData="M10.85,11.9a1.15,1.15 0 0 1 2.3,0v3.7a1.15,1.15 0 0 1 -2.3,0z" />
+</vector>

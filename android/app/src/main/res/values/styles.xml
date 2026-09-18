@@ -1,0 +1,140 @@
+<resources>
+    <!--
+      底部面板的形状：上方两角 24dp，贴底的两角不圆。
+      设计稿（2/4/5）里这些弹窗都是"从底部滑出的面板"，不是居中对话框；只圆上面两角才像面板。
+    -->
+    <style name="ShapeAppearance.App.BottomSheet" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeTopRight">16dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="coordinatorLayoutStyle">@style/Widget.Support.CoordinatorLayout</item>
+        <item name="colorSecondary">@color/colorPrimary</item>
+        <item name="android:colorBackground">@color/page_background</item>
+        <item name="colorSurface">@color/card_background</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="colorOnBackground">@color/text_primary</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.MyApp.SmallComponent
+        </item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.MyApp.MediumComponent
+        </item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.MyApp.LargeComponent
+        </item>
+        <item name="verticalRecyclerViewStyle">@style/VerticalRecyclerView</item>
+        <item name="android:windowSoftInputMode">adjustPan</item>
+        <item name="windowActionModeOverlay">true</item>
+    </style>
+
+    <!--
+      「就地选择」弹窗的**退出**动画。
+
+      只声明退出：进入动画不交给窗口动画，由 ChoicePopup.animateIn 自己驱动（缩放支点定在右缘）。
+      窗口动画这条路上支点不受本工程控制，真机上出现过"标志在右边、窗口却从左边展开"。
+    -->
+    <style name="ChoicePopupExitAnimation" parent="">
+        <item name="android:windowExitAnimation">@anim/choice_popup_exit</item>
+    </style>
+
+    <style name="ShapeAppearance.MyApp.SmallComponent" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="ShapeAppearance.MyApp.MediumComponent" parent="ShapeAppearance.MaterialComponents.MediumComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="ShapeAppearance.MyApp.LargeComponent" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <!--
+      桌面入口（ScheduleActivity）专用主题：只比 AppTheme 多一件事。
+
+      启动窗口在内容画出来之前一直是可见的，用主题默认的底色就会闪一下白，所以把它设成页面底色。
+
+      API 31+ 那一半（把系统强制的启动画面压成"看不出来"）必须写在 values-v31/styles.xml —— 资源
+      限定符是**覆盖**而非合并，没法只追加两个 item。这里只是那个基线。
+    -->
+    <style name="AppTheme.Launch" parent="AppTheme">
+        <item name="android:windowBackground">@color/page_background</item>
+    </style>
+
+    <style name="ButtonBackground">
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+    </style>
+
+    <style name="DialogButtonStyle" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="cornerRadius">8dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <attr name="verticalRecyclerViewStyle" format="reference" />
+
+    <style name="VerticalRecyclerView" parent="android:Widget">
+        <item name="android:scrollbars">vertical</item>
+    </style>
+
+
+    <style name="settings_subtitle">
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="settings_item_ll">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+
+    <style name="settings_item_tv_main">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+
+
+    <style name="ScheduleHeaderStyle">
+        <item name="android:textColor">@color/widget_panel_text_secondary</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@color/nodeIndex</item>
+    </style>
+
+    <style name="IconTextViewStyle">
+        <item name="android:textSize">24sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:fontFamily">@font/iconfont</item>
+    </style>
+
+</resources>

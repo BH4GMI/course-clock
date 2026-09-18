@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <!--
+        Android 13 (API 33) 起发通知需要这个运行时权限。当前 targetSdk 29 下系统走兼容
+        行为：安装后首次启动 activity 时自动弹系统权限框、默认临时授予，manifest 声明
+        与否不改变该行为。声明它的作用：满足 NotificationManagerCompat.notify 的权限
+        检查（否则 lint MissingPermission）；将来升 targetSdk 33 时它是必需项。运行时
+        兜底在 CourseReminderNotifier（areNotificationsEnabled 检查 + 日志）。
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!--
+        重启会清空 AlarmManager 里的全部闹钟，课程提醒必须靠这条广播重排。
+        normal 权限，不弹框。刻意**没有** SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM：
+        targetSdk 29 用精确闹钟本来就不需要权限，声明它反而会把 App Standby 桶钉在
+        WORKING_SET 或更低，降低后台配额。
+    -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!--
+        申请电池优化白名单（Doze 豁免）用。
+
+        没有它，ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS 会抛 SecurityException。
+        它不是"普通权限自动授予"，但也不弹权限框 —— 真正的用户确认发生在 ACTION_REQUEST_
+        IGNORE_BATTERY_OPTIMIZATIONS 那个系统对话框里，由用户点一下决定。
+
+        为什么必须有：真机实测深度 Doze 下未加白名单的闹钟会被 MIUI 的 `ssru` 策略推到约
+        一年后（详见 BatteryOptimization 的类文档），整夜待机之后的早课提醒就没了。
+    -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <application
+        android:name=".App"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:replace="android:allowBackup"
+        tools:targetApi="n">
+        <!--
+            带 intent-filter 的组件一律显式声明 android:exported，取值就是 targetSdk < 31 时的默认值
+            （即行为不变）：targetSdk 一旦升到 31+，缺这一行会**直接构建失败**。逐个的判断标准是
+            「谁需要从外部唤起它」——桌面入口 ScheduleActivity 要由桌面唤起、LoginWebActivity 要接
+            "用其他 App 打开分享文件"、小部件配置页要由桌面唤起、两个 AppWidgetProvider 要接系统
+            派发的 APPWIDGET_UPDATE。
+        -->
+        <!--
+            接"用其他 App 打开 .wakeup_schedule 备份文件"。
+
+            过滤条件**只能粗到 MIME 类型**，不要试图在这里按文件名拦：
+            - `application/octet-stream` 是"未知二进制文件"的通用兜底类型，所以任何应用
+              VIEW 一个未知类型文件都可能把这里列进候选（实测：连 `file:///…/foo.txt`
+              甚至**不带 data** 的 ACTION_VIEW 都能解析到本 Activity）；
+            - 曾经写过一个 `android:pathPattern=".*\.wakeup_schedule"`，但**没有 scheme 的
+              pathPattern 不参与匹配**（同上的实测），等于没写 —— 留着只会让人以为这里拦住了。
+            真正的判定在 LoginWebActivity 里，且与导入器共用同一个函数（path 或 DISPLAY_NAME），
+            被误拉起时静默结束，不打扰用户。
+        -->
+        <activity
+            android:name=".schedule_import.LoginWebActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter
+                android:label="导入到课程表"
+                tools:ignore="AppLinkUrlError">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="application/octet-stream" />
+            </intent-filter>
+        </activity>
+        <!--
+            桌面入口。**它必须同时是任务栈的根**。
+
+            原先入口是一个单独的 SplashActivity，它在起完首页后立刻把自己 finish 掉 —— 于是任务栈根
+            变成 ScheduleActivity，而任务的 baseIntent 仍指向 SplashActivity。两者不一致时系统**无法
+            复用已有任务**，只能再跑一次入口，表现就是「先内容（上次任务的快照）→ 再开屏 → 再内容」。
+            真机日志两条都抓到了：
+              START {act=MAIN cat=[LAUNCHER] cmp=.../.SplashActivity} with LAUNCH_MULTIPLE
+              TaskInfo{ baseIntent=.../.SplashActivity, baseActivity=...ScheduleActivity, newTask=true }
+
+            入口与栈根合一之后这条路整条消失：已经有任务时系统直接恢复，不再重放任何开屏。
+
+            主题用 AppTheme.Launch：它只比 AppTheme 多两件事 —— 启动窗口底色与页面同色（避免白闪），
+            以及在 API 31+ 把系统强制的启动画面压成"看不出来"（见 values-v31/styles.xml）。
+        -->
+        <activity
+            android:name=".schedule.ScheduleActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme.Launch">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".course_add.AddCourseActivity"
+            android:label="添加课程"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:label="设置" />
+        <activity
+            android:name=".settings.TimeSettingsActivity"
+            android:label="选择时间表" />
+
+        <receiver
+            android:name=".schedule_appwidget.ScheduleAppWidget"
+            android:exported="true"
+            android:label="一周课程">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/schedule_app_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".schedule_appwidget.ScheduleAppWidgetService"
+            android:enabled="true"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+        <service
+            android:name=".today_appwidget.TodayColorfulService"
+            android:enabled="true"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <activity
+            android:name=".intro.AboutActivity"
+            android:label="关于" />
+        <activity
+            android:name=".schedule_manage.ScheduleManageActivity"
+            android:label="多课表管理" />
+        <activity
+            android:name=".schedule_settings.ScheduleSettingsActivity"
+            android:label="课表设置" />
+        <!--
+            周视图小部件的配置页：选择本实例显示哪张课表。
+
+            只在"确实有得选"时才真的显示（只有一张课表或一张都没有时，onCreate 顶部会同步判定并
+            立刻结束自己），所以它不会成为"每次添加都多一步"的负担。
+            必须 exported：由宿主（桌面）拉起。
+        -->
+        <activity
+            android:name=".schedule_appwidget.WeekScheduleAppWidgetConfigActivity"
+            android:exported="true"
+            android:label="提示">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".today_appwidget.TodayCourseAppWidget"
+            android:exported="true"
+            android:label="当天课程">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/today_course_app_widget_info" />
+        </receiver>
+
+        <!--
+            2×2 的「当天课程（小）」= 设计稿三形态里的**小正方形**。
+
+            为什么是第二个 provider 而不是"让用户把上面那个拖小"：桌面按 **provider** 决定
+            "添加小部件时摆多大"（targetCellWidth/Height 与 minWidth/minHeight），一个 provider
+            只有一个默认尺寸，而同一个 `<receiver android:name>` 又不能在清单里出现两次。
+            于是"选择器里能直接放一个 2×2"这件事只能由另一个 provider 承担 ——
+            逻辑一行不重复：SmallTodayCourseAppWidget 继承 TodayCourseAppWidget，
+            画面同样由 TodayColorfulService 按实测宽高决定。
+        -->
+        <receiver
+            android:name=".today_appwidget.SmallTodayCourseAppWidget"
+            android:exported="true"
+            android:label="当天课程（小）">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/small_today_course_app_widget_info" />
+        </receiver>
+
+        <!--
+            提醒重排的系统触发点：开机、改时间、改时区、App 被覆盖安装。
+            这四条都在官方隐式广播豁免清单里，所以 targetSdk ≥ 26 时清单注册依然有效。
+            刻意不监听 ACTION_DATE_CHANGED：它不在豁免清单里，注册了也收不到，跨天只能靠
+            每天 00:05 的闹钟。
+        -->
+        <receiver
+            android:name=".utils.CourseReminderReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

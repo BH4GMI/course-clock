@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「添加课程」那一格（设计稿 8 的最后一格）。它是网格里**普通的最后一格**，
+  不是右下角的加号、也不是横跨两列的按钮 —— 所以宽度和课程卡一样，由网格决定。
+
+  高度必须和 item_course_list 的 120dp 一致：它是网格里的兄弟节点，矮一截整行就错位。
+
+  内容只有一行提示文字；圆钮和加号由 CourseListAdapter 在代码里拼（同一处解释为什么）。
+  虚线框是这一格的背景（bg_add_course_dashed），不需要再铺底色。
+-->
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ll_add_course"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:background="@drawable/bg_add_course_dashed"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingStart="@dimen/setting_row_inset"
+    android:paddingEnd="@dimen/setting_row_inset"
+    tools:layout_width="156dp">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/iv_add_course"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/bg_accent_soft_circle"
+        android:contentDescription="@null"
+        android:padding="8dp"
+        android:src="@drawable/ic_add" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_add_course"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:maxLines="1"
+        android:text="@string/course_manage_add_course"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>

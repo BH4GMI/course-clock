@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Android 12（API 31）起系统**强制**为每次冷启动画一张启动画面，应用关不掉它，只能改它的外观。
+      这里把它改成"看不出来"：
+
+      - `windowSplashScreenBackground` 换成应用自己的页面底色（与 values/styles.xml 里
+        `windowBackground` 同一个值）→ 系统启动画面退场时没有任何颜色跳变；
+      - `windowSplashScreenAnimatedIcon` 换成全透明 drawable —— **不设的话系统会画应用图标，
+        那正是"开屏画面"的来源**；
+      - `windowSplashScreenAnimationDuration` 设 0，省掉图标那一缩放。
+
+      为什么这里要整份重写 AppTheme.Launch：资源限定符是**覆盖**而不是合并，无法只追加两个 item。
+      所以 parent 沿用 AppTheme（只在 values/styles.xml 定义），只把底色重述一遍 —— 不是为了覆盖它，
+      而是这一档的 style 必须自己把 item 写全。
+
+      另注：本工程 targetSdk 29，但系统启动画面按**运行设备的 API**生效，与本工程 targetSdk 无关，
+      所以这一档对这台 API 36 的设备是实际生效的。
+    -->
+    <style name="AppTheme.Launch" parent="AppTheme">
+        <item name="android:windowBackground">@color/page_background</item>
+        <item name="android:windowSplashScreenBackground">@color/page_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_icon_none</item>
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
+    </style>
+</resources>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「就地选择」弹窗的消失动画：缩回自己的右上角（pivot 在右缘），与「从右缘展开」互逆。
+
+  只有退出走窗口动画。进入动画由 ChoicePopup.animateIn 自己驱动 —— 见那里的说明。
+-->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+     android:shareInterpolator="false">
+    <scale
+        android:duration="@integer/choice_popup_duration"
+        android:fromXScale="1.0"
+        android:fromYScale="1.0"
+        android:pivotX="100%"
+        android:pivotY="0%"
+        android:toXScale="0.85"
+        android:toYScale="0.85" />
+    <alpha
+        android:duration="@integer/choice_popup_duration"
+        android:fromAlpha="1.0"
+        android:interpolator="@android:anim/accelerate_interpolator"
+        android:toAlpha="0.0" />
+</set>

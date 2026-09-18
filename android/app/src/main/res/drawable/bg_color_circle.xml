@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  添加课程页颜色圆点的底（设计稿 6：28dp 圆点）。
+  这里只定形状（正圆 + 白底供 setTint 染成调色板色），选中态的「✓」由代码画在同一个
+  TextView 上——与课程表里「课程颜色」同源，不引入新的颜色资源。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="oval">
+    <solid android:color="@android:color/white" />
+</shape>

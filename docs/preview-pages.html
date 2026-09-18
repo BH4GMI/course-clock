@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课钟 · CourseClock 页面布局预览</title>
+<style>
+/* ==========================================================================
+   课钟 · CourseClock 页面布局预览
+   每个界面用内联 SVG 绘制：画布 360 × 780（1 用户单位 = 1dp，常见 1080×2340 屏）。
+   颜色全部走 CSS 变量，因此右上角按钮可整体切换浅色 / 深色主题。
+   ========================================================================== */
+:root{
+  --page:#eceff4; --card:#ffffff; --ink:#0f1216; --ink-soft:#5b6472;
+  --surface:#ffffff;            /* App 浅色底：main_background */
+  --surface-dim:#f3f4f8;
+  --on-surface:#0b0b0c;         /* 课表文字色（浅色下纯黑） */
+  --on-surface-soft:rgba(0,0,0,.32);
+  --grid:rgba(0,0,0,.18);       /* 网格虚线 alpha */
+  --hairline:rgba(0,0,0,.12);
+  --accent:#fa6278;             /* colorAccent / colorPrimary */
+  --off:#9aa3a3;                /* 未选中开关 */
+  --scrim:rgba(0,0,0,.32);
+  --shadow:0 1px 1px rgba(0,0,0,.06), 0 12px 32px rgba(12,16,24,.14);
+}
+[data-theme="dark"]{
+  --page:#0a0c10; --card:#14181f; --ink:#eef2f7; --ink-soft:#98a2b3;
+  --surface:#000000;            /* App 深色底：values-night 纯黑 */
+  --surface-dim:#0e0e11;
+  --on-surface:#ffffff;
+  --on-surface-soft:rgba(255,255,255,.40);
+  --grid:rgba(255,255,255,.35);
+  --hairline:rgba(255,255,255,.14);
+  --off:#6b7280;
+  --scrim:rgba(0,0,0,.5);
+  --shadow:0 1px 1px rgba(0,0,0,.5), 0 14px 36px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; padding:32px 24px 64px;
+  background:var(--page); color:var(--ink);
+  font:14px/1.65 "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+}
+header.page{max-width:1320px;margin:0 auto 28px;display:flex;gap:24px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+header.page h1{margin:0 0 6px;font-size:22px}
+header.page p{margin:0;color:var(--ink-soft);max-width:860px}
+header.page ul{margin:8px 0 0;padding-left:20px;color:var(--ink-soft);font-size:13px}
+#themeBtn{
+  flex:0 0 auto;padding:10px 18px;border-radius:10px;cursor:pointer;
+  border:1px solid var(--hairline);background:var(--card);color:var(--ink);
+  font:inherit;font-weight:600;box-shadow:var(--shadow);
+}
+#themeBtn:hover{border-color:var(--accent);color:var(--accent)}
+main{max-width:1320px;margin:0 auto;display:flex;flex-wrap:wrap;gap:36px 30px;align-items:flex-start}
+figure.shot{margin:0;width:360px}
+.device{border-radius:28px;box-shadow:var(--shadow);overflow:hidden;background:var(--surface);line-height:0}
+figcaption{margin-top:12px;font-size:13px;color:var(--ink-soft)}
+figcaption b{display:block;color:var(--ink);font-size:14px;margin-bottom:4px}
+figcaption code{display:block;margin-top:6px;font-size:11.5px;color:var(--ink-soft);opacity:.85;word-break:break-all}
+svg.phone{display:block}
+
+/* —— SVG 内部通用样式（class 作用于 SVG 元素，颜色随主题变量走） —— */
+svg.phone text{font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif}
+.f-surface{fill:var(--surface)}
+.f-dim{fill:var(--surface-dim)}
+.f-card{fill:var(--card)}
+.f-on{fill:var(--on-surface)}
+.f-soft{fill:var(--on-surface-soft)}
+.f-ink{fill:var(--ink)}
+.f-accent{fill:var(--accent)}
+.f-hair{fill:var(--hairline)}
+.s-hair{stroke:var(--hairline);fill:none;stroke-width:1}
+.s-grid{stroke:var(--grid);fill:none;stroke-width:1;stroke-dasharray:4 3}
+.s-icon{stroke:var(--on-surface);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.s-icon-soft{stroke:var(--on-surface-soft);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.s-accent{stroke:var(--accent);fill:none;stroke-width:1.5}
+.scrim{fill:var(--scrim)}
+.f-off{fill:var(--off)}
+/* 桌面小部件底板：跟随 App 底色 */
+.w-panel{fill:var(--surface)}
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div>
+    <h1>课钟 · CourseClock 页面布局预览</h1>
+    <p>按下表源码逐页还原的真实布局：画布 360 × 780（1 单位 = 1dp）。顶部 24dp 为沉浸式状态栏，底部 48dp 为系统导航栏，中间 708dp 才是 App 内容区。</p>
+    <ul>
+      <li>布局来源：<code>android/app/src/main/res/layout/*.xml</code>、<code>ScheduleActivityUI.kt</code>、<code>ScheduleUI.kt</code>、<code>BaseTitleActivity.kt</code>、<code>BaseListActivity.kt</code>、<code>BaseBlurTitleActivity.kt</code></li>
+      <li>配色与尺寸来源：<code>res/values/colors.xml</code>、<code>values-night/colors.xml</code>、<code>styles.xml</code>、<code>dimens.xml</code>、<code>TableBean.kt</code> 默认值</li>
+      <li>课表网格与课块：行高 56dp、行距 2dp（<code>dimen/weekItemMarTop</code>）、课块不透明度 60%、圆角 4dp、虚线 4/3</li>
+      <li>已声明的近似：五个顶栏图标在 App 里来自自定义 iconfont 字形，这里用同义图形近似；示例课程与姓名均为虚构数据</li>
+    </ul>
+  </div>
+  <button id="themeBtn" type="button">切换深色 / 浅色</button>
+</header>
+
+<main>
+
+<!-- =======================================================================
+     1 · 主课表（本周）
+     ScheduleActivityUI：DrawerLayout(内容) + 底部抽屉；ScheduleUI：表头 + 虚线网格 + 课块
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="主课表界面">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+
+  <!-- 状态栏（沉浸式：内容自绘让开 24dp） -->
+  <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+  <g class="f-on">
+    <rect x="296" y="12" width="3" height="4" rx="1"/><rect x="302" y="10" width="3" height="6" rx="1"/>
+    <rect x="308" y="8" width="3" height="8" rx="1"/><rect x="314" y="6" width="3" height="10" rx="1"/>
+    <path d="M322 8 l10 0 -5 6 z"/>
+    <rect x="336" y="6" width="16" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.2" class="s-icon"/>
+    <rect x="338" y="8" width="9" height="6" rx="1"/>
+  </g>
+
+  <!-- 顶部按钮行：statusBarMargin = 状态栏 24 + 4 = 28，按钮 32dp -->
+  <g class="s-icon">
+    <path d="M11 38 h18 M11 44 h18 M11 50 h18"/>
+  </g>
+  <text class="f-on" x="40" y="52" font-size="20" font-weight="700">9月15日</text>
+  <text class="f-on" x="40" y="74" font-size="14">第3周</text>
+  <text class="f-on" x="90" y="74" font-size="14">周一</text>
+
+  <g class="s-icon"><circle cx="240" cy="44" r="8.5"/><path d="M240 39.5 v9 M235.5 44 h9"/></g>
+  <g class="s-icon"><path d="M272 38.5 v9 M268 44 l4 4 4-4 M267 51.5 h10"/></g>
+  <g class="s-icon"><path d="M304 51.5 v-9 M300 46.5 l4-4 4 4 M299 37.5 h10"/></g>
+  <g class="f-on"><circle cx="336" cy="38" r="1.7"/><circle cx="336" cy="44" r="1.7"/><circle cx="336" cy="50" r="1.7"/></g>
+
+  <!-- 表头：时间列（权重 0.5）+ 7 天（各 1），两行「星期 / 日期」，上下 padding 8、行距 2 -->
+  <text class="f-on" x="12" y="100" font-size="12" text-anchor="middle">9</text>
+  <text class="f-on" x="12" y="118" font-size="12" text-anchor="middle">月</text>
+  <g font-size="12" text-anchor="middle">
+    <text class="f-on" x="47" y="100" font-weight="700">一</text><text class="f-on" x="47" y="118" font-weight="700">15</text>
+    <text class="f-soft" x="94" y="100">二</text><text class="f-soft" x="94" y="118">16</text>
+    <text class="f-soft" x="141" y="100">三</text><text class="f-soft" x="141" y="118">17</text>
+    <text class="f-soft" x="188" y="100">四</text><text class="f-soft" x="188" y="118">18</text>
+    <text class="f-soft" x="235" y="100">五</text><text class="f-soft" x="235" y="118">19</text>
+    <text class="f-soft" x="282" y="100">六</text><text class="f-soft" x="282" y="118">20</text>
+    <text class="f-soft" x="329" y="100">日</text><text class="f-soft" x="329" y="118">21</text>
+  </g>
+
+  <!-- 虚线网格：顶线 + 8 条竖线（7 天被 8 条线框住）+ 连堂内部不画横线 -->
+  <g class="s-grid">
+    <path d="M0 132 H360"/>
+    <path d="M24 132 V732 M71 132 V732 M118 132 V732 M165 132 V732 M211 132 V732 M258 132 V732 M305 132 V732 M352 132 V732"/>
+    <path d="M0 247 H360 M0 363 H360 M0 421 H360 M0 537 H360 M0 653 H360"/>
+  </g>
+
+  <!-- 时间列：开始时间在首行顶部、结束时间在末行底部；连堂只标一次（blockStartRow / gridLinesAfterRow） -->
+  <g class="f-on" text-anchor="middle">
+    <text x="12" y="141" font-size="8">08:15</text>
+    <text x="12" y="164" font-size="12">1</text>
+    <text x="12" y="222" font-size="12">2</text>
+    <text x="12" y="244" font-size="8">09:35</text>
+    <text x="12" y="257" font-size="8">09:55</text>
+    <text x="12" y="280" font-size="12">3</text>
+    <text x="12" y="338" font-size="12">4</text>
+    <text x="12" y="360" font-size="8">11:15</text>
+    <text x="12" y="373" font-size="8">11:20</text>
+    <text x="12" y="396" font-size="12">5</text>
+    <text x="12" y="418" font-size="8">12:00</text>
+    <text x="12" y="431" font-size="8">13:20</text>
+    <text x="12" y="454" font-size="12">6</text>
+    <text x="12" y="512" font-size="12">7</text>
+    <text x="12" y="534" font-size="8">14:40</text>
+    <text x="12" y="547" font-size="8">15:00</text>
+    <text x="12" y="570" font-size="12">8</text>
+    <text x="12" y="628" font-size="12">9</text>
+    <text x="12" y="650" font-size="8">16:20</text>
+    <text x="12" y="663" font-size="8">16:35</text>
+    <text x="12" y="686" font-size="12">10</text>
+  </g>
+
+  <!-- 课程块：上沿按真实开始时刻定位（D 楼第 3-4 节为方案 C，10:15 起 → 整块下移 14dp） -->
+  <g font-size="12" font-weight="700" fill="#fff">
+    <!-- 周一 -->
+    <rect x="25" y="132" width="45" height="114" rx="4" fill="#2979ff" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="30" y="148">高等数学</text><text x="30" y="162" font-weight="400" font-size="11">@A-201</text>
+    <rect x="25" y="248" width="45" height="56" rx="4" fill="#a375ff" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="30" y="264">大学英语</text><text x="30" y="278" font-weight="400" font-size="11">@C-305</text>
+    <rect x="25" y="364" width="45" height="56" rx="4" fill="#1DE9B6" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="30" y="380">体育</text><text x="30" y="394" font-weight="400" font-size="11">@西田径场</text>
+    <!-- 周二 -->
+    <rect x="72" y="132" width="45" height="114" rx="4" fill="#ff9100" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="77" y="148">线性代数</text><text x="77" y="162" font-weight="400" font-size="11">@A-101</text>
+    <rect x="72" y="248" width="45" height="114" rx="4" fill="#fa6278" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="77" y="264">英语视听说</text><text x="77" y="278" font-weight="400" font-size="11">@B-203</text>
+    <rect x="72" y="422" width="45" height="114" rx="4" fill="#005caf" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="77" y="438">程序设计</text><text x="77" y="452" font-weight="400" font-size="11">@F-105</text>
+    <!-- 周三：数据结构右下角三角 = 同槽位还有别的课（showMultiTip） -->
+    <rect x="119" y="248" width="45" height="114" rx="4" fill="#ff3d00" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="124" y="264">数据结构</text><text x="124" y="278" font-weight="400" font-size="11">@C-402</text>
+    <path d="M152 350 l6 0 0 -6 z" fill="#fff"/>
+    <rect x="119" y="538" width="45" height="114" rx="4" fill="#2196f3" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="124" y="554">计算机网络</text><text x="124" y="568" font-weight="400" font-size="11">@E-201</text>
+    <!-- 周四：D 楼第 3-4 节（方案 C 10:15~11:35）比默认格晚 20 分钟，整块下移 14dp -->
+    <rect x="166" y="262" width="44" height="114" rx="4" fill="#FF1744" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="171" y="278">大学物理</text><text x="171" y="292" font-weight="400" font-size="11">@D-303</text>
+    <!-- 周五 -->
+    <rect x="212" y="132" width="45" height="114" rx="4" fill="#2196f3" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="217" y="148">思想道德</text><text x="217" y="162" font-weight="400" font-size="11">@B-201</text>
+    <rect x="212" y="422" width="45" height="114" rx="4" fill="#a375ff" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="217" y="438">概率论</text><text x="217" y="452" font-weight="400" font-size="11">@A-301</text>
+  </g>
+
+  <!-- 系统导航栏（未开启「主界面虚拟键沉浸」时占 48dp） -->
+  <rect x="0" y="732" width="360" height="48" class="f-surface"/>
+  <path class="f-on" d="M54 760 l10 -7 v14 z" fill-opacity=".85"/>
+  <circle class="f-on" cx="180" cy="760" r="6" fill-opacity=".85"/>
+  <rect class="f-on" x="292" y="753" width="16" height="14" rx="3" fill-opacity=".85"/>
+</svg>
+</div>
+<figcaption>
+  <b>1 · 主课表（本周）</b>
+  顶部一行：三条杠（抽屉入口）+ 日期 20sp 粗体 / 第 N 周 / 星期，右侧依次为添加、导入、分享、更多四个 32dp 图标。主体是时间列（权重 0.5）+ 7 天表头 + 虚线网格 + 课程色块；底部抽屉收起时只剩课表。
+  <code>ScheduleActivityUI.kt · ScheduleUI.kt · ScheduleFragment.kt</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     2 · 主课表 + 底部抽屉展开
+     bottomSheet：MaterialCardView 高 320dp、四边 16dp，三组：周数 / 多课表 / 捷径
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="主课表底部抽屉展开">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+  <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+  <g class="s-icon"><path d="M11 38 h18 M11 44 h18 M11 50 h18"/></g>
+  <text class="f-on" x="40" y="52" font-size="20" font-weight="700">9月15日</text>
+  <text class="f-on" x="40" y="74" font-size="14">第3周</text>
+  <text class="f-on" x="90" y="74" font-size="14">周一</text>
+  <g class="f-on"><circle cx="336" cy="38" r="1.7"/><circle cx="336" cy="44" r="1.7"/><circle cx="336" cy="50" r="1.7"/></g>
+
+  <g font-size="12" text-anchor="middle">
+    <text class="f-on" x="12" y="100">9</text><text class="f-on" x="12" y="118">月</text>
+    <text class="f-on" x="47" y="100" font-weight="700">一</text><text class="f-on" x="47" y="118" font-weight="700">15</text>
+    <text class="f-soft" x="94" y="100">二</text><text class="f-soft" x="94" y="118">16</text>
+    <text class="f-soft" x="141" y="100">三</text><text class="f-soft" x="141" y="118">17</text>
+    <text class="f-soft" x="188" y="100">四</text><text class="f-soft" x="188" y="118">18</text>
+    <text class="f-soft" x="235" y="100">五</text><text class="f-soft" x="235" y="118">19</text>
+    <text class="f-soft" x="282" y="100">六</text><text class="f-soft" x="282" y="118">20</text>
+    <text class="f-soft" x="329" y="100">日</text><text class="f-soft" x="329" y="118">21</text>
+  </g>
+  <g class="s-grid">
+    <path d="M0 132 H360"/>
+    <path d="M24 132 V732 M71 132 V732 M118 132 V732 M165 132 V732 M211 132 V732 M258 132 V732 M305 132 V732 M352 132 V732"/>
+    <path d="M0 247 H360 M0 363 H360 M0 421 H360 M0 537 H360 M0 653 H360"/>
+  </g>
+  <g class="f-on" text-anchor="middle">
+    <text x="12" y="141" font-size="8">08:15</text><text x="12" y="164" font-size="12">1</text>
+    <text x="12" y="222" font-size="12">2</text><text x="12" y="244" font-size="8">09:35</text>
+    <text x="12" y="257" font-size="8">09:55</text><text x="12" y="280" font-size="12">3</text>
+    <text x="12" y="338" font-size="12">4</text><text x="12" y="360" font-size="8">11:15</text>
+    <text x="12" y="373" font-size="8">11:20</text><text x="12" y="396" font-size="12">5</text>
+    <text x="12" y="418" font-size="8">12:00</text>
+  </g>
+  <g font-size="12" font-weight="700" fill="#fff">
+    <rect x="25" y="132" width="45" height="114" rx="4" fill="#2979ff" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="30" y="148">高等数学</text><text x="30" y="162" font-weight="400" font-size="11">@A-201</text>
+    <rect x="25" y="248" width="45" height="56" rx="4" fill="#a375ff" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="30" y="264">大学英语</text><text x="30" y="278" font-weight="400" font-size="11">@C-305</text>
+    <rect x="25" y="364" width="45" height="56" rx="4" fill="#1DE9B6" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="30" y="380">体育</text>
+    <rect x="72" y="132" width="45" height="114" rx="4" fill="#ff9100" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="77" y="148">线性代数</text>
+    <rect x="72" y="248" width="45" height="114" rx="4" fill="#fa6278" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="77" y="264">英语视听说</text>
+    <rect x="119" y="248" width="45" height="114" rx="4" fill="#ff3d00" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="124" y="264">数据结构</text>
+    <rect x="166" y="262" width="44" height="114" rx="4" fill="#FF1744" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="171" y="278">大学物理</text>
+  </g>
+
+  <!-- 展开遮罩（isHideable 的 bottom sheet 展开时压暗课表） -->
+  <rect class="scrim" x="0" y="0" width="360" height="732"/>
+
+  <!-- 底部抽屉：卡片 320dp 高，贴底，四边 16dp -->
+  <rect x="16" y="396" width="328" height="320" rx="8" class="f-surface" stroke="var(--hairline)" stroke-width="1"/>
+  <text class="f-on" x="32" y="428" font-size="12">周数</text>
+  <text class="f-accent" x="328" y="428" font-size="12" text-anchor="end">修改当前周</text>
+  <g font-size="12">
+    <rect x="32" y="440" width="34" height="32" rx="8" class="s-hair"/>
+    <rect x="70" y="440" width="34" height="32" rx="8" class="s-hair"/>
+    <rect x="108" y="440" width="34" height="32" rx="8" class="s-accent"/>
+    <rect x="146" y="440" width="34" height="32" rx="8" class="s-hair"/>
+    <rect x="184" y="440" width="34" height="32" rx="8" class="s-hair"/>
+    <rect x="222" y="440" width="34" height="32" rx="8" class="s-hair"/>
+    <rect x="260" y="440" width="34" height="32" rx="8" class="s-hair"/>
+    <rect x="298" y="440" width="34" height="32" rx="8" class="s-hair"/>
+    <g class="f-on" text-anchor="middle">
+      <text x="49" y="461">1</text><text x="87" y="461">2</text>
+      <text x="125" y="461" class="f-accent" font-weight="700">3</text>
+      <text x="163" y="461">4</text><text x="201" y="461">5</text>
+      <text x="239" y="461">6</text><text x="277" y="461">7</text><text x="315" y="461">8</text>
+    </g>
+  </g>
+  <text class="f-on" x="32" y="504" font-size="12">多课表</text>
+  <text class="f-accent" x="328" y="504" font-size="12" text-anchor="end">管理</text>
+  <text class="f-accent" x="286" y="504" font-size="12" text-anchor="end">新建课表</text>
+  <rect x="32" y="516" width="86" height="40" rx="8" class="s-accent"/>
+  <text class="f-accent" x="75" y="541" font-size="13" text-anchor="middle">我的课表</text>
+  <rect x="126" y="516" width="62" height="40" rx="8" class="s-hair"/>
+  <text class="f-soft" x="157" y="541" font-size="13" text-anchor="middle">默认</text>
+
+  <text class="f-on" x="32" y="596" font-size="12">捷径</text>
+  <text class="f-accent" x="32" y="628" font-size="12">上课时间</text>
+  <text class="f-accent" x="110" y="628" font-size="12">更换背景</text>
+  <text class="f-accent" x="188" y="628" font-size="12">上课提醒</text>
+  <text class="f-accent" x="262" y="628" font-size="12">已添课程</text>
+
+  <rect x="0" y="732" width="360" height="48" class="f-surface"/>
+  <path class="f-on" d="M54 760 l10 -7 v14 z" fill-opacity=".85"/>
+  <circle class="f-on" cx="180" cy="760" r="6" fill-opacity=".85"/>
+  <rect class="f-on" x="292" y="753" width="16" height="14" rx="3" fill-opacity=".85"/>
+</svg>
+</div>
+<figcaption>
+  <b>2 · 主课表 + 底部抽屉</b>
+  点右上「更多」把 BottomSheet 展开成 320dp 卡片，三组自上而下：周数（修改当前周 + 周次按钮）、多课表（管理 / 新建课表 + 课表名横向列表）、捷径（上课时间 / 更换背景 / 上课提醒 / 已添课程）。
+  <code>ScheduleActivityUI.bottomSheet · cardContent</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     3 · 抽屉（NavigationView）
+     nav_header 200dp + main_navigation_menu：已添课程 / 设置 / 关于
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="侧栏抽屉">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+  <!-- 被抽屉推向右边的课表（只画露出来的 120dp） -->
+  <g transform="translate(240,0)">
+    <rect class="f-surface" x="-240" y="0" width="240" height="780"/>
+    <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+    <text class="f-on" x="40" y="52" font-size="20" font-weight="700">9月15日</text>
+    <text class="f-on" x="40" y="74" font-size="14">第3周</text>
+  </g>
+  <g class="s-grid">
+    <path d="M240 132 H360"/>
+    <path d="M264 132 V732 M311 132 V732"/>
+    <path d="M240 247 H360 M240 363 H360 M240 421 H360"/>
+  </g>
+  <g class="f-on" text-anchor="middle"><text x="252" y="164" font-size="12">1</text><text x="252" y="222" font-size="12">2</text></g>
+  <g font-size="12" font-weight="700" fill="#fff">
+    <rect x="265" y="132" width="45" height="114" rx="4" fill="#2979ff" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="270" y="148">高等数学</text>
+    <rect x="312" y="132" width="45" height="114" rx="4" fill="#ff9100" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="317" y="148">线性代数</text>
+    <rect x="265" y="248" width="45" height="56" rx="4" fill="#a375ff" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="270" y="264">大学英语</text>
+    <rect x="312" y="248" width="45" height="114" rx="4" fill="#fa6278" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="317" y="264">英语视听说</text>
+  </g>
+  <rect class="scrim" x="240" y="0" width="120" height="780"/>
+
+  <!-- 抽屉：NavigationView 宽 240dp，background = colorSurface -->
+  <rect x="0" y="0" width="240" height="780" class="f-surface"/>
+  <text class="f-on" x="20" y="170" font-size="20" font-weight="700">课钟</text>
+  <text class="f-on" x="16" y="224" font-size="14">通用</text>
+  <g>
+    <g class="s-icon"><circle cx="36" cy="272" r="7"/><path d="M36 261.5 v-3 M36 285.5 v3 M25.5 272 h-3 M49.5 272 h3"/></g>
+    <text class="f-on" x="64" y="277" font-size="14">已添课程</text>
+
+    <g class="s-icon"><circle cx="36" cy="320" r="3.4"/><path d="M36 314 v-2.4 M36 328.4 v-2.4 M29.6 320 h-2.4 M44.8 320 h-2.4 M31.5 315.5 l-1.7-1.7 M42.2 326.2 l-1.7-1.7 M31.5 324.5 l-1.7 1.7 M42.2 313.8 l-1.7 1.7"/></g>
+    <text class="f-on" x="64" y="325" font-size="14">设置</text>
+
+    <g class="s-icon"><circle cx="36" cy="368" r="8"/><path d="M36 364 v5 M36 372.5 v.5"/></g>
+    <text class="f-on" x="64" y="373" font-size="14">关于</text>
+  </g>
+  <rect x="240" y="0" width="1" height="780" class="f-hair"/>
+  <rect x="0" y="732" width="240" height="48" class="f-surface"/>
+</svg>
+</div>
+<figcaption>
+  <b>3 · 侧栏抽屉</b>
+  宽 240dp。头部 200dp 只放应用名（默认无背景图时不至于是一片空白），下面是一组菜单：已添课程、设置、关于；主界面被推向右并压暗。
+  <code>ScheduleActivityUI.drawerLayout · nav_header.xml · main_navigation_menu.xml</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     4 · 课程详情弹窗
+     fragment_course_detail.xml = item_add_course_detail.xml + 删除 / 编辑
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="课程详情弹窗">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+  <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+  <text class="f-on" x="40" y="52" font-size="20" font-weight="700">9月15日</text>
+  <text class="f-on" x="40" y="74" font-size="14">第3周</text>
+  <g class="s-grid">
+    <path d="M0 132 H360"/><path d="M24 132 V732 M71 132 V732 M118 132 V732 M165 132 V732 M211 132 V732 M258 132 V732 M305 132 V732 M352 132 V732"/>
+    <path d="M0 247 H360 M0 363 H360 M0 421 H360"/>
+  </g>
+  <g class="f-on" text-anchor="middle"><text x="12" y="164" font-size="12">1</text><text x="12" y="222" font-size="12">2</text></g>
+  <g font-size="12" font-weight="700" fill="#fff">
+    <rect x="25" y="132" width="45" height="114" rx="4" fill="#2979ff" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="30" y="148">高等数学</text><text x="30" y="162" font-weight="400" font-size="11">@A-201</text>
+    <rect x="72" y="132" width="45" height="114" rx="4" fill="#ff9100" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="77" y="148">线性代数</text>
+  </g>
+  <rect class="scrim" x="0" y="0" width="360" height="732"/>
+  <rect x="0" y="732" width="360" height="48" class="f-surface"/>
+  <path class="f-on" d="M54 760 l10 -7 v14 z" fill-opacity=".85"/>
+  <circle class="f-on" cx="180" cy="760" r="6" fill-opacity=".85"/>
+  <rect class="f-on" x="292" y="753" width="16" height="14" rx="3" fill-opacity=".85"/>
+
+  <!-- 弹窗卡片（card_bg 圆角）：字段行 48dp，图标列 40dp -->
+  <rect x="20" y="246" width="320" height="300" rx="8" class="f-surface"/>
+  <text class="f-on" x="36" y="274" font-size="12">时间段</text>
+  <g class="s-icon-soft"><path d="M314 264 l10 10 M324 264 l-10 10"/></g>
+
+  <!-- 周数 -->
+  <g><rect x="36" y="296" width="14" height="14" rx="2" fill="#16AD9F" opacity=".9"/>
+     <path d="M36 300 h14 M39 293 v3 M47 293 v3" stroke="#16AD9F" stroke-width="1.4" fill="none"/></g>
+  <text class="f-on" x="80" y="307" font-size="13">1-16周</text>
+  <!-- 时间段 -->
+  <circle cx="43" cy="343" r="7.5" fill="none" stroke="#FFA622" stroke-width="1.6"/>
+  <path d="M43 338 v5 h4" stroke="#FFA622" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <text class="f-on" x="80" y="355" font-size="13">周一    第1 - 2节</text>
+  <!-- 授课老师 -->
+  <circle cx="43" cy="391" r="4" fill="none" stroke="#1571D5" stroke-width="1.5"/>
+  <path d="M34 402 a9 6 0 0 1 18 0" fill="none" stroke="#1571D5" stroke-width="1.5"/>
+  <text class="f-on" x="80" y="403" font-size="13">张伟</text>
+  <!-- 上课地点 -->
+  <path d="M43 432 a6 6 0 0 1 6 6 c0 5 -6 11 -6 11 s-6 -6 -6 -11 a6 6 0 0 1 6 -6 z" fill="none" stroke="#F63D3E" stroke-width="1.5"/>
+  <circle cx="43" cy="438" r="2" fill="#F63D3E"/>
+  <text class="f-on" x="80" y="451" font-size="13">A-201</text>
+
+  <rect class="f-hair" x="32" y="488" width="296" height="1"/>
+  <!-- 底部两个动作：删除（红）/ 编辑（蓝） -->
+  <g>
+    <path d="M114 508 h20 l-2.5 26 h-15 z" fill="none" stroke="#FF1744" stroke-width="2"/>
+    <path d="M110 503 h28 M120 498 h8" stroke="#FF1744" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </g>
+  <g>
+    <path d="M236 530 l24 -24 8 8 -24 24 -10 2 z" fill="none" stroke="#2979ff" stroke-width="2" stroke-linejoin="round"/>
+  </g>
+</svg>
+</div>
+<figcaption>
+  <b>4 · 课程详情弹窗</b>
+  课程卡片与「添加课程」共用同一个 <code>item_add_course_detail</code>：字段行各 48dp，左侧图标列 40dp（周数青绿、时间橙、老师蓝、地点红），底部一行删除 / 编辑两个动作。
+  <code>fragment_course_detail.xml · item_add_course_detail.xml</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     5 · 导入课程弹窗
+     fragment_import_choose.xml：280dp 宽卡片 + 两个文字按钮
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="导入课程弹窗">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+  <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+  <text class="f-on" x="40" y="52" font-size="20" font-weight="700">9月15日</text>
+  <text class="f-on" x="40" y="74" font-size="14">第3周</text>
+  <g class="s-grid">
+    <path d="M0 132 H360"/><path d="M24 132 V732 M71 132 V732 M118 132 V732 M165 132 V732 M211 132 V732 M258 132 V732 M305 132 V732 M352 132 V732"/>
+    <path d="M0 247 H360 M0 363 H360"/>
+  </g>
+  <g font-size="12" font-weight="700" fill="#fff">
+    <rect x="25" y="132" width="45" height="114" rx="4" fill="#2979ff" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="30" y="148">高等数学</text>
+    <rect x="72" y="132" width="45" height="114" rx="4" fill="#ff9100" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="77" y="148">线性代数</text>
+    <rect x="25" y="248" width="45" height="56" rx="4" fill="#a375ff" fill-opacity=".6" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>
+    <text x="30" y="264">大学英语</text>
+  </g>
+  <rect class="scrim" x="0" y="0" width="360" height="732"/>
+  <rect x="0" y="732" width="360" height="48" class="f-surface"/>
+  <path class="f-on" d="M54 760 l10 -7 v14 z" fill-opacity=".85"/>
+  <circle class="f-on" cx="180" cy="760" r="6" fill-opacity=".85"/>
+  <rect class="f-on" x="292" y="753" width="16" height="14" rx="3" fill-opacity=".85"/>
+
+  <rect x="40" y="286" width="280" height="208" rx="8" class="f-surface"/>
+  <g class="s-icon-soft"><path d="M296 306 l10 10 M306 306 l-10 10"/></g>
+  <text class="f-on" x="180" y="336" font-size="16" font-weight="700" text-anchor="middle">导入课程</text>
+  <g class="f-soft" font-size="12" text-anchor="middle">
+    <text x="180" y="362">登录学校 WebVPN 后从教学服务中心导入本学期课表</text>
+    <text x="180" y="378">也可以用分享/导出的课表文件导入</text>
+  </g>
+  <text class="f-accent" x="180" y="416" font-size="14" font-weight="600" text-anchor="middle">从SUES教务导入</text>
+  <text class="f-accent" x="180" y="458" font-size="14" font-weight="600" text-anchor="middle">从分享/导出文件导入</text>
+</svg>
+</div>
+<figcaption>
+  <b>5 · 导入课程弹窗</b>
+  280dp 宽卡片居中：右上关闭、标题、两行说明，下面两个 Material 文字按钮（SUES 教务导入 / 文件导入）。
+  <code>fragment_import_choose.xml</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     6 · 添加课程
+     BaseTitleActivity 标题栏（返回 + 标题 + 副按钮）+ item_add_course_base/_detail/_btn
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="添加课程页">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+  <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+  <!-- 标题栏 48dp：返回 + 标题 16sp 粗体 + 副按钮 -->
+  <g class="s-icon"><path d="M26 42 l-7 6 7 6 M19 48 h14"/></g>
+  <text class="f-on" x="48" y="53" font-size="16" font-weight="700">添加课程</text>
+  <text class="f-accent" x="336" y="53" font-size="16" font-weight="700" text-anchor="end">保存</text>
+  <rect class="f-surface" x="0" y="72" width="360" height="1"/>
+
+  <!-- item_add_course_base：课程名 64dp + 颜色 64dp -->
+  <g class="s-icon"><rect x="17" y="93" width="22" height="16" rx="2"/><path d="M22 93 v-3 M34 93 v-3"/></g>
+  <text class="f-soft" x="48" y="109" font-size="14">课程名称</text>
+  <path d="M48 118 h288" class="f-hair"/>
+  <circle cx="28" cy="168" r="10" fill="#fa6278"/>
+  <text class="f-accent" x="44" y="173" font-size="14">点此更改颜色</text>
+  <rect class="f-hair" x="0" y="200" width="360" height="1"/>
+
+  <!-- item_add_course_detail：时间段 -->
+  <text class="f-on" x="16" y="228" font-size="12">时间段</text>
+  <g class="s-icon-soft"><path d="M330 218 l10 10 M340 218 l-10 10"/></g>
+  <!-- 周数 -->
+  <rect x="16" y="243" width="16" height="16" rx="2" fill="#16AD9F" opacity=".9"/>
+  <path d="M16 248 h16 M20 240 v4 M28 240 v4" stroke="#16AD9F" stroke-width="1.5" fill="none"/>
+  <text class="f-on" x="56" y="256" font-size="13">1-16周</text>
+  <!-- 时间 -->
+  <circle cx="28" cy="306" r="8" fill="none" stroke="#FFA622" stroke-width="1.7"/>
+  <path d="M28 301 v5 h4" stroke="#FFA622" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+  <text class="f-on" x="56" y="312" font-size="13">周一    第1 - 2节</text>
+  <!-- 老师 -->
+  <circle cx="28" cy="356" r="4.5" fill="none" stroke="#1571D5" stroke-width="1.6"/>
+  <path d="M18 368 a10 7 0 0 1 20 0" fill="none" stroke="#1571D5" stroke-width="1.6"/>
+  <text class="f-soft" x="56" y="363" font-size="13">授课老师（可不填）</text>
+  <!-- 地点 -->
+  <path d="M28 400 a6.5 6.5 0 0 1 6.5 6.5 c0 5 -6.5 11.5 -6.5 11.5 s-6.5 -6.5 -6.5 -11.5 a6.5 6.5 0 0 1 6.5 -6.5 z" fill="none" stroke="#F63D3E" stroke-width="1.6"/>
+  <circle cx="28" cy="406.5" r="2.2" fill="#F63D3E"/>
+  <text class="f-soft" x="56" y="412" font-size="13">上课地点（可不填）</text>
+
+  <!-- item_add_course_btn：paddingTop 24，按钮左右 padding 64 -->
+  <rect x="90" y="452" width="180" height="40" rx="8" class="f-accent"/>
+  <text x="180" y="478" font-size="14" font-weight="700" text-anchor="middle" fill="#fff">添加时间段</text>
+
+  <rect x="0" y="732" width="360" height="48" class="f-surface"/>
+  <path class="f-on" d="M54 760 l10 -7 v14 z" fill-opacity=".85"/>
+  <circle class="f-on" cx="180" cy="760" r="6" fill-opacity=".85"/>
+  <rect class="f-on" x="292" y="753" width="16" height="14" rx="3" fill-opacity=".85"/>
+</svg>
+</div>
+<figcaption>
+  <b>6 · 添加课程</b>
+  统一标题栏：返回箭头 + 标题 16sp 粗体 + 右侧副按钮「保存」（主题色粗体）。正文依次是课程名（64dp）、颜色（64dp，未设色时显示「点此更改颜色」），随后是一张「时间段」卡片（周数 / 时间 / 老师 / 地点各 48dp），最下面是「添加时间段」按钮。
+  <code>AddCourseActivity.kt · item_add_course_base.xml · item_add_course_detail.xml · item_add_course_btn.xml</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     7 · 多课表管理
+     activity_schedule_manage.xml + fragment_list_manage.xml + item_table_list.xml
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="多课表管理页">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+  <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+  <g class="s-icon"><path d="M26 42 l-7 6 7 6 M19 48 h14"/></g>
+  <text class="f-on" x="48" y="53" font-size="16" font-weight="700">多课表管理</text>
+  <text class="f-soft" x="180" y="96" font-size="12" text-anchor="middle">点击卡片查看该课表的课程</text>
+
+  <!-- 卡片：图片区 96dp + 名称行 48dp，左右 margin 24 -->
+  <g>
+    <rect x="24" y="110" width="312" height="144" rx="8" class="f-card" stroke="var(--hairline)" stroke-width="1"/>
+    <path d="M24 118 a8 8 0 0 1 8 -8 h296 a8 8 0 0 1 8 8 v88 h-312 z" fill="url(#bgA)"/>
+    <text class="f-on" x="40" y="238" font-size="16">我的课表</text>
+    <path d="M258 226 l14 0 0 -6 6 8 -6 8 0 -6 -14 0 z" fill="none" stroke="#ff9100" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M304 220 l14 20 -14 6 z" fill="none" stroke="#2979ff" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M344 218 h14 l-2 20 h-10 z" fill="none" stroke="#FF1744" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M341 214 h20" stroke="#FF1744" stroke-width="1.8" fill="none"/>
+  </g>
+  <g>
+    <rect x="24" y="266" width="312" height="144" rx="8" class="f-card" stroke="var(--hairline)" stroke-width="1"/>
+    <path d="M24 274 a8 8 0 0 1 8 -8 h296 a8 8 0 0 1 8 8 v88 h-312 z" fill="url(#bgB)"/>
+    <text class="f-on" x="40" y="394" font-size="16">默认</text>
+    <path d="M304 376 l14 20 -14 6 z" fill="none" stroke="#2979ff" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M344 374 h14 l-2 20 h-10 z" fill="none" stroke="#FF1744" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M341 370 h20" stroke="#FF1744" stroke-width="1.8" fill="none"/>
+  </g>
+  <g>
+    <rect x="24" y="422" width="312" height="144" rx="8" class="f-card" stroke="var(--hairline)" stroke-width="1"/>
+    <path d="M24 430 a8 8 0 0 1 8 -8 h296 a8 8 0 0 1 8 8 v88 h-312 z" fill="url(#bgC)"/>
+    <text class="f-on" x="40" y="550" font-size="16">2024 秋季</text>
+    <path d="M304 532 l14 20 -14 6 z" fill="none" stroke="#2979ff" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M344 530 h14 l-2 20 h-10 z" fill="none" stroke="#FF1744" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M341 526 h20" stroke="#FF1744" stroke-width="1.8" fill="none"/>
+  </g>
+
+  <!-- FAB：56 × 67，圆角 48dp -->
+  <rect x="288" y="697" width="56" height="67" rx="26" class="f-accent"/>
+  <path d="M316 722 v18 M307 731 h18" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+
+  <rect x="0" y="732" width="360" height="48" class="f-surface"/>
+  <path class="f-on" d="M54 760 l10 -7 v14 z" fill-opacity=".85"/>
+  <circle class="f-on" cx="180" cy="760" r="6" fill-opacity=".85"/>
+  <rect class="f-on" x="292" y="753" width="16" height="14" rx="3" fill-opacity=".85"/>
+  <defs>
+    <linearGradient id="bgA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8ec5ff"/><stop offset="1" stop-color="#4a7fd4"/></linearGradient>
+    <linearGradient id="bgB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffd7a1"/><stop offset="1" stop-color="#f2915c"/></linearGradient>
+    <linearGradient id="bgC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9b6ff"/><stop offset="1" stop-color="#7d63d6"/></linearGradient>
+  </defs>
+</svg>
+</div>
+<figcaption>
+  <b>7 · 多课表管理</b>
+  标题栏 + 列表头提示；每张卡片是「课表背景图 96dp + 名称 / 分享 / 编辑 / 删除」，删除需要长按并二次确认。右下角 56×67 的圆角 FAB 新建课表。
+  <code>activity_schedule_manage.xml · fragment_list_manage.xml · item_table_list.xml</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     8 · 课程管理
+     CourseManageFragment：StaggeredGrid 2 列 + item_course_list（120dp 高）
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="课程管理页">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+  <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+  <g class="s-icon"><path d="M26 42 l-7 6 7 6 M19 48 h14"/></g>
+  <text class="f-on" x="48" y="53" font-size="16" font-weight="700">课程管理</text>
+  <text class="f-accent" x="336" y="53" font-size="16" font-weight="700" text-anchor="end">清空</text>
+  <text class="f-soft" x="180" y="96" font-size="12" text-anchor="middle">轻触编辑，长按删除</text>
+
+  <!-- 两列卡片，宽 156 / 高 120，间距 8 -->
+  <g font-size="16" fill="#fff" text-anchor="middle">
+    <rect x="16" y="110" width="156" height="120" rx="4" fill="#2979ff" fill-opacity=".85"/>
+    <text x="94" y="176">高等数学</text>
+    <rect x="188" y="110" width="156" height="120" rx="4" fill="#a375ff" fill-opacity=".85"/>
+    <text x="266" y="176">大学英语</text>
+    <rect x="16" y="240" width="156" height="120" rx="4" fill="#ff9100" fill-opacity=".85"/>
+    <text x="94" y="306">线性代数</text>
+    <rect x="188" y="240" width="156" height="120" rx="4" fill="#FF1744" fill-opacity=".85"/>
+    <text x="266" y="306">大学物理</text>
+    <rect x="16" y="370" width="156" height="120" rx="4" fill="#ff3d00" fill-opacity=".85"/>
+    <text x="94" y="436">数据结构</text>
+    <rect x="188" y="370" width="156" height="120" rx="4" fill="#2196f3" fill-opacity=".85"/>
+    <text x="266" y="436">计算机网络</text>
+    <rect x="16" y="500" width="156" height="120" rx="4" fill="#1DE9B6" fill-opacity=".85"/>
+    <text x="94" y="566">体育</text>
+    <rect x="188" y="500" width="156" height="120" rx="4" fill="#005caf" fill-opacity=".85"/>
+    <text x="266" y="566">程序设计</text>
+  </g>
+
+  <rect x="288" y="697" width="56" height="67" rx="26" class="f-accent"/>
+  <path d="M316 722 v18 M307 731 h18" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>
+
+  <rect x="0" y="732" width="360" height="48" class="f-surface"/>
+  <path class="f-on" d="M54 760 l10 -7 v14 z" fill-opacity=".85"/>
+  <circle class="f-on" cx="180" cy="760" r="6" fill-opacity=".85"/>
+  <rect class="f-on" x="292" y="753" width="16" height="14" rx="3" fill-opacity=".85"/>
+</svg>
+</div>
+<figcaption>
+  <b>8 · 课程管理</b>
+  某一课表下的课程以 2 列瀑布流展示，每张卡片 120dp 高、底色即课程颜色、课程名居中；轻触进入编辑，长按删除。右下角同样是新建 FAB。
+  <code>CourseManageFragment.kt · item_course_list.xml</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     9 · 设置
+     BaseListActivity + CategoryItem / HorizontalItem / SwitchItem / VerticalItem
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="设置页">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+  <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+  <g class="s-icon"><path d="M26 42 l-7 6 7 6 M19 48 h14"/></g>
+  <text class="f-on" x="48" y="53" font-size="16" font-weight="700">设置</text>
+
+  <text class="f-on" x="16" y="96" font-size="12" font-weight="700">常规</text>
+
+  <!-- HorizontalItem：64dp，标题 16sp + 右侧值 12sp -->
+  <text class="f-on" x="16" y="148" font-size="16">设置当前课表</text>
+  <text class="f-accent" x="344" y="148" font-size="12" text-anchor="end">点这里！</text>
+
+  <!-- SwitchItem 无描述：64dp -->
+  <text class="f-on" x="16" y="212" font-size="16">节数栏显示具体时间</text>
+  <rect x="319" y="199" width="18" height="18" rx="2.5" class="f-accent"/>
+  <path d="M323 208 l3.5 3.5 7 -7" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- SwitchItem 带描述 -->
+  <text class="f-on" x="16" y="276" font-size="16">课表显示虚线网格</text>
+  <rect x="319" y="263" width="18" height="18" rx="2.5" class="f-accent"/>
+  <path d="M323 272 l3.5 3.5 7 -7" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <g class="f-soft" font-size="12">
+    <text x="16" y="300">按节次画横线、按星期画竖线，方便看清某一格属于哪一节、</text>
+    <text x="16" y="318">哪一天。默认开启。</text>
+  </g>
+
+  <text class="f-on" x="16" y="364" font-size="16">时间栏作息方案</text>
+  <text class="f-soft" x="344" y="364" font-size="12" text-anchor="end">自动</text>
+
+  <text class="f-on" x="16" y="428" font-size="16">页面预加载</text>
+  <rect x="319" y="415" width="18" height="18" rx="2.5" class="f-accent"/>
+  <path d="M323 424 l3.5 3.5 7 -7" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <g class="f-soft" font-size="12">
+    <text x="16" y="452">开启后，滑动界面后会马上显示课表。关闭后，滑动界面后需要短暂的</text>
+    <text x="16" y="470">时间加载课表，不过理论上内存占用会更小，App启动速度也会更快。</text>
+  </g>
+
+  <text class="f-on" x="16" y="516" font-size="16">课表下方增加留白区域</text>
+  <rect x="319" y="503" width="18" height="18" rx="2.5" class="f-accent"/>
+  <path d="M323 512 l3.5 3.5 7 -7" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text class="f-on" x="16" y="580" font-size="16">显示日视图背景</text>
+  <rect x="319" y="567" width="18" height="18" rx="2.5" class="f-accent"/>
+  <path d="M323 576 l3.5 3.5 7 -7" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text class="f-on" x="16" y="644" font-size="16">显示空视图图片</text>
+  <rect x="319" y="631" width="18" height="18" rx="2.5" class="f-accent"/>
+  <path d="M323 640 l3.5 3.5 7 -7" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text class="f-on" x="16" y="708" font-size="12" font-weight="700">外观</text>
+  <text class="f-on" x="16" y="760" font-size="16">显示主题</text>
+  <text class="f-soft" x="344" y="760" font-size="12" text-anchor="end">跟随系统</text>
+
+  <rect x="0" y="732" width="360" height="48" class="f-surface"/>
+  <path class="f-on" d="M54 760 l10 -7 v14 z" fill-opacity=".85"/>
+  <circle class="f-on" cx="180" cy="760" r="6" fill-opacity=".85"/>
+  <rect class="f-on" x="292" y="753" width="16" height="14" rx="3" fill-opacity=".85"/>
+</svg>
+</div>
+<figcaption>
+  <b>9 · 设置</b>
+  分类标题（通用 / 外观 / 上课提醒）下混排三种行：开关行（标题 16sp + 右侧勾选框）、取值行（标题 + 右侧 12sp 当前值）、说明行（标题 + 12sp 多行描述）。列表项左右各 16dp 内边距，行高 64dp 起。
+  <code>SettingsActivity.kt · SettingItemAdapter · provider/*.kt</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     10 · 选择时间表 / 设置时间
+     nav_time_settings.xml：timeTableFragment（列表）+ timeSettingsFragment（节次表）
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="选择时间表页">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+  <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+  <g class="s-icon"><path d="M26 42 l-7 6 7 6 M19 48 h14"/></g>
+  <text class="f-on" x="48" y="53" font-size="16" font-weight="700">选择时间表</text>
+  <text class="f-accent" x="336" y="53" font-size="16" font-weight="700" text-anchor="end">保存</text>
+
+  <!-- 选中项：左侧 4dp 主题色竖条（56dp 高） -->
+  <rect x="0" y="80" width="4" height="56" class="f-accent"/>
+  <text class="f-on" x="24" y="117" font-size="16">默认</text>
+  <path d="M280 100 l16 22 -16 6 z" fill="none" stroke="#2979ff" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M330 98 h16 l-2 22 h-12 z" fill="none" stroke="#FF1744" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M327 94 h22" stroke="#FF1744" stroke-width="1.8" fill="none"/>
+
+  <text class="f-on" x="24" y="181" font-size="16">2024 秋季</text>
+  <path d="M280 164 l16 22 -16 6 z" fill="none" stroke="#2979ff" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M330 162 h16 l-2 22 h-12 z" fill="none" stroke="#FF1744" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M327 158 h22" stroke="#FF1744" stroke-width="1.8" fill="none"/>
+
+  <text class="f-on" x="24" y="245" font-size="16">夏令时</text>
+  <path d="M280 228 l16 22 -16 6 z" fill="none" stroke="#2979ff" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M330 226 h16 l-2 22 h-12 z" fill="none" stroke="#FF1744" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M327 222 h22" stroke="#FF1744" stroke-width="1.8" fill="none"/>
+
+  <!-- 列表 footer：item_add_course_btn → 「新建时间表」 -->
+  <rect x="90" y="304" width="180" height="40" rx="8" class="f-accent"/>
+  <text x="180" y="330" font-size="14" font-weight="700" text-anchor="middle" fill="#fff">新建时间表</text>
+
+  <rect x="0" y="732" width="360" height="48" class="f-surface"/>
+  <path class="f-on" d="M54 760 l10 -7 v14 z" fill-opacity=".85"/>
+  <circle class="f-on" cx="180" cy="760" r="6" fill-opacity=".85"/>
+  <rect class="f-on" x="292" y="753" width="16" height="14" rx="3" fill-opacity=".85"/>
+</svg>
+</div>
+<figcaption>
+  <b>10 · 选择时间表</b>
+  进入时标题是「选择时间表」，保存即带 <code>selectedId</code> 返回；点某一项编辑进入「设置时间」，那里按节次改起止时刻（支持「每节课时长相同」批量套用）。选中项左侧有 4dp 主题色竖条。
+  <code>TimeSettingsActivity.kt · TimeTableFragment.kt · item_time_table.xml · item_time_detail_header.xml</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     11 · 关于
+     BaseBlurTitleActivity + activity_about.xml（居中单列说明）
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="关于页">
+  <rect class="f-surface" x="0" y="0" width="360" height="780"/>
+  <text class="f-on" x="12" y="16" font-size="11" font-weight="600">9:41</text>
+  <g class="s-icon"><path d="M26 42 l-7 6 7 6 M19 48 h14"/></g>
+  <text class="f-on" x="48" y="53" font-size="16" font-weight="700">关于</text>
+
+  <!-- 应用图标 72dp -->
+  <rect x="144" y="96" width="72" height="72" rx="16" fill="#2b2f6b"/>
+  <circle cx="180" cy="132" r="17" fill="none" stroke="#fff" stroke-width="3"/>
+  <path d="M180 121 v11 h8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M157 113 l-6 -6 M203 113 l6 -6" stroke="#ffd166" stroke-width="3" stroke-linecap="round"/>
+
+  <g class="f-on" font-size="12" text-anchor="middle">
+    <text x="180" y="200">版本 1.0.0</text>
+    <text x="180" y="232">课钟</text>
+    <text x="180" y="256">只服务上海工程技术大学（SUES）</text>
+    <text x="180" y="274">课表从教学服务中心导入</text>
+  </g>
+
+  <text class="f-on" x="180" y="320" font-size="14" font-weight="700" text-anchor="middle">导入课表</text>
+  <g class="f-on" font-size="12">
+    <text x="24" y="352">点「从SUES教务导入」后，在打开的页面里登录学校 WebVPN 并完成</text>
+    <text x="24" y="370">统一身份认证。登录成功后 App 自动走到课表页面，再点右下角按钮</text>
+    <text x="24" y="388">就读回本学期的课程、作息时间与学期起止日期。</text>
+    <text x="24" y="412">课表也可以从「从分享/导出文件导入」进来：选择本应用导出的</text>
+    <text x="24" y="430">.wakeup_schedule 文件即可。</text>
+    <text x="24" y="454">导入的课表保存在本机，可以在「已添课程」里查看和修改。</text>
+  </g>
+
+  <text class="f-on" x="180" y="500" font-size="14" font-weight="700" text-anchor="middle">来源</text>
+  <g class="f-on" font-size="12" text-anchor="middle">
+    <text x="180" y="532">本项目是 WakeupSchedule_Kotlin 的 fork</text>
+    <text x="180" y="556">上游许可 Apache License 2.0</text>
+  </g>
+
+  <rect x="0" y="732" width="360" height="48" class="f-surface"/>
+  <path class="f-on" d="M54 760 l10 -7 v14 z" fill-opacity=".85"/>
+  <circle class="f-on" cx="180" cy="760" r="6" fill-opacity=".85"/>
+  <rect class="f-on" x="292" y="753" width="16" height="14" rx="3" fill-opacity=".85"/>
+</svg>
+</div>
+<figcaption>
+  <b>11 · 关于</b>
+  居中单列：应用图标 72dp、版本号、应用名、一句定位说明，然后是「导入课表」与「来源」两段说明文字（12sp，行距 8dp，左右 24dp 内边距）。
+  <code>AboutActivity.kt · activity_about.xml</code>
+</figcaption>
+</figure>
+
+<!-- =======================================================================
+     12 · 桌面小部件
+     schedule_app_widget.xml（一周课程，整张课表渲染成位图）
+     today_course_app_widget.xml（当天课程，含下课倒计时）
+     ======================================================================= -->
+<figure class="shot">
+<div class="device">
+<svg class="phone" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="桌面小部件">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#243b55"/><stop offset="1" stop-color="#141e30"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="360" height="780" fill="url(#wall)"/>
+  <text x="12" y="16" font-size="11" font-weight="600" fill="#fff">9:41</text>
+  <g font-size="11" fill="#fff" opacity=".7" text-anchor="middle">
+    <text x="60" y="64">微信</text><text x="130" y="64">相机</text><text x="200" y="64">设置</text><text x="270" y="64">图库</text>
+  </g>
+  <g fill="#fff" opacity=".2">
+    <rect x="46" y="34" width="28" height="28" rx="8"/><rect x="116" y="34" width="28" height="28" rx="8"/>
+    <rect x="186" y="34" width="28" height="28" rx="8"/><rect x="256" y="34" width="28" height="28" rx="8"/>
+  </g>
+
+  <!-- 一周课程小部件：底板 + 缩小版课表 -->
+  <rect x="16" y="110" width="328" height="250" rx="16" class="w-panel"/>
+  <g transform="translate(28,122) scale(0.86)">
+    <text class="f-on" x="8" y="16" font-size="16" font-weight="700">9月15日</text>
+    <text class="f-on" x="8" y="36" font-size="12" font-weight="700">我的课表 | 第3周    周一</text>
+    <path d="M244 20 l-6 6 6 6 M250 20 l6 6 -6 6" class="s-icon" stroke-width="1.6"/>
+    <g font-size="12" text-anchor="middle">
+      <text class="f-on" x="10" y="62">9</text><text class="f-on" x="10" y="78">月</text>
+      <text class="f-on" x="48" y="62" font-weight="700">一</text><text class="f-on" x="48" y="78" font-weight="700">15</text>
+      <text class="f-soft" x="98" y="62">二</text><text class="f-soft" x="98" y="78">16</text>
+      <text class="f-soft" x="148" y="62">三</text><text class="f-soft" x="148" y="78">17</text>
+      <text class="f-soft" x="198" y="62">四</text><text class="f-soft" x="198" y="78">18</text>
+      <text class="f-soft" x="248" y="62">五</text><text class="f-soft" x="248" y="78">19</text>
+      <text class="f-soft" x="298" y="62">六</text><text class="f-soft" x="298" y="78">20</text>
+    </g>
+    <g class="s-grid" stroke-dasharray="3 2">
+      <path d="M0 92 H320"/><path d="M24 92 V250 M73 92 V250 M123 92 V250 M172 92 V250 M222 92 V250 M272 92 V250 M320 92 V250"/>
+      <path d="M0 152 H320 M0 200 H320"/>
+    </g>
+    <g class="f-on" text-anchor="middle" font-size="9">
+      <text x="12" y="118">1</text><text x="12" y="140">2</text><text x="12" y="178">3</text>
+    </g>
+    <g font-size="10" font-weight="700" fill="#fff">
+      <rect x="26" y="92" width="45" height="58" rx="3" fill="#2979ff" fill-opacity=".6"/>
+      <text x="30" y="106">高数</text>
+      <rect x="76" y="92" width="45" height="58" rx="3" fill="#ff9100" fill-opacity=".6"/>
+      <text x="80" y="106">线代</text>
+      <rect x="126" y="92" width="45" height="58" rx="3" fill="#ff3d00" fill-opacity=".6"/>
+      <text x="130" y="106">数构</text>
+      <rect x="176" y="92" width="45" height="58" rx="3" fill="#FF1744" fill-opacity=".6"/>
+      <text x="180" y="106">大物</text>
+      <rect x="226" y="92" width="45" height="58" rx="3" fill="#2196f3" fill-opacity=".6"/>
+      <text x="230" y="106">思政</text>
+      <rect x="26" y="152" width="45" height="46" rx="3" fill="#a375ff" fill-opacity=".6"/>
+      <text x="30" y="166">英语</text>
+    </g>
+  </g>
+
+  <!-- 当天课程小部件：头部（日期 / 周次 + 左右箭头）+ 课程列表 -->
+  <rect x="16" y="392" width="328" height="240" rx="16" class="w-panel"/>
+  <text class="f-on" x="30" y="424" font-size="14" font-weight="700">9月15日</text>
+  <text class="f-on" x="30" y="442" font-size="11" font-weight="700">第3周    周一</text>
+  <path d="M300 414 l-5 6 5 6" class="s-icon" stroke-width="1.6"/>
+  <path d="M316 414 l5 6 -5 6" class="s-icon" stroke-width="1.6"/>
+  <rect class="f-hair" x="26" y="452" width="308" height="1"/>
+
+  <g>
+    <rect x="26" y="464" width="308" height="46" rx="6" class="f-dim"/>
+    <rect x="26" y="464" width="4" height="46" rx="2" fill="#2979ff"/>
+    <text class="f-on" x="42" y="484" font-size="13" font-weight="700">高等数学</text>
+    <text class="f-on" x="42" y="500" font-size="11">08:15 - 09:35 · A-201</text>
+    <text class="f-accent" x="322" y="490" font-size="11" text-anchor="end">距上课 12 分钟</text>
+  </g>
+  <g>
+    <rect x="26" y="518" width="308" height="46" rx="6" class="f-dim"/>
+    <rect x="26" y="518" width="4" height="46" rx="2" fill="#a375ff"/>
+    <text class="f-on" x="42" y="538" font-size="13" font-weight="700">大学英语</text>
+    <text class="f-on" x="42" y="554" font-size="11">09:55 - 10:35 · C-305</text>
+    <text class="f-soft" x="322" y="544" font-size="11" text-anchor="end">共 3 节</text>
+  </g>
+  <g>
+    <rect x="26" y="572" width="308" height="46" rx="6" class="f-dim"/>
+    <rect x="26" y="572" width="4" height="46" rx="2" fill="#1DE9B6"/>
+    <text class="f-on" x="42" y="592" font-size="13" font-weight="700">体育</text>
+    <text class="f-on" x="42" y="608" font-size="11">11:20 - 12:00 · 西田径场</text>
+  </g>
+
+  <rect x="0" y="732" width="360" height="48" fill="#000" opacity=".35"/>
+  <path d="M54 760 l10 -7 v14 z" fill="#fff" opacity=".7"/>
+  <circle cx="180" cy="760" r="6" fill="#fff" opacity=".7"/>
+  <rect x="292" y="753" width="16" height="14" rx="3" fill="#fff" opacity=".7"/>
+</svg>
+</div>
+<figcaption>
+  <b>12 · 桌面小部件</b>
+  上：一周课程（整张课表按小部件字号渲染成位图后塞进 ImageView，含表头与课程色块）。下：当天课程（日期 / 周次 + 左右切换箭头 + 课程列表，含「距上课 N 分钟」与已上完课程自动剔除）。底板颜色与文字色跟随 App 主题，深色下不再画表头下面那条横线。
+  <code>schedule_app_widget.xml · today_course_app_widget.xml · AppWidgetUtils.kt</code>
+</figcaption>
+</figure>
+
+</main>
+
+<script>
+(function(){
+  var btn = document.getElementById('themeBtn');
+  btn.addEventListener('click', function(){
+    var root = document.documentElement;
+    root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+})();
+</script>
+</body>
+</html>

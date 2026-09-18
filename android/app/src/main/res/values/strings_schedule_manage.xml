@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  课程管理页（设计稿 8）自己的文案。
+
+  单独一个文件而不是塞进 strings.xml：这一屏的文案改动最频繁，而 strings.xml 是所有页面共用的，
+  两边同时改必然冲突。这里的几条都是**面向本科生、说人话**的短句：
+    「搜索课程、教师或教室」——说清能搜什么，不用"请输入……"那种模板话；
+    「添加课程」——不是"新增"、不是"+"；
+    「共 N 门课程」——进页面第一眼知道有多少门。
+-->
+<resources>
+    <string name="course_manage_search_hint">搜索课程、教师或教室</string>
+    <string name="course_manage_add_course">添加课程</string>
+    <string name="course_manage_count">共 %1$d 门课程</string>
+    <string name="course_manage_count_hint">共 %1$d 门课程 · 轻触编辑，长按删除</string>
+    <string name="course_manage_found">找到 %1$d 门课程</string>
+    <string name="course_manage_empty">还没有课程，点右下角加号添加一门</string>
+    <string name="course_manage_no_result">没有找到「%1$s」相关的课程</string>
+</resources>

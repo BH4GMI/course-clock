@@ -1,0 +1,69 @@
+CourseClock (课钟) — course timetable for Shanghai University of Engineering Science
+Copyright 2026 The CourseClock Project
+
+This product is a modified fork of WakeupSchedule_Kotlin and contains material
+from the projects listed below. Each is licensed under the Apache License,
+Version 2.0; the full license text is in the LICENSE file.
+
+==============================================================================
+WakeupSchedule_Kotlin — the immediate upstream of this fork
+commit a69fb75, versionName 3.621
+https://github.com/Cerbur/WakeupSchedule_Kotlin
+
+WakeupSchedule_Kotlin — original work
+Copyright 2019 YZune (杨增)
+https://github.com/YZune/WakeupSchedule_Kotlin
+
+------------------------------------------------------------------------------
+Splitties
+Copyright 2019 Louis Cognault Ayeva Derman
+https://github.com/LouisCAD/Splitties
+
+Inlined into android/app/src/main/java/splitties/ by the upstream project. That
+code is kept as received, including its copyright header.
+
+==============================================================================
+Trademarks and university affiliation
+
+Apache License 2.0 section 6 does not grant rights to the licensor's trade
+names, trademarks, service marks or product names. The upstream product name
+"WakeUp课程表" is therefore not carried over: this fork is named CourseClock
+(课钟) and uses entirely original artwork. Nothing here implies endorsement by,
+or affiliation with, the upstream authors.
+
+CourseClock is an independent, personally developed project. It is adapted for
+the teaching systems of Shanghai University of Engineering Science (SUES), but it
+is neither produced, maintained, reviewed, authorised nor endorsed by that
+university, and it is not an official application of it. The university name
+appears only to say what the software is adapted for.
+
+==============================================================================
+Modifications in this fork
+
+CourseClock is adapted for Shanghai University of Engineering Science (SUES)
+only. Changes relative to the upstream work:
+
+* Every school import path other than SUES was removed, together with its
+  parsers, activities, layouts and resources.
+* Added a SUES importer that guides the user through the university WebVPN and
+  unified identity authentication, then reads the semester date range, the
+  class times and the courses from the teaching service system.
+* Modelled the campus per-building class times, selected by building, instead of
+  a single table for the whole campus.
+* Render the schedule on a real-time vertical axis: a course is positioned by its
+  start time and sized by its duration, and courses that overlap in time are laid
+  out side by side.
+* Removed the donation and paid-unlock screens, the update check, the upstream
+  service client and the App Center telemetry SDK, the promotion of an unrelated
+  application, and the upstream customer-service links.
+* Renamed the application and replaced every artwork asset — launcher icon
+  (adaptive and legacy), notification icon, drawer icons, splash logo, widget
+  preview, empty-state and network-error illustrations — with original minimal
+  assets. The artwork sources are in design/.
+* Replaced the default main-screen background photo with a flat colour: pure
+  white, and pure black in dark mode. A user-chosen background image is still
+  supported; it is loaded by the in-tree `BackgroundImageLoader` instead of the
+  upstream Glide pipeline.
+* Added a first-run notice stating the upstream origin and version, the
+  Apache License 2.0 terms, and that the software is free of charge. A copy of
+  the license and of this notice ships inside the APK under assets/.

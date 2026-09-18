@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  关于页（设计稿 11；2026-09-18 按"更正式"重排，同日按"分栏太多"合并）：应用信息 / 使用说明 /
+  权限说明 三张卡 + 页脚署名。
+
+  这一页是"大标题页"：标题 30sp 在内容里，顶栏只留返回箭头（见 AboutActivity 把 mainTitle 隐藏）。
+  底色用设计稿的 page_background（灰），卡片是 card_background（白）——基类默认两处都用
+  colorSurface，白卡放在白底上就看不出卡片了，所以 AboutActivity 会把这两层换成 page_background。
+
+  "栏少、对齐、书面"在这份布局里落成四条可检查的规则，改动时别破坏：
+  · 只有三张卡、两个节标题（使用说明 / 权限说明），全页**一条分隔线都没有**。
+    上一版是四张卡 + 四个标题 + 三条 1dp 细线，同页并排像一张被切碎的表格；
+    「开源许可」那一路尤其多余 —— 它只有一段署名，单独立标题 + 卡片就是白占一栏，
+    现在收进页脚（署名仍然完整可见，只是不再占栏目）。
+  · 四张卡的圆角与内边距读同一对 token（dimens 的 about_card_radius / about_card_inset）。
+    以前第一张卡 24dp/20dp、后面两张 20dp/16dp，同页并排只会像没对齐。
+  · 每张卡上面一行节标题，字号/颜色/左边距/上间距四者全页一致。
+  · 权限三行是并列的三条，用 14dp 间距分行，不用细线 —— 少了线，才不像表格。
+-->
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="40dp"
+    tools:context=".intro.AboutActivity">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:includeFontPadding="false"
+        android:text="@string/about_title"
+        android:textSize="30sp"
+        android:textStyle="bold" />
+
+    <!--
+      卡片一：应用信息（应用名 + 版本号 + 项目地址，不设节标题：它紧贴页面大标题，是这一页的身份块）。
+
+      项目地址单独占一行、铺满卡宽：挤在名字右边那一列（72dp 图标之后只剩约 208dp）会被折成两行，
+      而且折的位置正好落在 URL 中间。整行给它是为了让它**能一行放下**，也是为了它可点。
+    -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/page_inset"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="@dimen/page_inset"
+        app:cardBackgroundColor="@color/card_background"
+        app:cardCornerRadius="@dimen/about_card_radius"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/about_card_inset">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:src="@mipmap/ic_launcher" />
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:text="@string/app_name"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_version"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12.5sp" />
+
+                    <!--
+                      这里原来还有一枚「上海工程技术大学」的浅强调底胶囊。用户要求去掉：本软件
+                      是个人独立开发的第三方 fork，没有校方背书，把校名做成徽章摆在应用名下面，
+                      看起来像校方出品。学校名与它的事实陈述仍然保留在首次运行的说明文字里
+                      （strings.first_run_body），那里写清了"适配这所学校、与校方无关"。
+                    -->
+                </androidx.appcompat.widget.LinearLayoutCompat>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_project"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:autoLink="web"
+                android:text="@string/about_project"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 卡片二：使用说明（三步，每步一行，扫读比长段落快） -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="@dimen/setting_group_gap"
+        android:text="@string/about_howto"
+        android:textColor="@color/text_secondary"
+        android:textSize="12.5sp" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/page_inset"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="@dimen/page_inset"
+        app:cardBackgroundColor="@color/card_background"
+        app:cardCornerRadius="@dimen/about_card_radius"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/about_card_inset">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="@drawable/bg_accent_soft_circle"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:text="1"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:text="@string/about_step1"
+                    android:textSize="13sp" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="@drawable/bg_accent_soft_circle"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:text="2"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:text="@string/about_step2"
+                    android:textSize="13sp" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="@drawable/bg_accent_soft_circle"
+                    android:gravity="center"
+                    android:includeFontPadding="false"
+                    android:text="3"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="12.5sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:text="@string/about_step3"
+                    android:textSize="13sp" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:lineSpacingExtra="4dp"
+                android:text="@string/about_howto_note"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 卡片三：权限说明（列的是"为什么需要"，不是系统权限名；三条之间只用间距，不用分隔线） -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="@dimen/setting_group_gap"
+        android:text="@string/about_uses"
+        android:textColor="@color/text_secondary"
+        android:textSize="12.5sp" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/page_inset"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="@dimen/page_inset"
+        app:cardBackgroundColor="@color/card_background"
+        app:cardCornerRadius="@dimen/about_card_radius"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/about_card_inset">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/about_use_network"
+                android:textSize="14sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/about_use_network_why"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/about_use_notify"
+                android:textSize="14sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/about_use_notify_why"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="@string/about_use_boot"
+                android:textSize="14sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/about_use_boot_why"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!--
+      页脚：开源署名 + 免费声明 + 版权。不占卡片、不给节标题 —— 它是这一页的落款，不是第四个栏目。
+      左对齐（与三个节标题同为 24dp 缩进），不再居中：居中的灰字在整页左对齐的排版里像一个孤岛。
+    -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="24dp"
+        android:autoLink="web"
+        android:lineSpacingExtra="4dp"
+        android:text="@string/about_upstream"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/about_free"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/about_copyright"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>

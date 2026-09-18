@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「次要动作」按钮的底（设计稿 6/7/10 的「+ 添加时间段」「+ 新建课表」「+ 新建时间表」）。
+  浅强调底 + 主题强调色文字，与 bg_primary_button 成对：主操作实心、次要操作浅底，
+  用户一眼能分出哪个是这一屏真正要按的按钮。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <solid android:color="@color/accent_soft" />
+    <corners android:radius="16dp" />
+</shape>

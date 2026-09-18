@@ -1,0 +1,7 @@
+<!-- 侧边栏「关于」图标：圆环 + i。描边画法，VectorDrawable 支持 strokeColor/strokeWidth。 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <path fill="none" stroke="#233A6B" stroke-width="1.8"
+        d="M12,3a9,9 0 1 1 0,18a9,9 0 1 1 0,-18z"/>
+  <path fill="#233A6B" d="M10.9,7.4a1.1,1.1 0 1 1 2.2,0a1.1,1.1 0 1 1 -2.2,0z"/>
+  <path fill="#233A6B" d="M10.85,11.9a1.15,1.15 0 0 1 2.3,0v3.7a1.15,1.15 0 0 1 -2.3,0z"/>
+</svg>

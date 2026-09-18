@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  添加课程页的「基本信息」卡（设计稿 6）：课程名称输入框 + 课程颜色圆点一行。
+
+  作为 RecyclerView 的 header 由 AddCourseActivity 填充：颜色圆点是代码按课程调色板
+  （R.array.customizedColors）现生成的，这里只留容器 ll_color；选中态的「✓」和
+  「已选：蓝」说明也由代码维护。长按圆点仍可打开取色器选任意自定义色（老功能保留）。
+-->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rl_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="16dp"
+    app:cardBackgroundColor="@color/card_background"
+    app:cardCornerRadius="@dimen/group_radius"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:text="@string/add_course_name_label"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/et_name"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_edit_field"
+            android:hint="@string/add_course_name_hint"
+            android:inputType="text"
+            android:lines="1"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:singleLine="true"
+            android:textColorHint="@color/text_secondary"
+            android:textSize="15sp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:includeFontPadding="false"
+            android:text="@string/add_course_color_label"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+
+        <!-- 颜色圆点行：代码按调色板填充（9 枚 28dp 圆点，选中的画 ✓）。 -->
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_color"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_color_caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:includeFontPadding="false"
+            android:textColor="@color/text_secondary"
+            android:textSize="11.5sp"
+            tools:text="已选：蓝" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</com.google.android.material.card.MaterialCardView>

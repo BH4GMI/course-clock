@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  日视图小部件（今日课程）。
+
+  尺寸：默认 4×2，可缩到 2×2。
+  - 原生写法是 targetCellWidth/targetCellHeight（API 31+），桌面按格数算，不会再出现
+    "拖的是 4×2、放下来只有 4×1"。
+  - minWidth/minHeight 是给 API < 31 的回落，按官方公式 70n−30：4 列 → 250dp，2 行 → 110dp。
+    原来 minHeight 写的是 40dp（= 1 行），所以默认就是 4×1。
+  - minResize* 写 110dp（= 2 格）而不是更大的值：形态由**实际可用空间**决定
+    （TodayColorfulService 按实测宽高选 focus / timeline / singleLarge），所以「小正方形」
+    那一档必须真的缩得到。原来 minResizeHeight=150dp 把 2×2 挡在外面，用户永远看不到它。
+
+  **只声明 previewImage，不声明 previewLayout**：previewLayout 会被 MIUI/HyperOS 的
+  「添加小部件 → 点条目文字 → 详情页」用 AppWidgetHostView 托管起来，并给预览控件挂一个
+  "打开本应用"的点击，于是用户点一下预览图就被带回主界面（实测：详情页里该节点
+  `click=true`、内容描述来自预览布局，点击日志是桌面用 LAUNCHER 意图拉起本应用）。
+  只给 `previewImage` 时详情页退化成普通 ImageView，不挂点击，与其它应用的表现一致；
+  这个差异只存在于"托管预览布局"这条路径，与小部件自身的点击入口无关。
+
+  预览图由 `WidgetPreviewImageTest` 从真实布局渲染生成，浅色与深色各一套。
+  选择器不会连接 RemoteViewsService，不能用正式布局中的空 ListView 作预览。
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialKeyguardLayout="@layout/today_course_app_widget"
+    android:initialLayout="@layout/today_course_app_widget"
+    android:minWidth="@dimen/day_widget_default_width"
+    android:minHeight="@dimen/day_widget_default_height"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="110dp"
+    android:previewImage="@drawable/day_widget_preview"
+    android:resizeMode="vertical|horizontal"
+    android:targetCellWidth="4"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="10800000"
+    android:widgetCategory="home_screen" />

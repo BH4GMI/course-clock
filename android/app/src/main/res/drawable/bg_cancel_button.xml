@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  面板里的"取消"按钮底（设计稿：一块中性灰，48dp 高、圆角 16dp）。
+  故意不用红色：取消不危险，红色留给真正会丢数据的操作。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/card2_background" />
+    <corners android:radius="8dp" />
+</shape>

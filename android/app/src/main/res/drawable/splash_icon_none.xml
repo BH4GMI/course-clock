@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  API 31+ 系统启动画面的"图标"占位：全透明。
+
+  系统启动画面（`android:windowSplashScreenAnimatedIcon`）不设时，系统会画应用图标 ——
+  那正是用户看到的"开屏画面"。设成全透明之后，那张画面只剩一层与应用底色相同的背景，
+  从点图标到看见内容之间不再出现任何第三方画面。
+
+  用 shape 而不是给位图设 alpha：这里不需要任何像素，shape 不产生 bitmap、也不占内存。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@android:color/transparent" />
+</shape>

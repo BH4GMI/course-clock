@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Toasty 1.4.2 背景色覆盖：同名的 App 资源在合并时优先于库资源（非 namespace 的传统合并规则），
+  库代码里的 ContextCompat.getColor(R.color.errorColor) 读到的就是这里的值。
+
+  为什么用资源覆盖而不是代码配置：反编译 1.4.2 的 Toasty$Config 确认它只有
+  setToastTypeface / setTextSize / tintIcon / allowQueue，没有任何颜色入口；
+  背景色是库代码从资源表取的，所以资源层就是它唯一的天然扩展点。
+
+  为什么是 85%（#D9）：用户要求 toast 不要完全不透明。颜色以 setColorFilter(color, SRC_IN)
+  刷到背景 9-patch 上，alpha 会原样透传；85% 在保持白字可读的同时能看出底下内容。
+  defaultTextColor 故意不覆盖——文字保持全不透明。
+
+  升级 Toasty 前先看 ToastyBackgroundOverrideTest：颜色名或上色机制变了它会红。
+-->
+<resources>
+    <color name="normalColor">#D9353A3E</color>
+    <color name="errorColor">#D9D50000</color>
+    <color name="successColor">#D9388E3C</color>
+    <color name="infoColor">#D93F51B5</color>
+    <color name="warningColor">#D9FFA900</color>
+</resources>

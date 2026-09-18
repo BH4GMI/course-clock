@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2K 屏（1440px 宽 @ 3.5x = 411dp）的小部件覆盖值，来源见 values/dimens.xml 里的注释。 -->
+<resources>
+    <dimen name="widget_corner_radius">21dp</dimen><!-- 73px @ 3.5x -->
+</resources>

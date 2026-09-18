@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      「就地选择」弹窗的进出时长，单位 ms。
+
+      放在这里是为了**只有一个来源**：弹窗的出现动画（ChoicePopup.animateIn）、它的退出动画
+      （res/anim/choice_popup_exit.xml）和它背后那层压暗的淡入淡出（见 ChoicePopup）都读这一个值
+      —— 三者一起出现／一起消失才像一件事，各写一个数迟早会分叉。
+
+      取 120ms：略快于 config_shortAnimTime（150ms）。这是一个"就地改一个值"的小列表，
+      慢一点就显得拖沓。
+    -->
+    <integer name="choice_popup_duration">120</integer>
+</resources>

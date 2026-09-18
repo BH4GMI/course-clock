@@ -1,0 +1,27 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.{kt,java}]
+indent_size = 4
+
+[*.{xml,gradle,pro}]
+indent_size = 4
+
+[*.{js,json,html,svg}]
+indent_size = 2
+
+[*.py]
+indent_size = 4
+
+# Windows PowerShell 5.1 与 cmd 批处理必须用 CRLF；.ps1 另见下一条。
+[*.{ps1,bat}]
+end_of_line = crlf
+
+[*.md]
+trim_trailing_whitespace = false

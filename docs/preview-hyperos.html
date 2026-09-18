@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课钟 · HyperOS 风格界面重设计稿</title>
+<style>
+/* ==========================================================================
+   课钟 · CourseClock —— HyperOS / MIUI 风格重设计稿
+
+   这一稿的目标是「学生一眼就懂」，所有取舍都围绕它：
+   · 一份信息只出现一次：详情页上面是摘要，下面是明细，不重复
+   · 课程块只写课程名和教室，几点上课统一交给左侧时间轴
+   · 课程颜色只做标识：淡底 + 同色文字，不再用实色块压白字
+   · 每一条含糊的设置都补一行解释；专业名词换成日常说法
+   · 破坏性操作（清空、删除）单独摆放，且会二次确认
+
+   画布 360 × 780，1 单位 = 1dp
+   圆角：卡片 20 / 弹窗与小组件 24 / 色块 14 / 按钮 16 / 输入 12
+   间距：8 / 12 / 16 / 20 / 24      列表行高 56      开关 42 × 26
+   字号：标题 22 / 列表项 15 / 说明 12
+   ========================================================================== */
+:root{
+  /* 页面外壳 */
+  --page:#E7E9EE; --ink-page:#15171C; --ink-page-2:#5C6270; --card-page:#FFFFFF;
+  /* App 浅色 */
+  --bg:#F2F3F5;            /* 页面底色（分组卡片之间的灰） */
+  --card:#FFFFFF;          /* 卡片 / 分组 */
+  --card2:#F4F5F7;         /* 输入框、次级容器 */
+  --ink:#181818;           /* 主文字 */
+  --ink2:#83838C;          /* 次文字 */
+  --ink3:#B4B4BC;          /* 三级文字 / 占位 */
+  --line:#EBEBEF;          /* 分隔线（组内左缩 16） */
+  --grid:#E2E5EB;          /* 课表虚线网格（默认显示） */
+  --accent:#3482FF;        /* HyperOS 蓝 */
+  --accent-soft:#E9F1FF;
+  --on-accent:#FFFFFF;
+  --switch-off:#D9D9DE;
+  --danger:#FF3B30;
+  --danger-soft:#FFEDEC;
+  --ok:#2FBF71;
+  --scrim:rgba(0,0,0,.42);
+  --shadow:0 1px 2px rgba(16,20,30,.05), 0 10px 28px rgba(16,20,30,.10);
+  --shadow-soft:0 1px 2px rgba(16,20,30,.04), 0 6px 18px rgba(16,20,30,.06);
+  /* 课程色（浅色） */
+  --c1:#3B7DFF; --c2:#FF6B35; --c3:#2FBF71; --c4:#A855F7;
+  --c5:#FF4D6D; --c6:#12B5B0; --c7:#F2A30F; --c8:#6C6CF5;
+}
+[data-theme="dark"]{
+  --page:#0A0B0D; --ink-page:#F2F3F7; --ink-page-2:#98A0AE; --card-page:#16181C;
+  --bg:#000000;
+  --card:#1C1C1E;
+  --card2:#2C2C2E;
+  --ink:#FFFFFF;
+  --ink2:#98989F;
+  --ink3:#6A6A70;
+  --line:#2E2E32;
+  --grid:#2F2F35;
+  --accent:#4A8FFF;
+  --accent-soft:#15253F;
+  --on-accent:#FFFFFF;
+  --switch-off:#48484D;
+  --danger:#FF453A;
+  --danger-soft:#3A1F1E;
+  --ok:#32D74B;
+  --scrim:rgba(0,0,0,.55);
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 12px 30px rgba(0,0,0,.55);
+  --shadow-soft:0 1px 2px rgba(0,0,0,.4), 0 8px 20px rgba(0,0,0,.45);
+  --c1:#5B9BFF; --c2:#FF8A5B; --c3:#4FD98D; --c4:#BE7BFF;
+  --c5:#FF7A93; --c6:#3ED3CE; --c7:#FFC44D; --c8:#8C8CFF;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; padding:32px 24px 72px;
+  background:var(--page); color:var(--ink-page);
+  font:14px/1.65 "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+}
+header.page{max-width:1360px;margin:0 auto 30px;display:flex;gap:28px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+header.page h1{margin:0 0 8px;font-size:23px;letter-spacing:-.2px}
+header.page p{margin:0;color:var(--ink-page-2);max-width:900px}
+header.page ul{margin:10px 0 0;padding-left:20px;color:var(--ink-page-2);font-size:13px}
+header.page li{margin:2px 0}
+header.page code{background:rgba(127,127,127,.14);padding:1px 5px;border-radius:5px;font-size:12px}
+#themeBtn{
+  flex:0 0 auto;padding:11px 20px;border-radius:14px;cursor:pointer;
+  border:1px solid rgba(127,127,127,.22);background:var(--card-page);color:var(--ink-page);
+  font:inherit;font-weight:700;box-shadow:var(--shadow-soft);
+}
+#themeBtn:hover{border-color:var(--accent);color:var(--accent)}
+main{max-width:1360px;margin:0 auto;display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start}
+figure.shot{margin:0;width:360px}
+.device{border-radius:32px;box-shadow:var(--shadow);overflow:hidden;background:var(--bg);line-height:0}
+figcaption{margin-top:14px;font-size:13px;color:var(--ink-page-2)}
+figcaption b{display:block;color:var(--ink-page);font-size:14.5px;margin-bottom:5px}
+
+/* —— SVG 内部样式：颜色一律走变量，presentation attribute 不支持 var()，所以用 class —— */
+svg.dp{display:block}
+svg.dp text{font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif}
+.bg{fill:var(--bg)} .card{fill:var(--card)} .card2{fill:var(--card2)}
+.ink{fill:var(--ink)} .ink2{fill:var(--ink2)} .ink3{fill:var(--ink3)}
+.accent{fill:var(--accent)} .accent-soft{fill:var(--accent-soft)} .on-accent{fill:var(--on-accent)}
+.danger{fill:var(--danger)} .danger-soft{fill:var(--danger-soft)}
+.ok{fill:var(--ok)} .off{fill:var(--switch-off)}
+.line{fill:var(--line)} .scrim{fill:var(--scrim)}
+.s-line{stroke:var(--line);fill:none;stroke-width:1}
+.grid{stroke:var(--grid);fill:none;stroke-width:1;stroke-dasharray:4 3}   /* 课表虚线网格 */
+.axis{stroke:var(--grid);fill:none;stroke-width:1}   /* 坐标轴：实线，和虚线网格区分开 */
+.s-ink{stroke:var(--ink);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.s-ink2{stroke:var(--ink2);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.s-ink3{stroke:var(--ink3);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.s-accent{stroke:var(--accent);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.s-on-accent{stroke:var(--on-accent);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.s-danger{stroke:var(--danger);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.s-icon{stroke:var(--ink);fill:none;stroke-width:1.2}   /* 状态栏小图标：细线，用 ink 而不是 currentColor */
+.dash{fill:var(--card2);stroke:var(--ink3);stroke-width:1.4;stroke-dasharray:5 4}   /* 虚线框：只用来表示「这里可以添加」 */
+/* 课程色：淡底 = 同色 + fill-opacity，文字 = 同色不透明 */
+.c1{fill:var(--c1)} .c2{fill:var(--c2)} .c3{fill:var(--c3)} .c4{fill:var(--c4)}
+.c5{fill:var(--c5)} .c6{fill:var(--c6)} .c7{fill:var(--c7)} .c8{fill:var(--c8)}
+.st1{stroke:var(--c1)} .st2{stroke:var(--c2)} .st3{stroke:var(--c3)} .st4{stroke:var(--c4)}
+.st5{stroke:var(--c5)} .st6{stroke:var(--c6)} .st7{stroke:var(--c7)} .st8{stroke:var(--c8)}
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div>
+    <h1>课钟 · HyperOS / MIUI 风格界面重设计稿</h1>
+    <p>同一套功能，按 HyperOS 的视觉语言重画一遍：灰底 + 白色分组卡片、大圆角、胶囊开关、柔和课程色块、手势条。画布 360 × 780，1 单位 = 1dp。与 <code>preview-pages.html</code>（现状还原稿）对照着看。</p>
+    <ul>
+      <li><b>一眼看清</b>：课程块只写课程名和教室，几点上课看左侧时间轴；星期和时间都做成带刻度的轴，刻度和课表格子对齐</li>
+      <li><b>不重复</b>：详情页上面是摘要、下面是明细，同一条信息只出现一次</li>
+      <li><b>说人话</b>：含糊的开关都补了一行解释，「节数栏」「沉浸」这类词换成日常说法</li>
+      <li><b>少误触</b>：清空、删除会二次确认，也不再紧挨着常用按钮</li>
+      <li><b>深色可读</b>：课程颜色只做标识，淡底 + 同色文字，深色下不会糊成一片</li>
+      <li><b>像 HyperOS 的设置页</b>：组内不画分隔线、靠行距区分；箭头分两种——「&gt;」进入新页面，「⌃⌄」就地选择；纯浏览页用大标题</li>
+      <li><b>数据一致</b>：12 张图共用同一份示例课表（9 门课），每次出现的课程、教师、教室都对得上</li>
+    </ul>
+  </div>
+  <button id="themeBtn" type="button">切换深色 / 浅色</button>
+</header>
+
+<main>
+
+<!-- =====================================================================
+     1 · 课表（主界面）
+     星期是横轴：五天直接挂在轴上（不画气泡），选中的一天用蓝色滑块标出；
+     左列是纵轴：时刻贴在它对应的横线上，节次落在行的中间。块内只写课程名 + 教室。
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="课表主界面：顶部为大标题与星期轴，中部是带课程块的课表，右下角有添加课程按钮">
+  <rect class="bg" x="0" y="0" width="360" height="780"/>
+
+  <!-- 状态栏 -->
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <!-- 标题区：抽屉入口 + 大标题 + 副标题 + 两个圆按钮 -->
+  <circle class="card2" cx="32" cy="56" r="18"/>
+  <g class="s-ink"><path d="M25 51 h14 M25 56 h14 M25 61 h14"/></g>
+  <text class="ink" x="60" y="54" font-size="22" font-weight="800">课表</text>
+  <text class="ink2" x="60" y="76" font-size="12">9月15日 周一 · 第 3 周</text>
+  <circle class="card2" cx="288" cy="56" r="18"/>
+  <g class="s-ink"><path d="M288 50 v10 M284 56 l4 4 4-4 M280 63 h16"/></g>
+  <circle class="card2" cx="332" cy="56" r="18"/>
+  <g class="ink"><circle cx="332" cy="50" r="1.9"/><circle cx="332" cy="56" r="1.9"/><circle cx="332" cy="62" r="1.9"/></g>
+
+  <!-- 星期轴：不画气泡，五天直接挂在轴上，选中的一天用蓝色滑块标出 -->
+  <g text-anchor="middle">
+    <text class="accent" x="69" y="101" font-size="11">周一</text>
+    <text class="accent" x="69" y="125" font-size="16" font-weight="800">15</text>
+    <text class="ink2" x="132" y="101" font-size="11">周二</text>
+    <text class="ink" x="132" y="125" font-size="16" font-weight="700">16</text>
+    <text class="ink2" x="195" y="101" font-size="11">周三</text>
+    <text class="ink" x="195" y="125" font-size="16" font-weight="700">17</text>
+    <text class="ink2" x="258" y="101" font-size="11">周四</text>
+    <text class="ink" x="258" y="125" font-size="16" font-weight="700">18</text>
+    <text class="ink2" x="321" y="101" font-size="11">周五</text>
+    <text class="ink" x="321" y="125" font-size="16" font-weight="700">19</text>
+  </g>
+  <g transform="translate(0,-27)">
+  <g class="axis">
+    <line x1="40" y1="167" x2="350" y2="167"/>
+    <line x1="132" y1="167" x2="132" y2="161"/>
+    <line x1="195" y1="167" x2="195" y2="161"/>
+    <line x1="258" y1="167" x2="258" y2="161"/>
+    <line x1="321" y1="167" x2="321" y2="161"/>
+  </g>
+  <rect class="accent" x="57" y="165.5" width="24" height="3" rx="1.5"/>
+
+  <!-- 时间轴：节次落在行的中间，时刻贴在它对应的横线上——刻度和线对齐，才看得出先后 -->
+  <g text-anchor="end">
+    <text class="ink2" x="33" y="171" font-size="10">08:15</text>
+    <text class="ink" x="33" y="219" font-size="12.5" font-weight="700">1-2</text>
+    <text class="ink2" x="33" y="267" font-size="10">09:55</text>
+    <text class="ink" x="33" y="315" font-size="12.5" font-weight="700">3-4</text>
+    <text class="ink2" x="33" y="363" font-size="10">11:20</text>
+    <text class="ink" x="33" y="387" font-size="12.5" font-weight="700">5</text>
+    <text class="ink2" x="33" y="411" font-size="10">13:20</text>
+    <text class="ink" x="33" y="459" font-size="12.5" font-weight="700">6-7</text>
+    <text class="ink2" x="33" y="507" font-size="10">15:00</text>
+    <text class="ink" x="33" y="555" font-size="12.5" font-weight="700">8-9</text>
+    <text class="ink2" x="33" y="603" font-size="10">16:35</text>
+    <text class="ink" x="33" y="650" font-size="12.5" font-weight="700">10-11</text>
+    <text class="ink2" x="33" y="697" font-size="10">17:55</text>
+  </g>
+  <g class="axis">
+    <line x1="37" y1="167" x2="40" y2="167"/>
+    <line x1="37" y1="263" x2="40" y2="263"/>
+    <line x1="37" y1="359" x2="40" y2="359"/>
+    <line x1="37" y1="407" x2="40" y2="407"/>
+    <line x1="37" y1="503" x2="40" y2="503"/>
+    <line x1="37" y1="599" x2="40" y2="599"/>
+    <line x1="37" y1="693" x2="40" y2="693"/>
+  </g>
+
+  <!-- 虚线网格：默认显示。横向按上课时段、纵向按星期分隔，比实线更轻，也不会把课块切碎 -->
+  <g class="grid">
+    <line x1="40" y1="167" x2="350" y2="167"/>
+    <line x1="40" y1="263" x2="350" y2="263"/>
+    <line x1="40" y1="359" x2="350" y2="359"/>
+    <line x1="40" y1="407" x2="350" y2="407"/>
+    <line x1="40" y1="503" x2="350" y2="503"/>
+    <line x1="40" y1="599" x2="350" y2="599"/>
+    <line x1="40" y1="693" x2="350" y2="693"/>
+    <line x1="40" y1="167" x2="40" y2="693"/>
+    <line x1="100.5" y1="167" x2="100.5" y2="693"/>
+    <line x1="163.5" y1="167" x2="163.5" y2="693"/>
+    <line x1="226.5" y1="167" x2="226.5" y2="693"/>
+    <line x1="289.5" y1="167" x2="289.5" y2="693"/>
+    <line x1="350" y1="167" x2="350" y2="693"/>
+  </g>
+
+  <!-- 周一（第 1 列） -->
+  <rect class="c1" x="40" y="167" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <text class="c1" x="47" y="209" font-size="11.5" font-weight="800">高等数学</text>
+  <text class="c1" x="47" y="227" font-size="10" fill-opacity=".8">A-201</text>
+
+  <rect class="c4" x="40" y="263" width="58" height="46" rx="14" fill-opacity=".13"/>
+  <text class="c4" x="47" y="283" font-size="11.5" font-weight="800">大学英语</text>
+  <text class="c4" x="47" y="299" font-size="10" fill-opacity=".8">C-305</text>
+
+  <rect class="c3" x="40" y="359" width="58" height="46" rx="14" fill-opacity=".13"/>
+  <text class="c3" x="47" y="379" font-size="11.5" font-weight="800">体育</text>
+  <text class="c3" x="47" y="395" font-size="10" fill-opacity=".8">西田径场</text>
+
+  <!-- 周二 -->
+  <rect class="c2" x="103" y="167" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <text class="c2" x="110" y="209" font-size="11.5" font-weight="800">线性代数</text>
+  <text class="c2" x="110" y="227" font-size="10" fill-opacity=".8">A-101</text>
+
+  <rect class="c5" x="103" y="263" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <text class="c5" x="110" y="297" font-size="11.5" font-weight="800">英语</text>
+  <text class="c5" x="110" y="311" font-size="11.5" font-weight="800">视听说</text>
+  <text class="c5" x="110" y="331" font-size="10" fill-opacity=".8">B-203</text>
+
+  <rect class="c6" x="103" y="407" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <text class="c6" x="110" y="449" font-size="11.5" font-weight="800">程序设计</text>
+  <text class="c6" x="110" y="467" font-size="10" fill-opacity=".8">F-105</text>
+
+  <!-- 周三 -->
+  <rect class="c7" x="166" y="263" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <text class="c7" x="173" y="297" font-size="11.5" font-weight="800">数据结构</text>
+  <text class="c7" x="173" y="315" font-size="10" fill-opacity=".8">C-402</text>
+
+  <rect class="c8" x="166" y="503" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <text class="c8" x="173" y="537" font-size="11.5" font-weight="800">计算机</text>
+  <text class="c8" x="173" y="551" font-size="11.5" font-weight="800">网络</text>
+  <text class="c8" x="173" y="571" font-size="10" fill-opacity=".8">E-201</text>
+
+  <!-- 周四：D 楼作息与时间轴不同，块内单独标出真实时间 -->
+  <rect class="c1" x="229" y="263" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <text class="c1" x="236" y="297" font-size="11.5" font-weight="800">大学物理</text>
+  <text class="c1" x="236" y="315" font-size="10" fill-opacity=".8">D-303</text>
+  <text class="c1" x="236" y="333" font-size="9.5" fill-opacity=".7">10:15 上课</text>
+  </g>
+  <!-- 主操作：添加课程 -->
+  <circle class="accent" cx="320" cy="700" r="28"/>
+  <g class="s-on-accent"><path d="M320 689 v22 M309 700 h22"/></g>
+
+  <rect class="ink" x="126" y="762" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>1 · 课表（主界面）</b>
+  课表默认带虚线网格：横向按时段、纵向按星期，比实线轻，也不会把课块切碎；关掉「显示虚线网格」就只剩留白。星期不做成一排气泡，而是和课表共用一条轴：五天挂在轴上，选中的一天用蓝色滑块标出来，一眼能看出今天在哪一列。左边的时间轴也对齐了刻度——几点上课贴在它对应的横线上，节次落在行的中间，所以「这块课在几点」不用猜。课程块只写课程名和教室；周四的大学物理在 D 楼、作息和别的楼不一样，所以只有它多标了一行「10:15 上课」。右下角的加号是添加课程。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     2 · 底部面板（周数 / 多课表 / 快捷操作）
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="底部面板：上面是周数胶囊、多课表和快捷操作三组内容">
+  <rect class="bg" x="0" y="0" width="360" height="780"/>
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <circle class="card2" cx="32" cy="56" r="18"/>
+  <g class="s-ink"><path d="M25 51 h14 M25 56 h14 M25 61 h14"/></g>
+  <text class="ink" x="60" y="54" font-size="22" font-weight="800">课表</text>
+  <text class="ink2" x="60" y="76" font-size="12">9月15日 周一 · 第 3 周</text>
+  <circle class="card2" cx="332" cy="56" r="18"/>
+  <g class="ink"><circle cx="332" cy="50" r="1.9"/><circle cx="332" cy="56" r="1.9"/><circle cx="332" cy="62" r="1.9"/></g>
+
+  <!-- 星期轴 + 时间轴（与第 1 张同一套） -->
+  <g text-anchor="middle">
+    <text class="accent" x="69" y="101" font-size="11">周一</text>
+    <text class="accent" x="69" y="125" font-size="16" font-weight="800">15</text>
+    <text class="ink2" x="132" y="101" font-size="11">周二</text>
+    <text class="ink" x="132" y="125" font-size="16" font-weight="700">16</text>
+    <text class="ink2" x="195" y="101" font-size="11">周三</text>
+    <text class="ink" x="195" y="125" font-size="16" font-weight="700">17</text>
+    <text class="ink2" x="258" y="101" font-size="11">周四</text>
+    <text class="ink" x="258" y="125" font-size="16" font-weight="700">18</text>
+    <text class="ink2" x="321" y="101" font-size="11">周五</text>
+    <text class="ink" x="321" y="125" font-size="16" font-weight="700">19</text>
+  </g>
+  <g transform="translate(0,-27)">
+  <g class="axis">
+    <line x1="40" y1="167" x2="350" y2="167"/>
+    <line x1="132" y1="167" x2="132" y2="161"/>
+    <line x1="195" y1="167" x2="195" y2="161"/>
+    <line x1="258" y1="167" x2="258" y2="161"/>
+    <line x1="321" y1="167" x2="321" y2="161"/>
+    <line x1="37" y1="167" x2="40" y2="167"/>
+    <line x1="37" y1="263" x2="40" y2="263"/>
+    <line x1="37" y1="359" x2="40" y2="359"/>
+    <line x1="37" y1="407" x2="40" y2="407"/>
+    <line x1="37" y1="503" x2="40" y2="503"/>
+    <line x1="37" y1="599" x2="40" y2="599"/>
+    <line x1="37" y1="693" x2="40" y2="693"/>
+  </g>
+  <rect class="accent" x="57" y="165.5" width="24" height="3" rx="1.5"/>
+  <g text-anchor="end">
+    <text class="ink2" x="33" y="171" font-size="10">08:15</text>
+    <text class="ink" x="33" y="219" font-size="12.5" font-weight="700">1-2</text>
+    <text class="ink2" x="33" y="267" font-size="10">09:55</text>
+    <text class="ink" x="33" y="315" font-size="12.5" font-weight="700">3-4</text>
+  </g>
+
+  <g class="grid">
+    <line x1="40" y1="167" x2="350" y2="167"/>
+    <line x1="40" y1="263" x2="350" y2="263"/>
+    <line x1="40" y1="359" x2="350" y2="359"/>
+    <line x1="40" y1="407" x2="350" y2="407"/>
+    <line x1="40" y1="503" x2="350" y2="503"/>
+    <line x1="40" y1="599" x2="350" y2="599"/>
+    <line x1="40" y1="693" x2="350" y2="693"/>
+    <line x1="40" y1="167" x2="40" y2="693"/>
+    <line x1="100.5" y1="167" x2="100.5" y2="693"/>
+    <line x1="163.5" y1="167" x2="163.5" y2="693"/>
+    <line x1="226.5" y1="167" x2="226.5" y2="693"/>
+    <line x1="289.5" y1="167" x2="289.5" y2="693"/>
+    <line x1="350" y1="167" x2="350" y2="693"/>
+  </g>
+
+  <rect class="c1" x="40" y="167" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <text class="c1" x="47" y="209" font-size="11.5" font-weight="800">高等数学</text>
+  <text class="c1" x="47" y="227" font-size="10" fill-opacity=".8">A-201</text>
+  <rect class="c4" x="40" y="263" width="58" height="46" rx="14" fill-opacity=".13"/>
+  <text class="c4" x="47" y="283" font-size="11.5" font-weight="800">大学英语</text>
+  <rect class="c2" x="103" y="167" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <text class="c2" x="110" y="209" font-size="11.5" font-weight="800">线性代数</text>
+  <rect class="c7" x="166" y="263" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <text class="c7" x="173" y="297" font-size="11.5" font-weight="800">数据结构</text>
+
+  </g>
+  <rect class="scrim" x="0" y="0" width="360" height="344"/>
+
+  <!-- 面板：24dp 顶部圆角 + 把手，内容分三组 -->
+  <path class="bg" d="M0 368 q0 -24 24 -24 h312 q24 0 24 24 v412 h-360 z"/>
+  <rect class="ink3" x="164" y="334" width="32" height="4.5" rx="2.25"/>
+
+  <text class="ink" x="20" y="384" font-size="16" font-weight="800">周数</text>
+  <text class="ink2" x="340" y="384" font-size="12" text-anchor="end">共 16 周</text>
+  <g font-size="13" text-anchor="middle">
+    <rect class="card" x="20" y="396" width="40" height="36" rx="12"/>
+    <text class="ink" x="40" y="419">1</text>
+    <rect class="card" x="66" y="396" width="40" height="36" rx="12"/>
+    <text class="ink" x="86" y="419">2</text>
+    <rect class="accent" x="112" y="396" width="40" height="36" rx="12"/>
+    <text class="on-accent" x="132" y="419" font-weight="700">3</text>
+    <rect class="card" x="158" y="396" width="40" height="36" rx="12"/>
+    <text class="ink" x="178" y="419">4</text>
+    <rect class="card" x="204" y="396" width="40" height="36" rx="12"/>
+    <text class="ink" x="224" y="419">5</text>
+    <rect class="card" x="250" y="396" width="40" height="36" rx="12"/>
+    <text class="ink" x="270" y="419">6</text>
+    <rect class="card" x="296" y="396" width="40" height="36" rx="12"/>
+    <text class="ink" x="316" y="419">7</text>
+  </g>
+
+  <text class="ink" x="20" y="466" font-size="16" font-weight="800">多课表</text>
+  <rect class="card" x="16" y="478" width="328" height="104" rx="20"/>
+  <text class="ink" x="32" y="500" font-size="15">我的课表</text>
+  <text class="ink2" x="32" y="518" font-size="11">9 门课程 · 第 1-16 周</text>
+  <path class="accent" d="M322 495 l3.5 4 6 -7" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text class="ink" x="32" y="552" font-size="15">默认</text>
+  <text class="ink2" x="32" y="570" font-size="11">空课表</text>
+
+  <text class="ink" x="20" y="616" font-size="16" font-weight="800">快捷操作</text>
+  <rect class="card" x="16" y="628" width="328" height="104" rx="20"/>
+  <text class="ink" x="32" y="659" font-size="15">导入课程</text>
+  <path class="s-ink3" d="M330 654 l5 5 -5 5"/>
+  <text class="ink" x="32" y="711" font-size="15">新建课程</text>
+  <path class="s-ink3" d="M330 706 l5 5 -5 5"/>
+
+  <rect class="ink" x="126" y="762" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>2 · 底部面板</b>
+  从底部滑出的圆角面板，里面分成三组：周数用一排胶囊切换（右边写明「共 16 周」，不会让人以为只有 7 周）；多课表直接列出表名、课程数和周数区间，正在用的那张打勾；快捷操作放了两个最常用的入口。原来这里只有一个「捷径」空标题，没有任何内容。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     3 · 侧栏抽屉
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="侧栏抽屉：列出我的课表、课程管理、设置，最下方是页脚「关于」">
+  <rect class="bg" x="0" y="0" width="360" height="780"/>
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <text class="ink" x="60" y="54" font-size="22" font-weight="800">课表</text>
+  <g text-anchor="middle">
+    <text class="accent" x="69" y="101" font-size="11">周一</text>
+    <text class="accent" x="69" y="125" font-size="16" font-weight="800">15</text>
+    <text class="ink2" x="132" y="101" font-size="11">周二</text>
+    <text class="ink" x="132" y="125" font-size="16" font-weight="700">16</text>
+    <text class="ink2" x="195" y="101" font-size="11">周三</text>
+    <text class="ink" x="195" y="125" font-size="16" font-weight="700">17</text>
+    <text class="ink2" x="258" y="101" font-size="11">周四</text>
+    <text class="ink" x="258" y="125" font-size="16" font-weight="700">18</text>
+    <text class="ink2" x="321" y="101" font-size="11">周五</text>
+    <text class="ink" x="321" y="125" font-size="16" font-weight="700">19</text>
+  </g>
+  <g transform="translate(0,-27)">
+  <g class="axis">
+    <line x1="40" y1="167" x2="350" y2="167"/>
+    <line x1="132" y1="167" x2="132" y2="161"/>
+    <line x1="195" y1="167" x2="195" y2="161"/>
+    <line x1="258" y1="167" x2="258" y2="161"/>
+    <line x1="321" y1="167" x2="321" y2="161"/>
+  </g>
+  <rect class="accent" x="57" y="165.5" width="24" height="3" rx="1.5"/>
+  <g class="grid">
+    <line x1="40" y1="167" x2="350" y2="167"/>
+    <line x1="40" y1="263" x2="350" y2="263"/>
+    <line x1="40" y1="359" x2="350" y2="359"/>
+    <line x1="40" y1="407" x2="350" y2="407"/>
+    <line x1="40" y1="503" x2="350" y2="503"/>
+    <line x1="40" y1="599" x2="350" y2="599"/>
+    <line x1="40" y1="693" x2="350" y2="693"/>
+    <line x1="40" y1="167" x2="40" y2="693"/>
+    <line x1="100.5" y1="167" x2="100.5" y2="693"/>
+    <line x1="163.5" y1="167" x2="163.5" y2="693"/>
+    <line x1="226.5" y1="167" x2="226.5" y2="693"/>
+    <line x1="289.5" y1="167" x2="289.5" y2="693"/>
+    <line x1="350" y1="167" x2="350" y2="693"/>
+  </g>
+  <rect class="c1" x="40" y="167" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <rect class="c2" x="103" y="167" width="58" height="94" rx="14" fill-opacity=".13"/>
+  </g>
+  <rect class="scrim" x="272" y="0" width="88" height="780"/>
+
+  <!-- 抽屉：卡片色 + 右侧 24dp 圆角 -->
+  <path class="card" d="M0 0 h248 q24 0 24 24 v732 q0 24 -24 24 h-248 z"/>
+  <text class="ink" x="24" y="80" font-size="24" font-weight="800">课钟</text>
+  <text class="ink2" x="24" y="102" font-size="12">课程表 · 上课提醒</text>
+
+  <!-- 当前项：蓝底胶囊 + 实心图标 -->
+  <rect class="accent-soft" x="16" y="132" width="220" height="56" rx="16"/>
+  <circle class="accent" cx="46" cy="160" r="16"/>
+  <path class="s-on-accent" d="M46 152 a8 8 0 1 0 4 15 l4 4" stroke-width="1.7"/>
+  <text class="accent" x="74" y="166" font-size="15" font-weight="700">我的课表</text>
+
+  <circle class="card2" cx="46" cy="220" r="16"/>
+  <g class="s-ink2"><path d="M39 218 h14 M46 211 v14"/></g>
+  <text class="ink" x="74" y="226" font-size="15">课程管理</text>
+
+  <circle class="card2" cx="46" cy="280" r="16"/>
+  <g class="s-ink2"><circle cx="46" cy="278" r="3.6"/><path d="M46 271.6 v-2.4 M46 286.4 v-2.4 M39.6 278 h-2.4 M52.4 278 h-2.4 M41.4 273.4 l-1.7-1.7 M50.6 282.6 l-1.7-1.7 M41.4 282.6 l-1.7 1.7 M50.6 273.4 l-1.7 1.7"/></g>
+  <text class="ink" x="74" y="286" font-size="15">设置</text>
+
+  <!-- 页脚：不是导航项，不用 32dp 圆底图标，也不占 56dp 行高 -->
+  <rect class="line" x="24" y="640" width="212" height="1"/>
+  <g class="s-ink2" transform="translate(96,673) scale(.42)"><circle cx="0" cy="0" r="20"/><path d="M0 -10 v11 M0 8 v1"/></g>
+  <text class="ink2" x="124" y="679" font-size="13" text-anchor="middle">关于</text>
+
+  <rect class="ink" x="126" y="762" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>3 · 侧栏抽屉</b>
+  抽屉要回答两个问题：现在在哪儿、还能去哪儿。当前页是蓝底胶囊 + 实心图标，其余是灰色线性图标；「我的课表」比「已添课程」更像用户自己的话。底部原来写着版本号和开源协议，那是开发信息，撤掉了。「数据只保存在本机」这类说明是对实现的要求，写在 README 里就够，不必占用 App 界面的位置。
+  <br><b>2026-09-18 修订</b>（用户要求）：撤掉「新建课表」一行 —— 它与底部面板那个按钮是同一件事，两个入口只会让同一个动作有两种到达方式（新建课表仍由底部面板提供）。「关于」从导航项的第四行挪到抽屉最下方，并且不再用导航行的语言：去掉 32dp 圆底图标与强调色胶囊，只剩一枚 16dp 线性图标 + 13sp 次要文字色，居中、行高 48dp。它回答的既不是"现在在哪"也不是"还能去哪"，是署名 —— 混在导航行里会被读成与「设置」平级的第四项。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     4 · 课程详情（底部弹窗）
+     上面是摘要（周几第几节、第几周），下面是明细，两处不重复同一条信息。
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="课程详情底部弹窗：课程名、周次与节次摘要，下面列出时间、教师、地点和提醒">
+  <rect class="bg" x="0" y="0" width="360" height="780"/>
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <text class="ink" x="60" y="54" font-size="22" font-weight="800">课表</text>
+  <text class="ink2" x="60" y="76" font-size="12">9月15日 周一 · 第 3 周</text>
+  <g text-anchor="middle">
+    <text class="accent" x="69" y="101" font-size="11">周一</text>
+    <text class="accent" x="69" y="125" font-size="16" font-weight="800">15</text>
+    <text class="ink2" x="132" y="101" font-size="11">周二</text>
+    <text class="ink" x="132" y="125" font-size="16" font-weight="700">16</text>
+    <text class="ink2" x="195" y="101" font-size="11">周三</text>
+    <text class="ink" x="195" y="125" font-size="16" font-weight="700">17</text>
+    <text class="ink2" x="258" y="101" font-size="11">周四</text>
+    <text class="ink" x="258" y="125" font-size="16" font-weight="700">18</text>
+    <text class="ink2" x="321" y="101" font-size="11">周五</text>
+    <text class="ink" x="321" y="125" font-size="16" font-weight="700">19</text>
+  </g>
+  <g transform="translate(0,-27)">
+  <g class="axis">
+    <line x1="40" y1="167" x2="350" y2="167"/>
+    <line x1="132" y1="167" x2="132" y2="161"/>
+    <line x1="195" y1="167" x2="195" y2="161"/>
+    <line x1="258" y1="167" x2="258" y2="161"/>
+    <line x1="321" y1="167" x2="321" y2="161"/>
+  </g>
+  <g text-anchor="end">
+    <text class="ink2" x="33" y="171" font-size="10">08:15</text>
+    <text class="ink" x="33" y="219" font-size="12.5" font-weight="700">1-2</text>
+    <text class="ink2" x="33" y="267" font-size="10">09:55</text>
+    <text class="ink" x="33" y="315" font-size="12.5" font-weight="700">3-4</text>
+  </g>
+  <g class="axis">
+    <line x1="37" y1="167" x2="40" y2="167"/>
+    <line x1="37" y1="263" x2="40" y2="263"/>
+  </g>
+  <rect class="accent" x="57" y="165.5" width="24" height="3" rx="1.5"/>
+  <g class="grid">
+    <line x1="40" y1="167" x2="350" y2="167"/>
+    <line x1="40" y1="263" x2="350" y2="263"/>
+    <line x1="40" y1="359" x2="350" y2="359"/>
+    <line x1="40" y1="407" x2="350" y2="407"/>
+    <line x1="40" y1="503" x2="350" y2="503"/>
+    <line x1="40" y1="599" x2="350" y2="599"/>
+    <line x1="40" y1="693" x2="350" y2="693"/>
+    <line x1="40" y1="167" x2="40" y2="693"/>
+    <line x1="100.5" y1="167" x2="100.5" y2="693"/>
+    <line x1="163.5" y1="167" x2="163.5" y2="693"/>
+    <line x1="226.5" y1="167" x2="226.5" y2="693"/>
+    <line x1="289.5" y1="167" x2="289.5" y2="693"/>
+    <line x1="350" y1="167" x2="350" y2="693"/>
+  </g>
+  <rect class="c1" x="40" y="167" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <rect class="c2" x="103" y="167" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <rect class="c4" x="40" y="263" width="58" height="46" rx="14" fill-opacity=".13"/>
+  </g>
+  <rect class="scrim" x="0" y="0" width="360" height="324"/>
+
+  <path class="bg" d="M0 348 q0 -24 24 -24 h312 q24 0 24 24 v432 h-360 z"/>
+  <rect class="ink3" x="164" y="314" width="32" height="4.5" rx="2.25"/>
+
+  <!-- 标题：颜色条 + 课程名 -->
+  <rect class="c1" x="24" y="354" width="4" height="22" rx="2"/>
+  <text class="ink" x="38" y="372" font-size="22" font-weight="800">高等数学</text>
+  <rect class="accent-soft" x="24" y="388" width="112" height="28" rx="14"/>
+  <text class="accent" x="80" y="407" font-size="12.5" font-weight="600" text-anchor="middle">周一 第 1-2 节</text>
+  <rect class="card2" x="142" y="388" width="88" height="28" rx="14"/>
+  <text class="ink2" x="186" y="407" font-size="12.5" text-anchor="middle">第 1-16 周</text>
+
+  <!-- 明细：4 行 56dp -->
+  <rect class="card" x="16" y="436" width="328" height="224" rx="20"/>
+  <g>
+    <circle class="card2" cx="44" cy="464" r="16"/>
+    <path class="st1" d="M44 456 a8 8 0 1 1 -8 8" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+    <path class="st1" d="M44 459 v5 h4" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+    <text class="ink2" x="72" y="457" font-size="12">上课时间</text>
+    <text class="ink" x="72" y="475" font-size="15">08:15 - 09:35</text>
+  </g>
+  <g>
+    <circle class="card2" cx="44" cy="520" r="16"/>
+    <g class="s-accent" stroke-width="1.7"><circle cx="44" cy="517" r="4"/><path d="M37 529 a8 6 0 0 1 14 0"/></g>
+    <text class="ink2" x="72" y="513" font-size="12">授课教师</text>
+    <text class="ink" x="72" y="531" font-size="15">张伟</text>
+  </g>
+  <g>
+    <circle class="card2" cx="44" cy="576" r="16"/>
+    <path class="st3" d="M44 568 a6 6 0 0 1 6 6 c0 5 -6 11 -6 11 s-6 -6 -6 -11 a6 6 0 0 1 6 -6 z" stroke-width="1.7" fill="none"/>
+    <text class="ink2" x="72" y="569" font-size="12">上课地点</text>
+    <text class="ink" x="72" y="587" font-size="15">A-201</text>
+  </g>
+  <g>
+    <circle class="card2" cx="44" cy="632" r="16"/>
+    <path class="st4" d="M39 632 a5 5 0 0 1 10 0 v3 h-10 z M37 638 h14 M44 627 v-2" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+    <text class="ink2" x="72" y="625" font-size="12">提醒</text>
+    <text class="ink" x="72" y="643" font-size="15">上课前 10 分钟</text>
+  </g>
+
+  <rect class="accent" x="16" y="676" width="200" height="48" rx="16"/>
+  <text class="on-accent" x="116" y="706" font-size="15.5" font-weight="700" text-anchor="middle">编辑课程</text>
+  <rect class="danger-soft" x="228" y="676" width="116" height="48" rx="16"/>
+  <text class="danger" x="286" y="706" font-size="15.5" font-weight="700" text-anchor="middle">删除</text>
+
+  <rect class="ink" x="126" y="762" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>4 · 课程详情</b>
+  上面一行是摘要（周几第几节、第几周），下面是明细（时间、教师、地点、提醒），摘要里出现过的信息下面不会再写一遍。原来「时间」和「地点」在摘要和明细里各出现一次，看着像两组不同的数据。删除和编辑分开摆放，红色只留给删除，并且会先问一次。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     5 · 导入课程（底部弹窗）
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="导入课程弹窗：两条导入途径，从学校教务导入或从备份文件导入">
+  <rect class="bg" x="0" y="0" width="360" height="780"/>
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <text class="ink" x="60" y="54" font-size="22" font-weight="800">课表</text>
+  <text class="ink2" x="60" y="76" font-size="12">9月15日 周一 · 第 3 周</text>
+  <g text-anchor="middle">
+    <text class="accent" x="69" y="101" font-size="11">周一</text>
+    <text class="accent" x="69" y="125" font-size="16" font-weight="800">15</text>
+    <text class="ink2" x="132" y="101" font-size="11">周二</text>
+    <text class="ink" x="132" y="125" font-size="16" font-weight="700">16</text>
+    <text class="ink2" x="195" y="101" font-size="11">周三</text>
+    <text class="ink" x="195" y="125" font-size="16" font-weight="700">17</text>
+    <text class="ink2" x="258" y="101" font-size="11">周四</text>
+    <text class="ink" x="258" y="125" font-size="16" font-weight="700">18</text>
+    <text class="ink2" x="321" y="101" font-size="11">周五</text>
+    <text class="ink" x="321" y="125" font-size="16" font-weight="700">19</text>
+  </g>
+  <g transform="translate(0,-27)">
+  <g class="axis">
+    <line x1="40" y1="167" x2="350" y2="167"/>
+    <line x1="132" y1="167" x2="132" y2="161"/>
+    <line x1="195" y1="167" x2="195" y2="161"/>
+    <line x1="258" y1="167" x2="258" y2="161"/>
+    <line x1="321" y1="167" x2="321" y2="161"/>
+  </g>
+  <g text-anchor="end">
+    <text class="ink2" x="33" y="171" font-size="10">08:15</text>
+    <text class="ink" x="33" y="219" font-size="12.5" font-weight="700">1-2</text>
+    <text class="ink2" x="33" y="267" font-size="10">09:55</text>
+    <text class="ink" x="33" y="315" font-size="12.5" font-weight="700">3-4</text>
+  </g>
+  <g class="axis">
+    <line x1="37" y1="167" x2="40" y2="167"/>
+    <line x1="37" y1="263" x2="40" y2="263"/>
+  </g>
+  <rect class="accent" x="57" y="165.5" width="24" height="3" rx="1.5"/>
+  <g class="grid">
+    <line x1="40" y1="167" x2="350" y2="167"/>
+    <line x1="40" y1="263" x2="350" y2="263"/>
+    <line x1="40" y1="359" x2="350" y2="359"/>
+    <line x1="40" y1="407" x2="350" y2="407"/>
+    <line x1="40" y1="503" x2="350" y2="503"/>
+    <line x1="40" y1="599" x2="350" y2="599"/>
+    <line x1="40" y1="693" x2="350" y2="693"/>
+    <line x1="40" y1="167" x2="40" y2="693"/>
+    <line x1="100.5" y1="167" x2="100.5" y2="693"/>
+    <line x1="163.5" y1="167" x2="163.5" y2="693"/>
+    <line x1="226.5" y1="167" x2="226.5" y2="693"/>
+    <line x1="289.5" y1="167" x2="289.5" y2="693"/>
+    <line x1="350" y1="167" x2="350" y2="693"/>
+  </g>
+  <rect class="c1" x="40" y="167" width="58" height="94" rx="14" fill-opacity=".13"/>
+  <rect class="c4" x="40" y="263" width="58" height="46" rx="14" fill-opacity=".13"/>
+  </g>
+  <rect class="scrim" x="0" y="0" width="360" height="384"/>
+
+  <path class="bg" d="M0 408 q0 -24 24 -24 h312 q24 0 24 24 v372 h-360 z"/>
+  <rect class="ink3" x="164" y="374" width="32" height="4.5" rx="2.25"/>
+
+  <text class="ink" x="24" y="432" font-size="20" font-weight="800">导入课程</text>
+  <text class="ink2" x="24" y="456" font-size="12.5">登录学校 WebVPN 后自动读回本学期课表</text>
+  <text class="ink2" x="24" y="474" font-size="12.5">也可以选择之前备份好的课表文件</text>
+
+  <rect class="card" x="16" y="492" width="328" height="80" rx="20"/>
+  <circle class="accent-soft" cx="56" cy="532" r="20"/>
+  <g class="s-accent"><path d="M56 524 v12 M51 531 l5 5 5-5 M48 540 h16"/></g>
+  <text class="ink" x="88" y="528" font-size="15.5" font-weight="700">从学校教务导入</text>
+  <text class="ink2" x="88" y="548" font-size="11.5">推荐 · 自动读回课程和作息</text>
+  <path class="s-ink3" d="M330 526 l6 6 -6 6"/>
+
+  <rect class="card" x="16" y="584" width="328" height="80" rx="20"/>
+  <circle class="card2" cx="56" cy="624" r="20"/>
+  <g class="s-ink2"><path d="M45 628 v-10 a2 2 0 0 1 2 -2 h6 l3 3 h9 a2 2 0 0 1 2 2 v7"/><path d="M45 628 v4 a2 2 0 0 0 2 2 h18 a2 2 0 0 0 2 -2 v-4"/></g>
+  <text class="ink" x="88" y="620" font-size="15.5" font-weight="700">从备份文件导入</text>
+  <text class="ink2" x="88" y="640" font-size="11.5">换手机或重装时用</text>
+  <path class="s-ink3" d="M330 618 l6 6 -6 6"/>
+
+  <rect class="card2" x="16" y="676" width="328" height="48" rx="16"/>
+  <text class="ink" x="180" y="706" font-size="15.5" font-weight="700" text-anchor="middle">取消</text>
+
+  <rect class="ink" x="126" y="762" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>5 · 导入课程</b>
+  两条路做成两块大选项：左边圆形图标、右边一行说明，第一块标了「推荐」，用户不用猜该点哪个。「从文件导入」原来写的是 .wakeup_schedule 文件名，普通用户看不懂，改成说清楚它是干嘛的——换手机时用。取消按钮没有用红色，因为它不危险。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     6 · 添加课程
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="添加课程页：上面填课程名和颜色，下面选周数、节次、教师和地点">
+  <rect class="bg" x="0" y="0" width="360" height="780"/>
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <g class="s-ink"><path d="M28 50 l-8 7 8 7"/></g>
+  <text class="ink" x="48" y="62" font-size="18" font-weight="800">添加课程</text>
+
+  <!-- 基本信息 -->
+  <rect class="card" x="16" y="92" width="328" height="188" rx="20"/>
+  <text class="ink2" x="32" y="122" font-size="12">课程名称</text>
+  <rect class="card2" x="32" y="132" width="296" height="44" rx="12"/>
+  <text class="ink" x="48" y="160" font-size="15">高等数学</text>
+  <text class="ink2" x="32" y="204" font-size="12">课程颜色</text>
+  <g>
+    <circle class="c1" cx="44" cy="232" r="14"/><path class="s-on-accent" d="M38 232 l4 4 6.5 -7" stroke-width="2.2"/>
+    <circle class="c2" cx="82" cy="232" r="14"/>
+    <circle class="c3" cx="120" cy="232" r="14"/>
+    <circle class="c4" cx="158" cy="232" r="14"/>
+    <circle class="c5" cx="196" cy="232" r="14"/>
+    <circle class="c6" cx="234" cy="232" r="14"/>
+    <circle class="c7" cx="272" cy="232" r="14"/>
+    <circle class="c8" cx="310" cy="232" r="14"/>
+  </g>
+  <text class="ink2" x="32" y="270" font-size="11.5">已选：蓝</text>
+
+  <!-- 上课时间 -->
+  <text class="ink2" x="24" y="308" font-size="12">上课时间</text>
+  <rect class="card" x="16" y="318" width="328" height="256" rx="20"/>
+  <g>
+    <text class="ink" x="32" y="346" font-size="15">周数</text>
+    <text class="ink2" x="334" y="346" font-size="15" text-anchor="end">第 1-16 周</text>
+    <path class="s-ink3" d="M340 336 l5 5 -5 5"/>
+  </g>
+  <g>
+    <text class="ink" x="32" y="410" font-size="15">节次</text>
+    <text class="ink2" x="334" y="410" font-size="15" text-anchor="end">周一 第 1-2 节</text>
+    <path class="s-ink3" d="M340 400 l5 5 -5 5"/>
+  </g>
+  <g>
+    <text class="ink" x="32" y="474" font-size="15">授课教师</text>
+    <rect class="card2" x="240" y="462" width="104" height="32" rx="10"/>
+    <text class="ink" x="292" y="483" font-size="13.5" text-anchor="middle">张伟</text>
+  </g>
+  <g>
+    <text class="ink" x="32" y="538" font-size="15">上课地点</text>
+    <rect class="card2" x="240" y="526" width="104" height="32" rx="10"/>
+    <text class="ink" x="292" y="547" font-size="13.5" text-anchor="middle">A-201</text>
+  </g>
+
+  <rect class="accent-soft" x="16" y="590" width="328" height="48" rx="16"/>
+  <text class="accent" x="180" y="620" font-size="15.5" font-weight="700" text-anchor="middle">+ 添加时间段</text>
+
+  <rect class="accent" x="16" y="652" width="328" height="52" rx="16"/>
+  <text class="on-accent" x="180" y="684" font-size="16" font-weight="700" text-anchor="middle">保存课程</text>
+
+  <rect class="ink" x="126" y="762" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>6 · 添加课程</b>
+  一页只留一个「保存课程」。原来右上角还有一个「保存」，和底部按钮做同一件事，用户会犹豫点哪个。教师和地点是能直接输入的空格（画成了输入框的样子），周数和节次是弹选择器（带箭头），一眼能看出哪些是打字、哪些是选择。「+ 添加时间段」是次要动作，用浅蓝底把它和主按钮区分开。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     7 · 多课表管理
+     色块写「表名首字 + 周数区间」，不再是「周一 / 周二」这种和内容无关的标识；
+     正在用的那张打勾，新建课表是一条明确的按钮，不用去猜右下角加号的含义。
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="多课表管理：每张课表一张卡片，当前使用的打勾，底部有新建课表按钮">
+  <rect class="bg" x="0" y="0" width="360" height="780"/>
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <g class="s-ink"><path d="M28 50 l-8 7 8 7"/></g>
+  <text class="ink" x="24" y="122" font-size="30" font-weight="800">多课表</text>
+  <text class="ink2" x="20" y="158" font-size="12">点一下切换，进详情可改名或删除</text>
+
+  <!-- 当前使用的课表 -->
+  <rect class="card" x="16" y="176" width="328" height="88" rx="20"/>
+  <rect class="accent" x="28" y="188" width="64" height="64" rx="16"/>
+  <text class="on-accent" x="60" y="219" font-size="20" font-weight="800" text-anchor="middle">我</text>
+  <text class="on-accent" x="60" y="238" font-size="11" text-anchor="middle" fill-opacity=".85">1-16 周</text>
+  <text class="ink" x="108" y="216" font-size="16" font-weight="700">我的课表</text>
+  <text class="ink2" x="108" y="236" font-size="12">9 门课程 · 正在使用</text>
+  <path class="accent" d="M318 212 l4 5 7 -8" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- 默认（空课表） -->
+  <rect class="card" x="16" y="276" width="328" height="88" rx="20"/>
+  <rect class="c2" x="28" y="288" width="64" height="64" rx="16" fill-opacity=".2"/>
+  <text class="c2" x="60" y="319" font-size="20" font-weight="800" text-anchor="middle">默</text>
+  <text class="c2" x="60" y="338" font-size="11" text-anchor="middle" fill-opacity=".8">空</text>
+  <text class="ink" x="108" y="316" font-size="16" font-weight="700">默认</text>
+  <text class="ink2" x="108" y="336" font-size="12">空课表 · 还没有课程</text>
+  <path class="s-ink3" d="M324 310 l5 5 -5 5"/>
+
+  <!-- 秋季作息 -->
+  <rect class="card" x="16" y="376" width="328" height="88" rx="20"/>
+  <rect class="c4" x="28" y="388" width="64" height="64" rx="16" fill-opacity=".2"/>
+  <text class="c4" x="60" y="419" font-size="20" font-weight="800" text-anchor="middle">秋</text>
+  <text class="c4" x="60" y="438" font-size="11" text-anchor="middle" fill-opacity=".8">1-12 周</text>
+  <text class="ink" x="108" y="416" font-size="16" font-weight="700">秋季作息</text>
+  <text class="ink2" x="108" y="436" font-size="12">6 门课程</text>
+  <path class="s-ink3" d="M324 410 l5 5 -5 5"/>
+
+  <!-- 夏令时作息 -->
+  <rect class="card" x="16" y="476" width="328" height="88" rx="20"/>
+  <rect class="c6" x="28" y="488" width="64" height="64" rx="16" fill-opacity=".2"/>
+  <text class="c6" x="60" y="519" font-size="20" font-weight="800" text-anchor="middle">夏</text>
+  <text class="c6" x="60" y="538" font-size="11" text-anchor="middle" fill-opacity=".8">1-8 周</text>
+  <text class="ink" x="108" y="516" font-size="16" font-weight="700">夏令时作息</text>
+  <text class="ink2" x="108" y="536" font-size="12">3 门课程</text>
+  <path class="s-ink3" d="M324 510 l5 5 -5 5"/>
+
+  <rect class="accent-soft" x="16" y="588" width="328" height="48" rx="16"/>
+  <text class="accent" x="180" y="618" font-size="15.5" font-weight="700" text-anchor="middle">+ 新建课表</text>
+
+  <text class="ink2" x="20" y="668" font-size="12">各课表互不影响，可按学期分开管理。</text>
+
+  <rect class="ink" x="126" y="762" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>7 · 多课表管理</b>
+  每张课表一张卡片：左边色块写的是表名首字 + 周数区间，右边是表名、课程数和「正在使用」。原来色块里写的是「周一 / 周二」，跟这张课表叫什么完全无关，看着像装饰。新建课表做成一条明确的按钮，不再用右下角的加号——同一个加号在主界面是「添加课程」，在这里却是「新建课表」，容易点错。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     8 · 课程管理
+     卡片底色跟着课程颜色走，和课表里的色块对得上；最后一格是「添加课程」。
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="课程管理：顶部搜索框，下面两列课程卡片，右下角有添加课程按钮">
+  <rect class="bg" x="0" y="0" width="360" height="780"/>
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <g class="s-ink"><path d="M28 50 l-8 7 8 7"/></g>
+  <text class="ink" x="48" y="62" font-size="18" font-weight="800">课程管理</text>
+  <text class="danger" x="340" y="62" font-size="15" font-weight="600" text-anchor="end">清空</text>
+
+  <rect class="card" x="16" y="88" width="328" height="44" rx="22"/>
+  <g class="s-ink3"><circle cx="42" cy="110" r="6.5"/><path d="M47 115 l5 5"/></g>
+  <text class="ink3" x="62" y="115" font-size="14">搜索课程、教师或教室</text>
+  <text class="ink2" x="20" y="152" font-size="12">共 9 门课程</text>
+
+  <!-- 第 1 行 -->
+  <g>
+    <rect class="c1" x="16" y="164" width="156" height="88" rx="18" fill-opacity=".1"/>
+    <text class="ink" x="28" y="196" font-size="15" font-weight="700">高等数学</text>
+    <text class="ink2" x="28" y="216" font-size="11.5">张伟 · A-201</text>
+    <text class="c1" x="28" y="236" font-size="11">周一 1-2 节</text>
+    <rect class="c4" x="188" y="164" width="156" height="88" rx="18" fill-opacity=".1"/>
+    <text class="ink" x="200" y="196" font-size="15" font-weight="700">大学英语</text>
+    <text class="ink2" x="200" y="216" font-size="11.5">李娜 · C-305</text>
+    <text class="c4" x="200" y="236" font-size="11">周一 3 节</text>
+  </g>
+
+  <!-- 第 2 行 -->
+  <g>
+    <rect class="c3" x="16" y="260" width="156" height="88" rx="18" fill-opacity=".1"/>
+    <text class="ink" x="28" y="292" font-size="15" font-weight="700">体育</text>
+    <text class="ink2" x="28" y="312" font-size="11.5">刘洋 · 西田径场</text>
+    <text class="c3" x="28" y="332" font-size="11">周一 5 节</text>
+    <rect class="c2" x="188" y="260" width="156" height="88" rx="18" fill-opacity=".1"/>
+    <text class="ink" x="200" y="292" font-size="15" font-weight="700">线性代数</text>
+    <text class="ink2" x="200" y="312" font-size="11.5">王强 · A-101</text>
+    <text class="c2" x="200" y="332" font-size="11">周二 1-2 节</text>
+  </g>
+
+  <!-- 第 3 行 -->
+  <g>
+    <rect class="c5" x="16" y="356" width="156" height="88" rx="18" fill-opacity=".1"/>
+    <text class="ink" x="28" y="388" font-size="15" font-weight="700">英语视听说</text>
+    <text class="ink2" x="28" y="408" font-size="11.5">李娜 · B-203</text>
+    <text class="c5" x="28" y="428" font-size="11">周二 3-4 节</text>
+    <rect class="c6" x="188" y="356" width="156" height="88" rx="18" fill-opacity=".1"/>
+    <text class="ink" x="200" y="388" font-size="15" font-weight="700">程序设计</text>
+    <text class="ink2" x="200" y="408" font-size="11.5">孙宇 · F-105</text>
+    <text class="c6" x="200" y="428" font-size="11">周二 6-7 节</text>
+  </g>
+
+  <!-- 第 4 行 -->
+  <g>
+    <rect class="c7" x="16" y="452" width="156" height="88" rx="18" fill-opacity=".1"/>
+    <text class="ink" x="28" y="484" font-size="15" font-weight="700">数据结构</text>
+    <text class="ink2" x="28" y="504" font-size="11.5">赵敏 · C-402</text>
+    <text class="c7" x="28" y="524" font-size="11">周三 3-4 节</text>
+    <rect class="c8" x="188" y="452" width="156" height="88" rx="18" fill-opacity=".1"/>
+    <text class="ink" x="200" y="484" font-size="15" font-weight="700">计算机网络</text>
+    <text class="ink2" x="200" y="504" font-size="11.5">陈磊 · E-201</text>
+    <text class="c8" x="200" y="524" font-size="11">周三 8-9 节</text>
+  </g>
+
+  <!-- 第 5 行：最后一门课 + 添加课程 -->
+  <g>
+    <rect class="c1" x="16" y="548" width="156" height="88" rx="18" fill-opacity=".1"/>
+    <text class="ink" x="28" y="580" font-size="15" font-weight="700">大学物理</text>
+    <text class="ink2" x="28" y="600" font-size="11.5">周涛 · D-303</text>
+    <text class="c1" x="28" y="620" font-size="11">周四 3-4 节</text>
+    <rect class="dash" x="188" y="548" width="156" height="88" rx="18"/>
+    <circle class="accent-soft" cx="266" cy="580" r="15"/>
+    <g class="s-accent"><path d="M266 573 v14 M259 580 h14"/></g>
+    <text class="ink2" x="266" y="616" font-size="12" text-anchor="middle">添加课程</text>
+  </g>
+
+  <circle class="accent" cx="320" cy="700" r="28"/>
+  <g class="s-on-accent"><path d="M320 689 v22 M309 700 h22"/></g>
+  <rect class="ink" x="126" y="762" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>8 · 课程管理</b>
+  课程卡片的底色就是这门课的颜色，和课表里的色块一一对应，扫一眼就能连起来。每张卡片三行：课程名、教师和教室、周几第几节。最后留一格虚线框的「添加课程」，不用跑到右下角找加号。「清空」放在右上角离手指最远的地方，而且会二次确认。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     9 · 设置
+     每一行都补一句解释；被关掉的开关，下面依赖它的那一行会变灰、不可点。
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="设置页：课表显示、外观、上课提醒三组设置">
+  <rect class="bg" x="0" y="0" width="360" height="780"/>
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <g class="s-ink"><path d="M28 50 l-8 7 8 7"/></g>
+  <text class="ink" x="48" y="62" font-size="18" font-weight="800">设置</text>
+
+  <!-- 分组一：课表显示（组内不分隔线，靠行距区分） -->
+  <text class="ink2" x="24" y="100" font-size="12.5">课表显示</text>
+  <rect class="card" x="16" y="112" width="328" height="256" rx="20"/>
+  <g>
+    <text class="ink" x="32" y="140" font-size="15">显示上课时间</text>
+    <text class="ink2" x="32" y="159" font-size="12">关闭后只显示节次</text>
+    <rect class="accent" x="298" y="130" width="46" height="28" rx="14"/>
+    <circle class="on-accent" cx="330" cy="144" r="12"/>
+  </g>
+  <g>
+    <text class="ink" x="32" y="204" font-size="15">显示虚线网格</text>
+    <text class="ink2" x="32" y="223" font-size="12">关闭后只剩留白</text>
+    <rect class="accent" x="298" y="194" width="46" height="28" rx="14"/>
+    <circle class="on-accent" cx="330" cy="208" r="12"/>
+  </g>
+  <g>
+    <text class="ink" x="32" y="268" font-size="15">作息时间表</text>
+    <text class="ink2" x="32" y="287" font-size="12">左侧时间按它显示</text>
+    <text class="ink2" x="334" y="268" font-size="14" text-anchor="end">分楼错峰</text>
+    <path class="s-ink3" d="M340 258 l5 5 -5 5"/>
+  </g>
+  <g>
+    <text class="ink" x="32" y="332" font-size="15">显示周末</text>
+    <text class="ink2" x="32" y="351" font-size="12">周六周日也排进课表</text>
+    <rect class="off" x="298" y="322" width="46" height="28" rx="14"/>
+    <circle class="on-accent" cx="312" cy="336" r="12"/>
+  </g>
+
+  <!-- 分组二：外观 -->
+  <text class="ink2" x="24" y="396" font-size="12.5">外观</text>
+  <rect class="card" x="16" y="408" width="328" height="172" rx="20"/>
+  <g>
+    <text class="ink" x="32" y="440" font-size="15">显示主题</text>
+    <text class="ink2" x="334" y="440" font-size="14" text-anchor="end">跟随系统</text>
+    <path class="s-ink3" d="M340 433 l5 -5 5 5"/>
+    <path class="s-ink3" d="M340 437 l5 5 5 -5"/>
+  </g>
+  <g>
+    <text class="ink" x="32" y="494" font-size="15">主题颜色</text>
+    <circle class="accent" cx="308" cy="489" r="9"/>
+    <text class="ink2" x="334" y="494" font-size="14" text-anchor="end">蓝</text>
+    <path class="s-ink3" d="M340 484 l5 5 -5 5"/>
+  </g>
+  <g>
+    <text class="ink" x="32" y="544" font-size="15">课表全屏显示</text>
+    <text class="ink2" x="32" y="563" font-size="12">隐藏状态栏，课表多一行</text>
+    <rect class="off" x="298" y="534" width="46" height="28" rx="14"/>
+    <circle class="on-accent" cx="312" cy="548" r="12"/>
+  </g>
+
+  <!-- 分组三：上课提醒 -->
+  <text class="ink2" x="24" y="608" font-size="12.5">上课提醒</text>
+  <rect class="card" x="16" y="620" width="328" height="116" rx="20"/>
+  <g>
+    <text class="ink" x="32" y="648" font-size="15">开启上课提醒</text>
+    <text class="ink2" x="32" y="667" font-size="12">上课前通知和振动提醒</text>
+    <rect class="accent" x="298" y="638" width="46" height="28" rx="14"/>
+    <circle class="on-accent" cx="330" cy="652" r="12"/>
+  </g>
+  <g>
+    <text class="ink" x="32" y="714" font-size="15">上课前提醒</text>
+    <text class="ink2" x="334" y="714" font-size="14" text-anchor="end">10 分钟</text>
+    <path class="s-ink3" d="M340 707 l5 -5 5 5"/>
+    <path class="s-ink3" d="M340 711 l5 5 5 -5"/>
+  </g>
+
+  <rect class="ink" x="126" y="762" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>9 · 设置</b>
+  照着实机的 HyperOS 设置页对齐：组标题在卡片上方，<b>组内不画分隔线</b>，靠行距区分；每个开关和选项下面都补一行小字解释它到底改的是什么——「节数栏显示具体时间」改成「显示上课时间 / 关闭后只显示节次」，「主界面沉浸」改成「课表全屏显示 / 隐藏状态栏，课表多一行」。右边的箭头分两种：「&gt;」表示进入新页面，「⌃⌄」表示就地选择，不用点进去才知道。说明文字都写成短信，面向的是本校本科生——「换手机或重装时用」这种程度就够，不必解释到「点一下就会切换」。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     10 · 选择时间表
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="选择时间表：列出已有作息方案，下面用一张卡片解释分楼错峰">
+  <rect class="bg" x="0" y="0" width="360" height="780"/>
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <g class="s-ink"><path d="M28 50 l-8 7 8 7"/></g>
+  <text class="ink" x="48" y="62" font-size="18" font-weight="800">选择时间表</text>
+  <text class="accent" x="340" y="62" font-size="16" font-weight="700" text-anchor="end">保存</text>
+
+  <text class="ink2" x="24" y="100" font-size="12.5">作息时间表</text>
+  <rect class="card" x="16" y="112" width="328" height="216" rx="20"/>
+  <g>
+    <text class="ink" x="32" y="142" font-size="15">默认</text>
+    <text class="ink2" x="32" y="162" font-size="12">第 1-12 节 · 每节 45 分钟</text>
+    <path class="s-ink3" d="M340 132 l5 5 -5 5"/>
+  </g>
+  <g>
+    <text class="ink" x="32" y="214" font-size="15" font-weight="700">分楼错峰</text>
+    <text class="ink2" x="32" y="234" font-size="12">第 1-12 节 · 按教学楼取时间</text>
+    <path class="accent" d="M318 198 l4 5 7 -8" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g>
+    <text class="ink" x="32" y="286" font-size="15">夏令时</text>
+    <text class="ink2" x="32" y="306" font-size="12">第 1-10 节 · 每节 40 分钟</text>
+    <path class="s-ink3" d="M340 276 l5 5 -5 5"/>
+  </g>
+
+  <rect class="accent-soft" x="16" y="344" width="328" height="48" rx="16"/>
+  <text class="accent" x="180" y="374" font-size="15.5" font-weight="700" text-anchor="middle">+ 新建时间表</text>
+
+  <text class="ink2" x="24" y="432" font-size="12.5">什么是分楼错峰</text>
+  <rect class="card" x="16" y="444" width="328" height="160" rx="20"/>
+  <g class="ink2" font-size="12.5">
+    <text x="32" y="480">同一节课，不同教学楼的上课时间不一样。</text>
+    <text x="32" y="508">课钟按课程所在的教学楼自动取时间，</text>
+    <text x="32" y="536">课表上看到的先后顺序就是真实顺序。</text>
+    <text x="32" y="572" fill-opacity=".7">导入时自动判断，也可以手动指定。</text>
+  </g>
+
+  <rect class="ink" x="126" y="762" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>10 · 选择时间表</b>
+  每一行写清这个作息是几节、每节多长、要不要分楼错峰，当前用的一行打勾。下面那张卡片把「分楼错峰」讲成人话：同一节课各教学楼时间不一样，课钟自己按课程所在的楼取时间。原稿写的是「三套作息两两交叠、互不包含，所以应用按课程所在楼宇分别取值，课块位置就是真实时间」——那是给开发者看的。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     11 · 关于
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 900" width="360" height="900" role="img" aria-label="关于页：应用信息（含项目地址）、使用说明、权限说明，页脚是开源署名">
+  <rect class="bg" x="0" y="0" width="360" height="900"/>
+  <text class="ink" x="20" y="21" font-size="13" font-weight="700">9:41</text>
+  <g class="ink">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="8" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+  </g>
+  <path class="ink" d="M321 8 h11 l-5.5 6 z"/>
+  <rect class="s-icon" x="336" y="7" width="17" height="10" rx="3"/>
+  <rect class="ink" x="338" y="9" width="10" height="6" rx="1.5"/>
+
+  <g class="s-ink"><path d="M28 50 l-8 7 8 7"/></g>
+  <text class="ink" x="24" y="122" font-size="30" font-weight="800">关于</text>
+
+  <!-- 应用信息（含项目地址） -->
+  <rect class="card" x="16" y="144" width="328" height="132" rx="20"/>
+  <rect x="32" y="160" width="72" height="72" rx="20" fill="#2B2F6B"/>
+  <circle cx="68" cy="196" r="17" fill="none" stroke="#fff" stroke-width="3"/>
+  <path d="M68 185 v11 h8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <path d="M45 177 l-6 -6 M91 177 l6 -6" stroke="#FFD166" stroke-width="3" stroke-linecap="round"/>
+  <text class="ink" x="120" y="188" font-size="20" font-weight="800">课钟</text>
+  <text class="ink2" x="120" y="210" font-size="12.5">版本 1.0.1</text>
+  <text class="ink2" x="32" y="252" font-size="12">项目地址：<tspan class="accent">https://github.com/BH4GMI/course-clock</tspan></text>
+
+  <!-- 使用说明 -->
+  <text class="ink2" x="24" y="306" font-size="12.5">使用说明</text>
+  <rect class="card" x="16" y="318" width="328" height="158" rx="20"/>
+  <g>
+    <circle class="accent-soft" cx="40" cy="346" r="13"/>
+    <text class="accent" x="40" y="351" font-size="12.5" font-weight="700" text-anchor="middle">1</text>
+    <text class="ink" x="64" y="351" font-size="13">在「导入课程」中选择「从学校教务导入」。</text>
+  </g>
+  <g>
+    <circle class="accent-soft" cx="40" cy="390" r="13"/>
+    <text class="accent" x="40" y="395" font-size="12.5" font-weight="700" text-anchor="middle">2</text>
+    <text class="ink" x="64" y="395" font-size="13">在弹出的页面中登录学校 WebVPN。</text>
+  </g>
+  <g>
+    <circle class="accent-soft" cx="40" cy="434" r="13"/>
+    <text class="accent" x="40" y="439" font-size="12.5" font-weight="700" text-anchor="middle">3</text>
+    <text class="ink" x="64" y="439" font-size="13">返回课表页面，点击右下角按钮获取课程。</text>
+  </g>
+  <text class="ink3" x="32" y="464" font-size="12">更换设备时，亦可使用此前备份的课表文件导入。</text>
+
+  <!-- 权限说明：不用分隔线，三行靠留白分开 -->
+  <text class="ink2" x="24" y="512" font-size="12.5">权限说明</text>
+  <rect class="card" x="16" y="524" width="328" height="164" rx="20"/>
+  <text class="ink" x="32" y="554" font-size="14">网络访问</text>
+  <text class="ink2" x="32" y="572" font-size="12">仅用于从学校教务系统导入课表数据</text>
+  <text class="ink" x="32" y="600" font-size="14">通知与振动</text>
+  <text class="ink2" x="32" y="618" font-size="12">用于在课程开始前发送上课提醒</text>
+  <text class="ink" x="32" y="646" font-size="14">开机自启动</text>
+  <text class="ink2" x="32" y="664" font-size="12">用于在设备重启后重新安排课程提醒</text>
+
+  <!-- 页脚：开源署名 + 免费声明 + 版权。不占卡片、不给节标题 -->
+  <text class="ink2" x="24" y="724" font-size="12">本软件为开源课程表应用 WakeupSchedule 的修改版本，</text>
+  <text class="ink2" x="24" y="741" font-size="12">依据 Apache License 2.0 授权发布。</text>
+  <text class="ink2" x="24" y="758" font-size="12">上游项目：Cerbur/WakeupSchedule_Kotlin</text>
+  <text class="accent" x="24" y="775" font-size="12">https://github.com/Cerbur/WakeupSchedule_Kotlin</text>
+  <text class="ink2" x="24" y="792" font-size="12">原作者：YZune</text>
+  <text class="accent" x="24" y="809" font-size="12">https://github.com/YZune/WakeupSchedule_Kotlin</text>
+  <text class="ink2" x="24" y="833" font-size="12">本软件完全免费，不提供内购、订阅或广告。</text>
+  <text class="ink2" x="24" y="853" font-size="12">© 2026 The CourseClock Project</text>
+
+  <rect class="ink" x="126" y="882" width="108" height="4.5" rx="2.25" fill-opacity=".32"/>
+</svg>
+</div>
+<figcaption>
+  <b>11 · 关于</b>
+  三张卡片：应用信息（含项目地址）、使用说明、权限说明，署名收在页脚。原来那节标题叫「权限」，下面列着「网络 / 振动 / 开机自启」——那是系统里的权限名，用户关心的是「为什么需要」。「课程和账号都只保存在本机」那句撤掉了：它是对实现的要求，写在 README 里就够，放界面上属于自我表扬。
+  <br><b>2026-09-18 修订</b>（用户要求「排版和文案要更加正式」→「关于中分的栏太多了」）：这一页比一屏高，所以这个画框按整页高画（900px，真机上是滚动页）。节标题去口语（「怎么用」→「使用说明」、「应用会用到」→「权限说明」），三步写成完整陈述句，「开机自动恢复」改成系统里的真名「开机自启动」。栏目从**四张卡 + 四个标题 + 三条 1dp 细线**减到**三张卡 + 两个标题 + 零条线**：开源声明只有一段署名，单独立标题加卡片是白占一栏，收进页脚（署名仍完整可见）；权限三行靠 14dp 留白分行，不画线——线一多，整页就像一张被切碎的表格。应用信息卡补一行项目地址（可点），放在整行而不是名字右边那一列，否则 URL 会被折成两行。四张卡的圆角与内边距统一读同一对 token。
+</figcaption>
+</figure>
+
+<!-- =====================================================================
+     12 · 桌面 · 小组件
+     ===================================================================== -->
+<figure class="shot">
+<div class="device">
+<svg class="dp" viewBox="0 0 360 780" width="360" height="780" role="img" aria-label="桌面上的两个小组件：今日课程和一周课程">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B4E8C"/><stop offset=".45" stop-color="#5A3F86"/><stop offset="1" stop-color="#1B2036"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="360" height="780" fill="url(#wall)"/>
+  <text x="20" y="21" font-size="13" font-weight="700" fill="#fff">9:41</text>
+  <g fill="#fff" opacity=".85">
+    <rect x="296" y="13" width="3" height="4" rx="1"/><rect x="302" y="11" width="3" height="6" rx="1"/>
+    <rect x="308" y="9" width="3" height="8" rx="1"/><rect x="314" y="7" width="3" height="10" rx="1"/>
+    <rect x="336" y="7" width="17" height="10" rx="3" fill="none" stroke="#fff" stroke-width="1.2" opacity=".6"/>
+    <rect x="338" y="9" width="10" height="6" rx="1.5"/>
+  </g>
+  <g font-size="11" fill="#fff" opacity=".72" text-anchor="middle">
+    <text x="62" y="66">微信</text><text x="132" y="66">相机</text><text x="202" y="66">图库</text><text x="272" y="66">设置</text>
+  </g>
+  <g fill="#fff" opacity=".18">
+    <rect x="48" y="34" width="28" height="28" rx="9"/><rect x="118" y="34" width="28" height="28" rx="9"/>
+    <rect x="188" y="34" width="28" height="28" rx="9"/><rect x="258" y="34" width="28" height="28" rx="9"/>
+  </g>
+
+  <!-- 小组件 A：今日课程（浅色，配色锁定，不随页面主题变）
+       按 4×2 格位定尺寸：整块 176dp（HyperOS 桌面是 4×6，一格约 90dp）。
+       标题行 40dp，「已结束」和「之后的课」各一行，蓝卡里课程名与教室并成一行；
+       卡片内左右各留 14dp，文字不贴边。 -->
+  <g style="--card:#FFFFFF;--ink:#181818;--ink2:#83838C;--ink3:#B4B4BC;--line:#EBEBEF;--accent:#3482FF;--accent-soft:#E9F1FF;--on-accent:#FFFFFF;--c1:#3B7DFF;--c2:#FF6B35;--c3:#2FBF71;--c4:#A855F7;--c5:#FF4D6D;--c6:#12B5B0;--c7:#F2A30F;--c8:#6C6CF5">
+  <rect class="card" x="16" y="96" width="328" height="176" rx="24"/>
+  <text class="ink" x="36" y="126" font-size="22" font-weight="800">15</text>
+  <text class="ink2" x="72" y="124" font-size="11.5">9月 · 周一 · 今天 3 节课</text>
+  <rect class="accent-soft" x="280" y="110" width="44" height="24" rx="12"/>
+  <text class="accent" x="302" y="126" font-size="11" font-weight="700" text-anchor="middle">第3周</text>
+
+  <!-- 已经上完的一节：变灰并标「已结束」 -->
+  <circle class="ink3" cx="42" cy="148" r="3.5"/>
+  <text class="ink3" x="54" y="152" font-size="12">高等数学 · 08:15-09:35 已结束</text>
+
+  <!-- 下一节：蓝色实心卡，课程名和教室并成一行 -->
+  <rect class="accent" x="36" y="164" width="288" height="64" rx="18"/>
+  <text x="50" y="184" font-size="11" fill="#fff" opacity=".85">下一节 · 09:55</text>
+  <text x="310" y="184" font-size="11" fill="#fff" text-anchor="end">14 分钟后</text>
+  <text x="50" y="210" font-size="15" font-weight="800" fill="#fff">大学英语 · C-305 · 李娜</text>
+
+  <!-- 之后的课：一行写完 -->
+  <circle class="c3" cx="42" cy="246" r="3.5"/>
+  <text class="ink" x="54" y="250" font-size="12">体育 · 11:20-12:00 · 西田径场</text>
+  </g>
+
+  <!-- 小组件 B：一周课程（深色，配色锁定，块高一律相同） -->
+  <g style="--c1:#5B9BFF;--c2:#FF8A5B;--c3:#4FD98D;--c4:#BE7BFF;--c5:#FF7A93;--c6:#3ED3CE;--c7:#FFC44D;--c8:#8C8CFF">
+  <rect x="16" y="296" width="328" height="248" rx="24" fill="#1C1C1E"/>
+  <g transform="translate(0,-74)">
+  <text x="36" y="406" font-size="16" font-weight="800" fill="#fff">第 3 周</text>
+  <text x="324" y="406" font-size="11.5" fill="#98989F" text-anchor="end">9/15 - 9/21</text>
+  <text x="36" y="426" font-size="11.5" fill="#98989F">我的课表</text>
+
+  <g font-size="11" fill="#98989F" text-anchor="middle">
+    <text x="62" y="452">一</text><text x="121" y="452">二</text><text x="180" y="452">三</text><text x="239" y="452">四</text><text x="298" y="452">五</text>
+  </g>
+  <rect x="36" y="464" width="288" height="1" fill="#2E2E32"/>
+
+  <g font-size="9" font-weight="700">
+    <rect class="c1" x="36" y="472" width="52" height="60" rx="12" fill-opacity=".24"/>
+    <text class="c1" x="44" y="502">高等数学</text>
+    <rect class="c2" x="95" y="472" width="52" height="60" rx="12" fill-opacity=".24"/>
+    <text class="c2" x="103" y="502">线性代数</text>
+    <rect class="c7" x="154" y="472" width="52" height="60" rx="12" fill-opacity=".24"/>
+    <text class="c7" x="162" y="502">数据结构</text>
+    <rect class="c1" x="213" y="472" width="52" height="60" rx="12" fill-opacity=".24"/>
+    <text class="c1" x="221" y="502">大学物理</text>
+
+    <rect class="c4" x="36" y="540" width="52" height="60" rx="12" fill-opacity=".24"/>
+    <text class="c4" x="44" y="570">大学英语</text>
+    <rect class="c5" x="95" y="540" width="52" height="60" rx="12" fill-opacity=".24"/>
+    <text class="c5" x="103" y="562">英语</text>
+    <text class="c5" x="103" y="576">视听说</text>
+    <rect class="c8" x="154" y="540" width="52" height="60" rx="12" fill-opacity=".24"/>
+    <text class="c8" x="162" y="562">计算机</text>
+    <text class="c8" x="162" y="576">网络</text>
+  </g>
+  </g>
+  </g>
+
+  <g fill="#fff" opacity=".85" font-size="11" text-anchor="middle">
+    <text x="62" y="756">电话</text><text x="132" y="756">信息</text><text x="202" y="756">浏览器</text><text x="272" y="756">相机</text>
+  </g>
+  <g fill="#fff" opacity=".18">
+    <rect x="48" y="722" width="28" height="28" rx="9"/><rect x="118" y="722" width="28" height="28" rx="9"/>
+    <rect x="188" y="722" width="28" height="28" rx="9"/><rect x="258" y="722" width="28" height="28" rx="9"/>
+  </g>
+</svg>
+</div>
+<figcaption>
+  <b>12 · 桌面 · 小组件</b>
+  上面「今日课程」按 4×2 格位定尺寸，整块 176dp（HyperOS 桌面 4×6，一格约 90dp）：标题行 40dp，「日期 · 周几 · 今天几节」一行写完、第几周做右上角标；「已结束」和「之后的课」各一行，蓝卡里课程名和教室并成一行。一天三段的信息都在，笔画却比原来省了 38dp。下面「一周课程」4×3，按天分列、块高统一；末尾那句「点一下切换今日课程 / 一周课程」删掉了——小组件能切换是它自己的事，不该占桌面空间。
+</figcaption>
+</figure>
+
+</main>
+
+</body>
+</html>

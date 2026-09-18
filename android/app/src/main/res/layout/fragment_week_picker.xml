@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  周数选择面板（设计稿 2）。
+
+  这一屏的内容只有三样：右上角的「共 N 周」、左边的「周数」、下面 1..N 的周次格子
+  （当前周用强调色实心 + 白字，其余是卡片色）。面板本身（贴底、铺满宽度、上面两角 24dp 圆角、
+  把手、32% 遮罩）由 fragment_base_dialog + BaseDialogFragment 统一给，这里只排内容。
+
+  为什么是网格而不是横向滚动：设计稿一行放 7 个（40dp 格 + 6dp 间距 = 322dp，正好落在
+  左右各 20dp 的可用宽度里），16 周就是 7+7+2 三行，一眼看全；横向滚动会把"一共有多少周"
+  藏起来 —— 而右上角那句「共 16 周」正是要靠它一眼对得上。
+-->
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="20dp"
+    tools:context="courseclock.timetable.schedule.WeekPickerFragment">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_week_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:text="@string/week_picker_title"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:textColor="#181818" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_week_total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:textSize="12sp"
+            tools:text="共 16 周"
+            tools:textColor="#83838C" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <!-- 周次格子由 WeekPickerFragment 按课表的 maxWeek 现场填 -->
+    <GridLayout
+        android:id="@+id/grid_week"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:columnCount="7" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>

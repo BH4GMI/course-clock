@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「基本信息」卡里课程名称输入框的底（设计稿 6：296×44、圆角 12dp）。
+  card2_background 与外层 card_background 分层，深浅两套色值都在 colors.xml。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <solid android:color="@color/card2_background" />
+    <corners android:radius="8dp" />
+</shape>

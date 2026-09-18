@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  课程卡片（课程管理页两列网格里的一格）的底。
+
+  底是 white 的 card_background 而不是课程色：课程色**由适配器在绑定时铺在 cardBackgroundColor
+  上**，只能用代码设（每门课一个颜色，XML 里写不出来；写死 hex 也违反本页的约束）。
+  圆角用设计稿的 group_radius，和设置页的分组卡片是同一档。
+
+  深色模式下底换成 values-night 的 card_background，课程色压在上面同样成立。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/card_background" />
+    <corners android:radius="@dimen/group_radius" />
+</shape>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  面板里的"主操作"按钮底（课程详情的「编辑课程」）：主题强调色、48dp 以上高、圆角 16dp。
+  形状与 bg_cancel_button 成对（同一个圆角，一个强调色一个中性色），只是底色要跟着主题色走 ——
+  用户在「课表设置」里换过主题色，主按钮还留着写死的蓝色就是两块不搭的颜色。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="?attr/colorPrimary" />
+    <corners android:radius="8dp" />
+</shape>

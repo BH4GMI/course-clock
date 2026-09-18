@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  选择时间表（设计稿 10）：上面一张白卡装全部作息方案（当前的一行打勾），
+  一条浅强调「+ 新建时间表」，下面一张卡把「分楼错峰」讲成人话。
+
+  本应用确实实现了分楼错峰（TimeDetailBean.timeGroup：导入器按教学楼写分组，
+  渲染时按课程所在楼取时间），解释卡照实写。时间表数量很少（个位数），RecyclerView
+  用 wrap_content 一次铺平，整页交 ScrollView 滚——不做嵌套滚动那套复杂度。
+  右上角「保存」由宿主 TimeSettingsActivity 的标题栏按钮承担（既有行为）。
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    android:fillViewport="true"
+    android:overScrollMode="never"
+    tools:context=".settings.TimeTableFragment">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="8dp"
+            android:includeFontPadding="false"
+            android:text="@string/time_table_section"
+            android:textColor="@color/text_secondary"
+            android:textSize="12.5sp" />
+
+        <!-- 作息方案：一张卡装全部行（行间分隔线由 ItemDecoration 画）。 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="16dp"
+            app:cardBackgroundColor="@color/card_background"
+            app:cardCornerRadius="@dimen/group_radius"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_time_table"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_time_table" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_new_time_table"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_soft_button"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:text="@string/time_table_new"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15.5sp"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:includeFontPadding="false"
+            android:text="@string/time_table_explore_title"
+            android:textColor="@color/text_secondary"
+            android:textSize="12.5sp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="@color/card_background"
+            app:cardCornerRadius="@dimen/group_radius"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="6sp"
+                android:padding="16dp"
+                android:text="@string/time_table_explore_body"
+                android:textColor="@color/text_secondary"
+                android:textSize="12.5sp" />
+        </com.google.android.material.card.MaterialCardView>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</ScrollView>

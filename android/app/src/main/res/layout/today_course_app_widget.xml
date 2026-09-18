@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="@dimen/widget_edge_padding"
+    android:paddingEnd="@dimen/widget_edge_padding"
+    android:paddingTop="@dimen/widget_edge_padding"
+    android:paddingBottom="@dimen/widget_edge_padding"
+    android:background="@drawable/day_widget_panel_bg">
+
+    <!--
+        表头是设计稿 `.head` 的一行小字：左「标题」右「课程计数」，两边同一个字号（12sp）。
+        标题随形态变（横条「今日日程」、小正方形「9月18日 · 周五」），由 `refreshTodayWidget` 按
+        `TodayColorfulService.dayWidgetForm` 写入；这里的 12sp 与它一致，布局预览与测量才对得上。
+
+        原先左边是 22sp 的大号日号：与设计稿逐字不符，而且横条正文左列本来就有大号日号 + 星期，
+        表头再写一遍就是重复。
+    -->
+    <TextView
+        android:id="@+id/tv_date"
+        android:textColor="@color/widget_panel_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="18dp"
+        android:layout_marginStart="2dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="start|center_vertical"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="今日日程"
+        android:textSize="12sp"
+        tools:textColor="#181818" />
+
+    <!--
+        表头另一头铺到最右边：右上角那两个箭头（切明天 / 切回今天）已删除，它们占掉的宽度正好够
+        放下课程计数（`3节 · 已上1节`）；箭头在 2×2 那一格里把表头挤到只剩约 60dp，日期都会被截断。
+
+        计数在格宽不足 180dp 时不写（见 `refreshTodayWidget`）：与其做一个用户永远看不全的截断串，
+        不如把这点宽度留给标题本身。
+    -->
+    <TextView
+        android:id="@+id/tv_summary"
+        android:textColor="@color/widget_panel_text_secondary"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        android:layout_alignTop="@id/tv_date"
+        android:layout_marginStart="2dp"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@id/tv_date"
+        android:ellipsize="end"
+        android:gravity="end|center_vertical"
+        android:includeFontPadding="false"
+        android:maxLines="1"
+        android:text="3节 · 已上1节"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif-medium"
+        tools:textColor="#83838C" />
+
+    <ListView
+        android:id="@+id/lv_course"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/tv_date"
+        android:layout_marginTop="2dp"
+        android:divider="@null"
+        android:overScrollMode="never"
+        android:scrollbars="none" />
+
+</RelativeLayout>

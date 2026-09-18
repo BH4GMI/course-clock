@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3482FF</color>
+    <color name="colorPrimaryDark">#3482FF</color>
+    <color name="colorAccent">#3482FF</color>
+
+    <!-- 主界面默认背景：纯白（浅色）。深色模式见 values-night/colors.xml（纯黑）。
+         它是**颜色而不是图片** —— 既然默认背景是纯色，就不该由 Glide 去加载一张照片来充当，
+         那张来源不明的 main_background_2020_1.jpg 因此已被删除。
+
+         这一层就是 ui.bg，**和用户在「课表设置」里换的背景是同一层**，所以它随主题变。
+         配套约束：课表这一屏的文字/时间轴取色必须跟着主题走（见 ViewUtils.scheduleTextColor），
+         否则浅底黑字、深底也黑字，深色下整屏文字会消失。 -->
+    <color name="main_background">#FFFFFF</color>
+    <!-- 设计稿的"次级容器"色（稿子里的 card2）：顶栏圆钮的底、选项左边的灰色圆点、取消按钮的底。
+         深色见 values-night/colors.xml。 -->
+    <color name="card2_background">#F4F5F7</color>
+
+    <!-- 设置类页面的三层底色（设计稿的 HyperOS 分组样式：灰底 + 白卡，卡内不画分隔线）。
+         主课表那一屏不用这三层：它的底色是 ui.bg（main_background），见 ScheduleActivity。 -->
+    <color name="page_background">#F2F3F5</color>
+    <color name="card_background">#FFFFFF</color>
+    <!-- 次要文字（行的解释、选项当前值、分组标题）。 -->
+    <color name="text_primary">#202124</color>
+    <color name="text_secondary">#62666F</color>
+    <!-- 需要画线时的分隔线颜色（组内默认不画线，只在少数确有必要的分组用）。 -->
+    <color name="list_divider">#EBEBEF</color>
+
+    <!-- 设计稿的"浅强调底"：当前项胶囊、编号圆点、选中的卡片都用它（深色见 values-night）。
+         它和 colorPrimary 是一对：底是它，字和图标是 colorPrimary。 -->
+    <color name="accent_soft">#E9F1FF</color>
+
+    <!-- 小部件底板上文字的颜色（表头、时间列、「今天没有课哦」）。
+         底板就是 main_background，所以它必须与底板同步：浅底黑字，深底白字（values-night）。
+         原来这一层用的是 TableBean.widgetTextColor，默认纯黑 —— 深色底板上等于看不见。 -->
+    <color name="widget_panel_text">#FF000000</color>
+
+    <!-- 底板上的次要文字（上课时刻、教室·教师），比正文淡一档。取值与设计稿一致。 -->
+    <!-- 规范 2.3：次要信息 40% 黑 -->
+<!-- 官方文字透明度表：副文案 60%（此前误用 40%）。 -->
+    <color name="widget_panel_text_secondary">#99000000</color>
+    <color name="widget_panel_background">#FFFFFF</color>
+
+    <!-- 日视图小部件表头下面那条横线（浅色下是收边）。
+         深色下由 values-night 置成全透明：用户要求深色模式不要这条线 —— 它贴着深色壁纸
+         就是一条多余的蓝灰亮线，而底板圆角已经交代了边界。
+         放在颜色资源里而不是代码里，表头下面那个 View 就一行代码都不用碰。 -->
+    <color name="widget_divider">#14000000</color>
+
+    <color name="grey">#9aa3a3a3</color>
+    <color name="deep_grey">#9a505050</color>
+    <color name="nodeIndex" >#00000000</color>
+
+
+    <color name="red">#FF1744</color>
+    <color name="pink">#fa6278</color>
+    <color name="blue">#2979ff</color>
+    <color name="green">#1DE9B6</color>
+    <color name="yellow">#ffea00</color>
+    <color name="purple">#a375ff</color>
+    <color name="orange">#ff9100</color>
+    <color name="deepOrange">#ff3d00</color>
+    <color name="lightBlue">#2196f3</color>
+    <color name="ruri">#005caf</color>
+
+    <integer-array name="customizedColors">
+        <item>@color/red</item>
+        <item>@color/pink</item>
+        <item>@color/blue</item>
+        <item>@color/green</item>
+        <item>@color/purple</item>
+        <item>@color/orange</item>
+        <item>@color/deepOrange</item>
+        <item>@color/lightBlue</item>
+        <item>@color/ruri</item>
+    </integer-array>
+
+</resources>

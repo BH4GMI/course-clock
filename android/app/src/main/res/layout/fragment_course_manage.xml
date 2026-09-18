@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  课程管理（设计稿 8）：顶部搜索、课程数一行、两列课程卡片、右下角加号。
+
+  多课表页旧布局（fragment_list_manage）只有「列表 + 加号」两件东西，装不下搜索框和
+  课程数，这里给课程管理单独一份布局。「清空」在宿主 Activity 的标题栏右侧（带二次确认），
+  跟设计稿「放在离手指最远的右上角」一致，不重复做一份。
+
+  底色 page_background 由本页自设（BaseTitleActivity 不设页面底色），白卡片才分得出来。
+-->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    tools:context=".schedule_manage.CourseManageFragment">
+
+    <!-- 搜索胶囊：一张白卡 + 放大镜 + 输入行。实时过滤课程名 / 教师 / 教室。 -->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/ll_search"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_search_field"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_search"
+            android:tint="@color/text_secondary" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/et_search"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="@string/course_manage_search_hint"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textColorHint="@color/text_secondary"
+            android:textSize="14sp" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tv_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="14dp"
+        android:includeFontPadding="false"
+        android:textColor="@color/text_secondary"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_search"
+        tools:text="共 9 门课程" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:overScrollMode="never"
+        android:splitMotionEvents="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_count" />
+
+    <!-- 空态：一张表还没有课（过滤后没有结果时换文案）。 -->
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/ll_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="wrap_content"
+            android:layout_height="160dp"
+            android:src="@drawable/ic_schedule_empty" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_empty_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/course_manage_empty"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <!-- 右下角加号保留（设计稿里它与虚线格并存）：虚线格在卡片流末尾，加号常驻。 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/fab_add"
+        android:layout_width="56dp"
+        android:layout_height="67dp"
+        android:layout_margin="16dp"
+        android:fontFamily="@font/iconfont"
+        android:includeFontPadding="false"
+        android:text="@string/icon_add"
+        android:textSize="25sp"
+        app:cornerRadius="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

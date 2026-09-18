@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  教务系统登录页的网络错误插图。极简：一张卡片 + 两行文字占位 + 一个感叹号。
+  用中性蓝灰，浅色与深色主题下都不刺眼。只出现在界面的 Fragment 里（不在 RemoteViews 中），
+  所以可以是矢量。
+  源：design/net_work_error.svg
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="150dp"
+    android:viewportWidth="240"
+    android:viewportHeight="180">
+    <path
+        android:fillColor="#FFEDF2FA"
+        android:pathData="M28,52h184a16,16 0 0 1 16,16v44a16,16 0 0 1 -16,16h-184a16,16 0 0 1 -16,-16v-44a16,16 0 0 1 16,-16z" />
+    <path
+        android:fillColor="#FFC7D4E8"
+        android:pathData="M36,74h128a5,5 0 0 1 0,10h-128a5,5 0 0 1 0,-10z" />
+    <path
+        android:fillColor="#FFC7D4E8"
+        android:pathData="M36,94h76a5,5 0 0 1 0,10h-76a5,5 0 0 1 0,-10z" />
+    <path
+        android:fillColor="#FF8FA3C8"
+        android:pathData="M192,106a4,4 0 0 1 8,0v18a4,4 0 0 1 -8,0z" />
+    <path
+        android:fillColor="#FF8FA3C8"
+        android:pathData="M193,85a3,3 0 1 1 6,0a3,3 0 1 1 -6,0z" />
+</vector>

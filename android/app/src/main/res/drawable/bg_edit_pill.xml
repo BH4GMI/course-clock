@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  时间段卡里教师/地点行内输入框的底（设计稿 6：104×32、圆角 10dp）。
+  与 bg_edit_field 同一层（card2_background），只是圆角更小、高度更矮。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+       android:shape="rectangle">
+    <solid android:color="@color/card2_background" />
+    <corners android:radius="8dp" />
+</shape>

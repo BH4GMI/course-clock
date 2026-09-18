@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「浅强调底」的圆点（关于页"使用说明"里的 1/2/3）。
+  圆形 + accent_soft 底 + colorPrimary 数字，直径由使用处的 layout_width/height 决定（26dp）。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/accent_soft" />
+</shape>

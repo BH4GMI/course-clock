@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  自适应图标前景：三条圆角横条（课表行）+ 右上角琥珀色圆点（提醒）。
+  内容收在中心 72×72 安全区内（实际占 56×56），所以任何遮罩形状都不会切到它。
+  造型复用 24×24 的标记定义，靠 group 放进去 —— 改造型只改 design/wakeup.svg 那一处。
+  上游这份是 800×800 自动描摹出来的图形，已整体替换。
+  源：design/ic_launcher_foreground.svg
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="26"
+        android:translateY="26"
+        android:scaleX="2.333333"
+        android:scaleY="2.333333">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M4.75,5h8.5a1.75,1.75 0 0 1 0,3.5h-8.5a1.75,1.75 0 0 1 0,-3.5z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M4.75,10.25h5.5a1.75,1.75 0 0 1 0,3.5h-5.5a1.75,1.75 0 0 1 0,-3.5z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M4.75,15.5h10.5a1.75,1.75 0 0 1 0,3.5h-10.5a1.75,1.75 0 0 1 0,-3.5z" />
+        <path
+            android:fillColor="#FFFFC24B"
+            android:pathData="M16.75,6.75a2.25,2.25 0 1 1 4.5,0a2.25,2.25 0 1 1 -4.5,0z" />
+    </group>
+</vector>

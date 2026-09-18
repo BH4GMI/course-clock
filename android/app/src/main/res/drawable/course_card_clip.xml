@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  课程卡的剪裁轮廓。
+
+  自己不画任何东西（全透明），只提供一条**圆角矩形轮廓**——父容器配上
+  `android:clipToOutline="true"` 之后，子 View（课程色底、课程色竖条）都会被裁进这条轮廓。
+
+  为什么非这么绕：竖条宽 4dp，如果让它自己带圆角，半径最多只能是 2dp（圆角会被夹到短边的一半），
+  而卡片圆角是 8dp —— 两个圆角不同心，卡片底色就从接缝里透出来一条月牙（就是用户圈出来的那处）。
+  用父容器裁之后，竖条画成直角矩形即可：外边必然等于卡片的 8dp 圆角，内边是直角，严丝合缝。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@android:color/transparent" />
+    <corners android:radius="8dp" />
+</shape>

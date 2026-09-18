@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  底部面板上方的把手（设计稿 2/4/5 都画了它）。
+
+  它浮在面板上沿之外、压在遮罩上，所以只能放在面板外面（fragment_base_dialog 的线性布局里），
+  不能塞进卡片内部。颜色用次要文字色再加透明度，深浅两套主题都能看。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/text_secondary" />
+    <corners android:radius="2.25dp" />
+</shape>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  侧边栏「设置」图标：三条滑杆。比齿轮更极简，在 24dp 下也更清楚。
+
+  **刻意单色**：侧边栏设了 itemIconTintList = createColorStateList(colorOnBackground)
+  （见 ScheduleActivityUI 里 navViewStart 的构造），图标会被整体染成一个颜色。
+  用"横杆一色、旋钮另一色"的写法会在染色后两者同色、旋钮消失。
+  旋钮靠**直径大于杆宽**（5.2 对 2）在单色下依然可见。
+  源：design/setting.svg
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF233A6B"
+        android:pathData="M4,5h16a1,1 0 0 1 0,2h-16a1,1 0 0 1 0,-2z" />
+    <path
+        android:fillColor="#FF233A6B"
+        android:pathData="M4,11h16a1,1 0 0 1 0,2h-16a1,1 0 0 1 0,-2z" />
+    <path
+        android:fillColor="#FF233A6B"
+        android:pathData="M4,17h16a1,1 0 0 1 0,2h-16a1,1 0 0 1 0,-2z" />
+    <path
+        android:fillColor="#FF233A6B"
+        android:pathData="M5.4,6a2.6,2.6 0 1 1 5.2,0a2.6,2.6 0 1 1 -5.2,0z" />
+    <path
+        android:fillColor="#FF233A6B"
+        android:pathData="M13.4,12a2.6,2.6 0 1 1 5.2,0a2.6,2.6 0 1 1 -5.2,0z" />
+    <path
+        android:fillColor="#FF233A6B"
+        android:pathData="M7.4,18a2.6,2.6 0 1 1 5.2,0a2.6,2.6 0 1 1 -5.2,0z" />
+</vector>

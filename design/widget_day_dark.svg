@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  日视图小部件（今日课程）· 深色 · 4×2
+
+  与浅色版的**几何完全一致**，只有三处不同：
+   1. 底板 #2A2F3A（= 主界面深色底，values-night/colors.xml）；
+   2. **没有外边框**（浅色版有一圈 8% 黑的收边；深色下它贴着深色壁纸会显出一条偏蓝的亮线）；
+   3. **没有表头下面那条横线**（同理由：浅色下是收边，深色下就是一条多余的蓝灰亮线）。
+  底板的圆角已经足够交代边界，深色不需要再画线。
+
+  其余：卡片轮廓同样用 <clipPath> 裁竖条，竖条不带自己的圆角。
+-->
+
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="320" viewBox="0 0 700 320"
+     font-family="'Microsoft YaHei','Noto Sans SC',system-ui,sans-serif">
+
+  <defs>
+    <clipPath id="card1">
+      <rect x="0" y="0" width="644" height="92" rx="16"/>
+    </clipPath>
+    <clipPath id="card2">
+      <rect x="0" y="0" width="644" height="92" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <!-- 底板：无边框 -->
+  <rect x="0" y="0" width="700" height="320" rx="24" fill="#2A2F3A"/>
+
+  <!-- 表头 -->
+  <text x="32" y="58" font-size="30" font-weight="700" fill="#ECEDEF">9月15日</text>
+  <text x="196" y="56" font-size="22" fill="#9BA1AC">第1周  周二</text>
+  <path d="M650 36 l12 12 -12 12" fill="none" stroke="#4C535F" stroke-width="3"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 深色下不画表头横线 -->
+
+  <!-- 第 1 节课 -->
+  <g transform="translate(28,96)">
+    <g clip-path="url(#card1)">
+      <rect x="0" y="0" width="644" height="92" fill="#FF1744" fill-opacity="0.20"/>
+      <rect x="0" y="0" width="8" height="92" fill="#FF4D6A"/>
+    </g>
+    <text x="30" y="40" font-size="28" font-weight="700" fill="#ECEDEF">1</text>
+    <text x="30" y="70" font-size="21" fill="#9BA1AC">08:15</text>
+    <text x="112" y="42" font-size="30" font-weight="700" fill="#ECEDEF">汽车电控技术</text>
+    <text x="112" y="74" font-size="22" fill="#9BA1AC">@B210多  ·  魏丹</text>
+  </g>
+
+  <!-- 第 2 节课 -->
+  <g transform="translate(28,200)">
+    <g clip-path="url(#card2)">
+      <rect x="0" y="0" width="644" height="92" fill="#1DE9B6" fill-opacity="0.20"/>
+      <rect x="0" y="0" width="8" height="92" fill="#4FC79F"/>
+    </g>
+    <text x="30" y="40" font-size="28" font-weight="700" fill="#ECEDEF">6</text>
+    <text x="30" y="70" font-size="21" fill="#9BA1AC">13:20</text>
+    <text x="112" y="42" font-size="30" font-weight="700" fill="#ECEDEF">汽车检测诊断技术</text>
+    <text x="112" y="74" font-size="22" fill="#9BA1AC">@C106多  ·  马其华</text>
+  </g>
+</svg>

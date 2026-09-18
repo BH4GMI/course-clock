@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      这些 id 不是普通的资源名：代码会对它们做算术，例如
+        id = R.id.anko_tv_node1 + 节次 − 1
+        ui.content.getViewById(R.id.anko_ll_week_panel_0 + 列号 − 1)
+      因此 anko_tv_node1..N、anko_ll_week_panel_0..N、anko_tv_title0..N 这几段必须保持
+      连续，中间不能删条目——删掉一个，后面的 id 会整体前移，算术就会指到别的资源上。
+      看起来"没有引用"也不要删。
+    -->
+    <item name="anko_cl_schedule" type="id" />
+    <item name="anko_iv_bg" type="id" />
+    <item name="anko_iv_blur" type="id" />
+    <item name="anko_tv_date" type="id" />
+    <item name="anko_tv_title" type="id" />
+    <item name="anko_tv_week" type="id" />
+    <item name="anko_tv_weekday" type="id" />
+    <item name="anko_ib_nav" type="id" />
+    <item name="anko_ib_add" type="id" />
+    <item name="anko_ib_import" type="id" />
+    <item name="anko_ib_more" type="id" />
+    <item name="anko_ib_share" type="id" />
+    <item name="anko_vp_schedule" type="id" />
+    <item name="anko_sb_week" type="id" />
+    <item name="anko_nv" type="id" />
+    <item name="anko_nv_end" type="id" />
+    <item name="anko_rv_table_name" type="id" />
+    <item name="anko_drawer_layout" type="id" />
+    <item name="anko_navigation_bar_blur_layout" type="id" />
+    <item name="anko_navigation_bar_view" type="id" />
+
+    <item name="anko_cl_fragment_schedule" type="id" />
+    <item name="anko_tv_title0" type="id" />
+    <item name="anko_tv_title0_1" type="id" />
+    <item name="anko_tv_title1" type="id" />
+    <item name="anko_tv_title2" type="id" />
+    <item name="anko_tv_title3" type="id" />
+    <item name="anko_tv_title4" type="id" />
+    <item name="anko_tv_title5" type="id" />
+    <item name="anko_tv_title6" type="id" />
+    <item name="anko_tv_title7" type="id" />
+    <item name="anko_sv_schedule" type="id" />
+    <item name="anko_cl_content_panel" type="id" />
+    <item name="anko_tv_node1" type="id" />
+    <item name="anko_tv_node2" type="id" />
+    <item name="anko_tv_node3" type="id" />
+    <item name="anko_tv_node4" type="id" />
+    <item name="anko_tv_node5" type="id" />
+    <item name="anko_tv_node6" type="id" />
+    <item name="anko_tv_node7" type="id" />
+    <item name="anko_tv_node8" type="id" />
+    <item name="anko_tv_node9" type="id" />
+    <item name="anko_tv_node91" type="id" />
+    <item name="anko_tv_node92" type="id" />
+    <item name="anko_tv_node93" type="id" />
+    <item name="anko_tv_node94" type="id" />
+    <item name="anko_tv_node95" type="id" />
+    <item name="anko_tv_node96" type="id" />
+    <item name="anko_tv_node97" type="id" />
+    <item name="anko_tv_node98" type="id" />
+    <item name="anko_tv_node99" type="id" />
+    <item name="anko_tv_node991" type="id" />
+    <item name="anko_tv_node992" type="id" />
+    <item name="anko_tv_node993" type="id" />
+    <item name="anko_tv_node994" type="id" />
+    <item name="anko_tv_node995" type="id" />
+    <item name="anko_tv_node996" type="id" />
+    <item name="anko_tv_node997" type="id" />
+    <item name="anko_tv_node998" type="id" />
+    <item name="anko_tv_node999" type="id" />
+    <item name="anko_tv_node9991" type="id" />
+    <item name="anko_tv_node9992" type="id" />
+    <item name="anko_tv_node9993" type="id" />
+    <item name="anko_fl_time_axis" type="id" />
+    <item name="anko_tv_time_label1" type="id" />
+    <item name="anko_tv_time_label2" type="id" />
+    <item name="anko_tv_time_label3" type="id" />
+    <item name="anko_tv_time_label4" type="id" />
+    <item name="anko_tv_time_label5" type="id" />
+    <item name="anko_tv_time_label6" type="id" />
+    <item name="anko_tv_time_label7" type="id" />
+    <item name="anko_tv_time_label8" type="id" />
+    <item name="anko_tv_time_label9" type="id" />
+    <item name="anko_tv_time_label10" type="id" />
+    <item name="anko_tv_time_label11" type="id" />
+    <item name="anko_tv_time_label12" type="id" />
+    <item name="anko_tv_time_label13" type="id" />
+    <item name="anko_tv_time_label14" type="id" />
+    <item name="anko_tv_time_label15" type="id" />
+    <item name="anko_tv_time_label16" type="id" />
+    <item name="anko_tv_time_label17" type="id" />
+    <item name="anko_tv_time_label18" type="id" />
+    <item name="anko_tv_time_label19" type="id" />
+    <item name="anko_tv_time_label20" type="id" />
+    <item name="anko_tv_time_label21" type="id" />
+    <item name="anko_tv_time_label22" type="id" />
+    <item name="anko_tv_time_label23" type="id" />
+    <item name="anko_tv_time_label24" type="id" />
+    <item name="anko_tv_time_label25" type="id" />
+    <item name="anko_tv_time_label26" type="id" />
+    <item name="anko_tv_time_label27" type="id" />
+    <item name="anko_tv_time_label28" type="id" />
+    <item name="anko_tv_time_label29" type="id" />
+    <item name="anko_tv_time_label30" type="id" />
+    <item name="anko_tv_time_label31" type="id" />
+    <item name="anko_ll_week_panel_0" type="id" />
+    <item name="anko_ll_week_panel_1" type="id" />
+    <item name="anko_ll_week_panel_2" type="id" />
+    <item name="anko_ll_week_panel_3" type="id" />
+    <item name="anko_ll_week_panel_4" type="id" />
+    <item name="anko_ll_week_panel_5" type="id" />
+    <item name="anko_ll_week_panel_6" type="id" />
+    <item name="anko_ll_week_panel_7" type="id" />
+
+    <item name="anko_layout" type="id" />
+    <item name="anko_view" type="id" />
+    <item name="anko_text_view" type="id" />
+    <item name="anko_tv_description" type="id" />
+    <item name="anko_tv_prefix" type="id" />
+    <item name="anko_tv_value" type="id" />
+    <item name="anko_tv_unit" type="id" />
+    <item name="anko_switch" type="id" />
+    <item name="anko_check_box" type="id" />
+    <item name="anko_iv_arrow" type="id" />
+    <item name="anko_seek_bar" type="id" />
+    <item name="anko_quick_side_bar" type="id" />
+    <item name="anko_empty_view" type="id" />
+
+    <item name="bottom_sheet_title_week" type="id" />
+    <item name="bottom_sheet_title_schedule" type="id" />
+    <item name="bottom_sheet_title_shortcut" type="id" />
+    <item name="bottom_sheet_change_week_btn" type="id" />
+    <item name="bottom_sheet_modify_time_btn" type="id" />
+    <item name="bottom_sheet_bg_btn" type="id" />
+    <item name="bottom_sheet_remind_btn" type="id" />
+    <item name="bottom_sheet_check_course_btn" type="id" />
+    <item name="bottom_sheet_create_schedule_btn" type="id" />
+    <item name="bottom_sheet_manage_schedule_btn" type="id" />
+    <item name="bottom_sheet_sv_week" type="id" />
+    <item name="bottom_sheet_cg_week" type="id" />
+    <item name="bottom_sheet_rv_table" type="id" />
+
+    <!--
+      课表下方留白区**按需存在**（设置里开了才加进来）。虚线网格则完全不占位：它画在
+      content 的背景上，不是视图 —— 曾经作为 MATCH_PARENT 子视图让课表高度塌成 0。
+    -->
+    <item name="anko_schedule_blank_area" type="id" />
+
+    <!-- 星期轴下面标出"今天"那一列的滑块。名字不进任何算术区间，加在末尾不影响上面的 id。 -->
+    <item name="anko_tv_today_slider" type="id" />
+
+    <!-- 星期轴整行的下沿（所有格子底边里最低的那条），网格钉在它下面。 -->
+    <item name="anko_week_axis_bottom" type="id" />
+
+    <!-- 星期轴一格里的两行：上行「周几 / 月」，下行日期。 -->
+    <item name="anko_tv_title_label" type="id" />
+    <item name="anko_tv_title_value" type="id" />
+
+    <!--
+      侧栏抽屉的行 id。
+
+      抽屉不再用 NavigationView + 菜单 XML（NavigationView 的行样式被 Material 定死：纯图标 + 文字，
+      做不到设计稿的"当前项蓝底胶囊 + 圆形图标底 + 56dp 行高"），行改由 ScheduleActivityUI 自己搭，
+      id 就从菜单 XML 挪到这里。加在文件最末尾：上面 anko_tv_title0..7 / anko_tv_node* /
+      anko_ll_week_panel_* 那几段是按算术取用的连续区间，插进去会让后面的 id 整体前移。
+    -->
+    <item name="nav_row_schedule" type="id" />
+    <item name="nav_row_course" type="id" />
+    <item name="nav_row_setting" type="id" />
+    <item name="nav_row_about" type="id" />
+    <item name="nav_row_new_table" type="id" />
+    <item name="nav_row_divider" type="id" />
+    <!--
+      nav_row_new_table / nav_row_divider 自 2026-09-18 起不再有引用：抽屉里那行「新建课表」
+      与它上面那条分隔线都撤掉了（新建课表仍由底部面板提供）。保留声明不删 —— 本文件按
+      "条目顺序即 id" 管理（见文件顶部），删条目会让后面的条目整体前移，而留着它们不花任何代价。
+    -->
+    <item name="ll_add_course_actions" type="id" />
+
+    <!--
+      背景图加载的"本次请求标记"，打在 ImageView 的 tag 上。
+      解码在后台线程做，回调回来时用它判断这个 View 有没有被 RecyclerView 绑到别的数据上
+      （Glide 自动做的事，BackgroundImageLoader 靠它实现，见那里的注释）。
+      同样加在末尾：上面的 id 区间是连着取用的。
+    -->
+    <item name="bg_image_load_key" type="id" />
+
+    <!--
+      这个 View 上"当前真正显示的那张图"的叶子 Drawable，同样打在 ImageView 的 tag 上。
+      交叉淡入需要知道"从哪张淡到哪张"，而 view.drawable 在渐变进行中拿到的是
+      TransitionDrawable 本身；拿它当下一轮的旧层就会一层套一层，把历史上每一张 Bitmap
+      永久钉在引用链上（BackgroundImageLoader.attach 的注释里有完整说明）。
+      仍加在末尾：上面的 id 区间是连着取用的。
+    -->
+    <item name="bg_image_current" type="id" />
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「搜索」的放大镜。iconfont 里没有可用的搜索字形，所以画一个矢量：
+  左上角一个圆（镜片）+ 一条 45° 的柄，线宽 1.8 与 ic_chevron_right 同一套视觉。
+  颜色写 text_secondary，深浅两套色值都在颜色资源里；要在别处换色用 app:tint。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M11,4.5 A6.5,6.5 0 1,0 11,17.5 A6.5,6.5 0 1,0 11,4.5 M15.8,15.8 L20,20"
+        android:strokeColor="@color/text_secondary"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:strokeWidth="1.8" />
+</vector>

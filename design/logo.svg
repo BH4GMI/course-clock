@@ -1,0 +1,14 @@
+<!--
+  启动页 logo。必须是位图：res/drawable/splash.xml 用的是 <bitmap android:src="@drawable/logo">，
+  而 <bitmap> 只接受位图 drawable，喂矢量会在 inflate 时报错。
+  所以这份 SVG 的作用是"源"，最终要栅格化成 mdpi~xxxhdpi 的 PNG。
+  透明底 + 靛蓝标记 + 蓝色提醒点，贴在任何 splash 背景上都成立。
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <g transform="translate(12,12) scale(3)">
+    <path fill="#233A6B" d="M4.75,5h8.5a1.75,1.75 0 0 1 0,3.5h-8.5a1.75,1.75 0 0 1 0,-3.5z"/>
+    <path fill="#233A6B" d="M4.75,10.25h5.5a1.75,1.75 0 0 1 0,3.5h-5.5a1.75,1.75 0 0 1 0,-3.5z"/>
+    <path fill="#233A6B" d="M4.75,15.5h10.5a1.75,1.75 0 0 1 0,3.5h-10.5a1.75,1.75 0 0 1 0,-3.5z"/>
+    <path fill="#4C7DF0" d="M16.75,6.75a2.25,2.25 0 1 1 4.5,0a2.25,2.25 0 1 1 -4.5,0z"/>
+  </g>
+</svg>

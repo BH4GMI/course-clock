@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  课程管理网格末尾的「添加课程」虚线格（设计稿 8）：不用跑到右下角找加号。
+  虚线框是 bg_add_course_dashed（虚线画在图上，格内无底色——"空"本身就是提示），
+  中间一枚浅强调圆点加号 + 一行说明，点击直接进添加课程页。
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cell_add"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="96dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="14dp"
+    android:background="@drawable/bg_add_course_dashed"
+    android:clickable="true"
+    android:focusable="true"
+    tools:layout_width="160dp">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/bg_accent_soft_circle"
+            android:fontFamily="@font/iconfont"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:text="@string/icon_add"
+            android:textColor="@color/colorPrimary"
+            android:textSize="14sp" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:includeFontPadding="false"
+            android:text="@string/course_manage_add_course"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</FrameLayout>

@@ -1,0 +1,177 @@
+<resources>
+    <!-- 应用名。上游把这个资源放在 flavor 源集（src/google、src/huawei、src/normal）里，
+         那三套图标与 strings 在本次清理中已并入 main 并删除，所以它现在归这里。 -->
+    <string name="app_name">课钟</string>
+
+    <!-- 主界面顶栏的大标题。原来顶栏最大的一行是"今天的日期"，"这是哪一屏"和"这是哪一天"
+         混在一起；现在标题是这一屏的名字，日期降为副标题的一段。 -->
+    <string name="schedule_title">课表</string>
+
+    <!-- 图标字形。实际使用的只有下面这六个，其余图标用 "\uExxx" 字面量写在 Kotlin 里，
+         不再占用字符串资源。留着这六条是因为它们仍被 XML 布局引用：
+         item_add_course_detail.xml（close/date/clock/person/location）与
+         fragment_list_manage.xml（add）。 -->
+    <string name="icon_location" translatable="false"></string>
+    <string name="icon_close" translatable="false"></string>
+    <string name="icon_date" translatable="false"></string>
+    <string name="icon_clock" translatable="false"></string>
+    <string name="icon_add" translatable="false"></string>
+    <string name="icon_person" translatable="false"></string>
+
+    <string name="error_course_data">检测到课程数据有误，请仔细核对</string>
+    <string name="error_course_node">有课程的节数大于课表的最大节数</string>
+
+    <string name="setting_schedule_name">课表名称</string>
+
+    <string name="sure">确定</string>
+    <string name="cancel">取消</string>
+
+    <string-array name="day_night_setting">
+        <item>浅色模式</item>
+        <item>深色模式</item>
+        <item>跟随系统</item>
+    </string-array>
+
+    <!-- 首次启动的唯一一个弹窗：上游来源与具体版本、Apache-2.0 授权、完全免费。
+         「完全免费」只在这里完整说一次；关于页只保留署名并顺带提一句。
+         三段用陈述句、不用感叹与口语：「本软件为……」而不是「本软件是……修改而来的」，
+         禁用词写作「不提供……亦不接受……」，与关于页的书面口径一致。
+
+         校名的口径是**适配**，不是「面向 / 只服务」——后者读起来像"该校自己的应用"。
+         第二段必须把"与校方无关"说全（无隶属、无合作、无背书、非校方出品），
+         由 FirstRunDialogOrderTest 钉住，改动这一条前先想清楚：这是一条事实陈述，不是文案偏好。 -->
+    <string name="first_run_title">关于本软件</string>
+    <string name="first_run_body">本软件为 WakeUp 课程表（上游项目 Cerbur/WakeupSchedule_Kotlin，版本 3.621，提交 a69fb75；原作者 YZune）的修改版本，依据 Apache License 2.0 授权发布。\n\n本软件适配上海工程技术大学的教学系统。本软件是个人开发的独立项目，与上海工程技术大学及上游原作者均无隶属、合作或背书关系；出现校名仅用于说明适配对象，不代表本软件由该校出品、维护或授权。上游版权归原作者所有。\n\n本软件完全免费，不提供内购、订阅或广告，亦不接受任何形式的打赏或捐赠。</string>
+    <string name="first_run_view_license">查看完整许可证</string>
+    <string name="first_run_ok">我知道了</string>
+    <string name="license_title">Apache License 2.0</string>
+    <string name="license_missing">许可证全文读取失败。完整内容见随包附带的 NOTICE 与 LICENSE 文件。</string>
+
+    <!-- 关于页：署名 + 顺带提一句免费（Apache-2.0 第 4 条要求保留版权与许可声明）。
+         直接上游是本 fork 的 origin：Cerbur/WakeupSchedule_Kotlin；原作者 YZune。
+         原来这里把直接来源写成了 YZune，已改正。 -->
+    <string name="about_title">关于</string>
+    <string name="about_version">版本 %1$s</string>
+
+    <!--
+      导入课程弹窗（设计稿 5）。两条路做成两块大选项：左边圆形图标、右边标题 + 一行说明，
+      第一块标「推荐」，用户不用猜该点哪个；文件那条不再写 .wakeup_schedule 文件名
+      （普通用户看不懂），改成说清楚它是干嘛的。
+    -->
+    <string name="import_title">导入课程</string>
+    <string name="import_subtitle_sues">登录学校 WebVPN 后自动读回本学期课表</string>
+    <string name="import_subtitle_file">也可以选择之前备份好的课表文件</string>
+    <string name="import_from_sues">从学校教务导入</string>
+    <string name="import_from_sues_desc">推荐 · 自动读回课程和作息</string>
+    <string name="import_from_file">从备份文件导入</string>
+    <string name="import_from_file_desc">换手机或重装时用</string>
+
+    <!--
+      课程详情面板（设计稿 4）。文案面向本科生：短、说人话。
+      摘要在上面（周几第几节、第几周），明细在下面（上课时间 / 授课教师 / 上课地点 / 上课提醒），
+      两处不重复。行名带上"上课"两个字：面板里同时有"上课提醒"这类行，只写"时间"会被读成当前时刻。
+    -->
+    <string name="course_detail_time">上课时间</string>
+    <string name="course_detail_teacher">授课教师</string>
+    <string name="course_detail_room">上课地点</string>
+    <string name="course_detail_reminder">上课提醒</string>
+    <string name="course_detail_edit">编辑课程</string>
+    <string name="course_detail_delete">删除</string>
+    <!-- 详情里的空值：不写"—"（用户读不出那是"没有"还是"没查到"）。 -->
+    <string name="course_detail_unknown">未填</string>
+    <!-- 提醒那一行的当前值：总开关关着 / 开着时提前几分钟。 -->
+    <string name="course_detail_remind_off">未开启</string>
+    <string name="course_detail_remind_before">上课前 %1$d 分钟</string>
+    <!--
+      删除的二次确认。原文案"再点一次确定删除\n长按可以同时删除这门课程的其他时间哦"把两件事
+      混在一句里，而且"其他时间"是数据模型的说法（同一门课在一周里的多次安排）。这里分开说清楚。
+    -->
+    <string name="course_detail_delete_tips">再点一次「删除」确认。\n长按「删除」可以一次删掉这门课一周里的其他几节。</string>
+
+    <!--
+      关于页的文案（设计稿 11，2026-09-18 按"更正式"重写，同日按"分栏太多"合并）。
+
+      三张卡：应用信息（含项目地址）/ 使用说明 / 权限说明，开源署名与免费声明回到页脚。
+      原来那节叫「权限」，下面写的是系统权限名（网络 / 振动 / 开机自启）—— 用户关心的不是叫什么，
+      是"为什么需要"，所以每行都补了用途。改动如下：
+      · 节标题去口语：「怎么用」→「使用说明」，「应用会用到」→「权限说明」；
+      · 步骤写成完整的陈述句（句末带句号），不再用"点右下角""读回课程"这类口语动词；
+      · 「开机自动恢复」改成系统里真正的名字「开机自启动」，说明补上"设备重启"这个前提；
+      · 原来还给开源声明单独立过一节标题 + 一张卡，与上面三张并排就成了第四栏、第五栏 ——
+        现在它与免费声明、版权一起收进页脚（署名仍然完整可见，只是不再占一个栏目）。
+      「导入的课表保存在本机」这类自我说明仍然不写 —— 那是对实现的要求，写在 README 里就够。
+    -->
+    <string name="about_project">项目地址：https://github.com/BH4GMI/course-clock</string>
+    <string name="about_howto">使用说明</string>
+    <string name="about_step1">在「导入课程」中选择「从学校教务导入」。</string>
+    <string name="about_step2">在弹出的页面中登录学校 WebVPN。</string>
+    <string name="about_step3">返回课表页面，点击右下角按钮获取课程。</string>
+    <string name="about_howto_note">更换设备时，亦可使用此前备份的课表文件导入。</string>
+    <string name="about_uses">权限说明</string>
+    <string name="about_use_network">网络访问</string>
+    <string name="about_use_network_why">仅用于从学校教务系统导入课表数据</string>
+    <string name="about_use_notify">通知与振动</string>
+    <string name="about_use_notify_why">用于在课程开始前发送上课提醒</string>
+    <string name="about_use_boot">开机自启动</string>
+    <string name="about_use_boot_why">用于在设备重启后重新安排课程提醒</string>
+
+    <!-- 页脚的署名块：上游署名（Apache-2.0 第 4 条要求保留）与免费声明各一段，另加版权行。
+         版权主体照抄仓库根目录 NOTICE 的写法（Copyright 2026 The CourseClock Project），
+         与 NOTICE 不一致的署名等于没有署名。
+         本项目地址不写在这里：它在应用信息卡里，那是用户找"这东西哪来的"时会看的地方。 -->
+    <string name="about_upstream">本软件为开源课程表应用 WakeupSchedule 的修改版本，依据 Apache License 2.0 授权发布。\n上游项目：Cerbur/WakeupSchedule_Kotlin\nhttps://github.com/Cerbur/WakeupSchedule_Kotlin\n原作者：YZune\nhttps://github.com/YZune/WakeupSchedule_Kotlin</string>
+    <string name="about_free">本软件完全免费，不提供内购、订阅或广告。</string>
+    <string name="about_copyright">© 2026 The CourseClock Project</string>
+
+    <!-- 周数选择面板（设计稿 2） -->
+    <string name="week_picker_title">周数</string>
+    <string name="week_picker_total">共 %1$d 周</string>
+
+    <!-- 多课表管理（设计稿 7） -->
+    <string name="table_default_name">我的课表</string>
+    <string name="table_courses_subtitle">%1$d 门课程</string>
+    <string name="table_current_subtitle">%1$d 门课程 · 正在使用</string>
+    <string name="table_empty_subtitle">空课表 · 还没有课程</string>
+    <string name="table_manage_hint">点一下切换，进详情可改名或删除</string>
+    <string name="table_manage_new">+ 新建课表</string>
+    <string name="table_manage_footnote">各课表互不影响，可按学期分开管理。</string>
+
+    <!-- 课程管理的文案在 strings_schedule_manage.xml（这一屏的文案改动最频繁，单独成档） -->
+
+    <!-- 选择时间表（设计稿 10） -->
+    <string name="time_table_section">作息时间表</string>
+    <string name="time_table_new">+ 新建时间表</string>
+    <string name="time_table_summary">第 1-%1$d 节 · 每节约 %2$d 分钟</string>
+    <string name="time_table_summary_unset">还没有设置作息</string>
+    <string name="time_table_explore_title">什么是分楼错峰</string>
+    <string name="time_table_explore_body">同一节课，不同教学楼的上课时间可能不一样。\n课钟按每门课所在的教学楼自动取时间，\n课表上看到的先后顺序就是真实顺序。\n导入时自动按教学楼写入，也可以在「设置时间」里手动改。</string>
+
+    <!-- 添加课程（设计稿 6） -->
+    <string name="add_course_name_label">课程名称</string>
+    <string name="add_course_name_hint">课程名称（必填）</string>
+    <string name="add_course_color_label">课程颜色</string>
+    <string name="add_course_period_label">时间段</string>
+    <string name="add_course_weeks_label">周数</string>
+    <string name="add_course_time_label">节次</string>
+    <string name="add_course_teacher_label">授课教师</string>
+    <string name="add_course_room_label">上课地点</string>
+    <string name="add_course_optional">可不填</string>
+    <string name="add_course_add_period">+ 添加时间段</string>
+    <string name="add_course_save">保存课程</string>
+    <string name="add_course_pick_color">还没选颜色</string>
+    <string name="add_course_picked">已选：%1$s</string>
+    <string name="add_course_picked_custom">已选：自定义颜色</string>
+
+    <!-- 课程调色板的名字（与 R.array.customizedColors 一一对应，「已选：蓝」用） -->
+    <string-array name="customizedColorNames">
+        <item>红</item>
+        <item>粉</item>
+        <item>蓝</item>
+        <item>绿</item>
+        <item>紫</item>
+        <item>橙</item>
+        <item>深橙</item>
+        <item>浅蓝</item>
+        <item>群青</item>
+    </string-array>
+</resources>

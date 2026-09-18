@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  底部面板自己的底：`page_background` + 只圆上面两角。
+
+  为什么要由面板自己画这一层，而不是让 BottomSheetDialog 那层底露着：
+  Material 会给 `design_bottom_sheet` 套一层 `MaterialShapeDrawable`（表面色 `colorSurface`），
+  而且是在**内容视图挂载之后**才套上的 —— 在 onStart / onResume 里把它改成透明都会被盖回去
+  （实测：改完那一刻是 ColorDrawable，面板真正显示出来时又变回 MaterialShapeDrawable）。
+  露出它就会在把手位置多出一条白色横带（设计稿里把手是直接贴面板的）。
+
+  所以由这一层来承接面板底色，形状和面板里那张卡片一致（16dp 圆角），两层叠起来是一条连续的
+  灰面板。这个做法不依赖任何时机，框架换什么底都被它盖住。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/page_background" />
+    <corners
+        android:topLeftRadius="16dp"
+        android:topRightRadius="16dp" />
+</shape>

@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  添加课程页的一个「时间段」卡（设计稿 6）：周数、节次是弹选择器的行（带箭头），
+  授课教师、上课地点是能直接打字的输入框（浅底小胶囊）——一眼能分出哪些是选择、哪些是输入。
+
+  由 AddCourseAdapter 绑定：et_weeks / et_time 是只读值（点了整行开选择器），
+  et_teacher / et_room 是真的 EditText（TextChanged 直接写回 viewModel，不再弹对话框）。
+  每张卡右上角一枚 ✕ 删掉这个时间段（至少保留一个的逻辑在 Activity 里）。
+-->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="12dp"
+    android:layout_marginEnd="16dp"
+    app:cardBackgroundColor="@color/card_background"
+    app:cardCornerRadius="@dimen/group_radius"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="6dp">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_item"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:includeFontPadding="false"
+                android:text="@string/add_course_period_label"
+                android:textColor="@color/text_secondary"
+                android:textSize="12sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/ib_delete"
+                style="@style/ButtonBackground"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:fontFamily="@font/iconfont"
+                android:gravity="center"
+                android:includeFontPadding="false"
+                android:text="@string/icon_close"
+                android:textColor="@color/text_secondary"
+                android:textSize="18sp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <!-- 周数：点了开周次选择面板（整行可点，值在适配器里回填）。 -->
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_weeks"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:includeFontPadding="false"
+                android:text="@string/add_course_weeks_label"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/et_weeks"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1.4"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                tools:text="第 1-16 周" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_chevron_right"
+                android:tint="@color/text_secondary" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <!-- 节次：点了开节次选择面板。 -->
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_time"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:includeFontPadding="false"
+                android:text="@string/add_course_time_label"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/et_time"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1.4"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                tools:text="周一 第 1 - 2节" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_chevron_right"
+                android:tint="@color/text_secondary" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <!-- 授课教师 / 上课地点：直接输入（设计稿：能直接输入的空格），不弹对话框。 -->
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_teacher"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:includeFontPadding="false"
+                android:text="@string/add_course_teacher_label"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/et_teacher"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1.4"
+                android:background="@drawable/bg_edit_pill"
+                android:hint="@string/add_course_optional"
+                android:inputType="text"
+                android:lines="1"
+                android:maxLines="1"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="13.5sp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/ll_room"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:includeFontPadding="false"
+                android:text="@string/add_course_room_label"
+                android:textSize="15sp" />
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/et_room"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1.4"
+                android:background="@drawable/bg_edit_pill"
+                android:hint="@string/add_course_optional"
+                android:inputType="text"
+                android:lines="1"
+                android:maxLines="1"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="13.5sp" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</com.google.android.material.card.MaterialCardView>

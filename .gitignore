@@ -1,0 +1,45 @@
+# ---- 构建产物（可再生，不入库） --------------------------------------------
+build/
+.gradle/
+android/build/
+android/app/build/
+coursetime/build/
+
+# ---- 本机环境与 IDE --------------------------------------------------------
+local.properties
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# ---- 签名密钥：绝不入版本库 ------------------------------------------------
+*.jks
+*.keystore
+keystore.properties
+
+# ---- 本机临时产物（不入库） ------------------------------------------------
+# _crop/     历史调试现场（截图、logcat、数据库 dump）
+# .backup/   上游 git 历史备份与一次性迁移脚本
+# .mimosa/   会话钩子状态，不是工程输入
+_crop/
+.backup/
+__pycache__/
+*.pyc
+.mimosa/
+_check*.png
+_wp*.png
+_m*.png
+android/_build.log
+android/_test.log
+
+# ---- 含个人数据的导出文件 --------------------------------------------------
+# 教务系统导出的原始 JSON 含本人课表与教师信息；.wakeup_schedule 是同样的东西换一种封装。
+# device_db/ 是从真机拉下来的应用数据与日志（`adb` 拉的 db、资源目录、测试日志），
+#            同样含本人课表与教师信息，只用于本机排查。
+get-data*.json
+*.wakeup_schedule
+device_db/
+
+# 例外：测试夹具是构建输入，必须入库，不能被上面那条规则吞掉。
+!android/app/src/test/resources/*.wakeup_schedule

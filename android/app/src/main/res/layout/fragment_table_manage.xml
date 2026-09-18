@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  多课表管理（设计稿 7）：每张课表一张卡片，点一下切换，长按进编辑/删除。
+
+  这一层只放列表本体：副标题（「点一下切换，进详情可改名或删除」）、「+ 新建课表」按钮和
+  页脚说明都由适配器的 header/footer 挂，跟卡片一起滚动——设计稿里按钮就在卡片流末尾，
+  不再像旧版那样压一个含义不明的右下角加号（同一个加号在主界面是「添加课程」）。
+
+  底色 page_background 由本页自设（BaseTitleActivity 不设页面底色），白卡片才分得出来。
+-->
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_background"
+    android:orientation="vertical"
+    tools:context=".schedule_manage.ScheduleManageFragment">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never"
+        android:splitMotionEvents="false" />
+
+</androidx.appcompat.widget.LinearLayoutCompat>

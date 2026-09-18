@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  深色模式下的主界面默认背景。
+
+  这一层（ui.bg）就是用户在「课表设置」里换背景的那一层，所以它必须与主题一起变，
+  否则深色模式下整个软件还是浅色。配套地，课表这一屏的文字/时间轴取色也必须跟着主题走，
+  见 utils/ViewUtils.kt 的 scheduleTextColor() —— 只改背景不改文字，结果就是一片黑看不见东西。
+
+  取值 #2A2F3A（深蓝灰）而不是纯黑 #000000：纯黑与课程卡的描边、抽屉的深色 surface 之间
+  完全没有层次，整屏看上去像一块挖空的洞。这是用户的裁决，浅色那一侧仍是纯白。
+-->
+<resources>
+    <color name="main_background">#2A2F3A</color>
+
+    <!-- 设计稿的"次级容器"色（稿子里的 card2）。 -->
+    <color name="card2_background">#2C2C2E</color>
+
+    <!-- 设置类页面的三层底色（设计稿深色版：黑底 + 深灰卡）。 -->
+    <color name="page_background">#161719</color>
+    <color name="card_background">#222326</color>
+    <color name="text_primary">#F1F2F4</color>
+    <color name="text_secondary">#B0B3BA</color>
+    <color name="list_divider">#2E2E32</color>
+    <color name="accent_soft">#15253F</color>
+
+    <!-- 小部件底板上的文字色，底板同上。 -->
+    <color name="widget_panel_text">#E6FFFFFF</color><!-- 标题/正文 90% 白 -->
+
+    <!-- 规范 2.3：次要信息 40% 白 -->
+    <color name="widget_panel_text_secondary">#99FFFFFF</color><!-- 副文案 60% -->
+
+    <!-- 深色下不要表头横线（与深色版设计稿一致）。 -->
+    <color name="widget_divider">@android:color/transparent</color>
+<color name="widget_panel_background">#1A1A1B</color><!-- 官方底板色：深色 #1A1A1B -->
+</resources>

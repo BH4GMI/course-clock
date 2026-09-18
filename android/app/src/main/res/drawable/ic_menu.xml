@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  左上角抽屉入口的「三条杠」。
+
+  为什么不再用 iconfont 的 U+E6A7：那个字形把三条杠画在 em 方框里很小的一块上（本机实测
+  3.0 密度下只有 19px 长，而旁边 ＋ / ↓ / 分享三个图标各约 52px），而且字体字形是等比缩放的
+  —— 放大 textSize 会让它变高变宽，却不能单独把三条杠拉长；把 TextView 加宽反而会因为
+  `endToStart` 约束把它推到屏幕左边外面去（实测按钮左沿落在 x = −60px）。
+
+  三条杠的长度是布局属性，不是字体属性，所以改用矢量图：几何完全可控，宽度由 ImageView 决定，
+  并且不再依赖第三方字体（iconfont 的授权无从查证）。
+
+  几何取 Material 官方 menu 图标：视口 24×24，三条杠各 18 单位长、2 单位厚，位于 y = 6 / 11 / 16。
+  放进 24dp 的绘制区里三条杠就是 18dp（本机 54px），与旁边 32dp 框里的其它图标同一视觉量级。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#ffffffff"
+        android:pathData="M3,6h18v2H3zM3,11h18v2H3zM3,16h18v2H3z" />
+</vector>

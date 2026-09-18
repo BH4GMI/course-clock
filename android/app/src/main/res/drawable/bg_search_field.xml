@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  搜索框的底：白卡片色 + 大圆角（44dp 高、22dp 半径，即胶囊）。
+
+  和列表里的卡片同一层底色，所以复用 card_background（深色下 values-night 会给深灰）——
+  这一屏的三层底色就是 page_background（BaseListActivity 已设）+ card_background，
+  不为搜索框单独造一个颜色资源。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/card_background" />
+    <corners android:radius="22dp" />
+</shape>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="weekItemMarTop">2dp</dimen>
+
+    <!--
+      设计稿（docs/preview-hyperos.html）的尺寸 token：稿子里写 px，落地到 Android 就是 dp / sp，
+      逐条对应，改尺寸只改这里，不散到各个 provider 里。
+
+      分组卡片：圆角 8dp，距屏幕边 16dp，卡片内左右各 16dp。
+      行高：一行说明 56dp，两行（标题 + 解释）64dp —— 稿子里两条基线之间的距离也是这么定的。
+      开关：46×28 的胶囊 + 24dp 的圆点。
+    -->
+    <dimen name="group_radius">8dp</dimen>
+    <dimen name="page_inset">16dp</dimen>
+    <dimen name="setting_row_inset">16dp</dimen>
+    <dimen name="setting_row_min_height">56dp</dimen>
+    <dimen name="setting_row_two_line_height">64dp</dimen>
+    <dimen name="setting_group_gap">24dp</dimen>
+    <dimen name="switch_width">46dp</dimen>
+    <dimen name="switch_height">28dp</dimen>
+    <dimen name="switch_thumb">24dp</dimen>
+
+    <!--
+      HyperOS 小部件规范（dev.mi.com pId=1664）的两个全局值：
+
+      * widget_corner_radius —— 交付资源圆角：1080p 屏 55px（3x 密度 ≈ 18dp），2K 屏 73px
+        （3.5x 密度 ≈ 21dp）。2K 的覆盖值在 values-sw411dp/dimens.xml（官方 Q&A 指定 2K
+        用 sw411dp 出适配值）。
+      * widget_edge_padding —— 内容安全区：主要内容距小部件边缘 1080p ≥42px、2K ≥55px。
+        16dp 在 3x 下是 48px、3.5x 下是 56px，一档同时满足两档下限，两个小部件（4×2 日视图、
+        4×4 周视图）共用，不再需要分辨率限定符。
+    -->
+    <dimen name="widget_corner_radius">18dp</dimen>
+    <dimen name="widget_edge_padding">16dp</dimen>
+    <dimen name="day_widget_default_width">250dp</dimen>
+    <dimen name="day_widget_default_height">110dp</dimen>
+
+    <!--
+      课程详情底部弹窗的内容边距：左右各 24dp，比设置页的 page_inset 宽一档 ——
+      它是整屏宽的贴底弹窗，边距再小，文字就会顶到卡片上沿的圆角。
+
+      写成 token 而不是在布局里写死 24dp：CourseDetailRenderTest 要断言"课程名离卡片左右各
+      这么远"，只有双方读同一个值时，这条断言才既不会因为没人改布局而失效，也不会在改边距时
+      变成两处各说各话。
+    -->
+    <dimen name="course_detail_inset">24dp</dimen>
+
+    <!--
+      关于页（设计稿 11）卡片的圆角与内边距。
+
+      原先第一张卡写 24dp、后面两张写 20dp，内边距一张 20dp、两张 16dp —— 设计稿本身就是这么画的，
+      但四张卡并排在同一页上，圆角和内边距不一致只会像"没对齐"。关于页是"正式文档"的面孔，
+      四张卡统一读这里的两个值。
+    -->
+    <dimen name="about_card_radius">20dp</dimen>
+    <dimen name="about_card_inset">16dp</dimen>
+
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「添加课程」圆钮里的加号（设计稿 8 最后一格：浅强调圆底 + 品牌色加号）。
+
+  iconfont 的加号字形是给 25sp 的字号设计的，缩到 15dp 的圆钮里粗细会散，
+  所以这里画两条圆头线段，视觉粗细由 strokeWidth 控制、与字号无关。
+  颜色写 colorPrimary：底已经是 accent_soft（浅强调底），品牌色压在上面才是一对。
+  不用 app:tint 是因为这一枚图标只有这一种用法。
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M12,5 L12,19 M5,12 L19,12"
+        android:strokeColor="@color/colorPrimary"
+        android:strokeLineCap="round"
+        android:strokeWidth="2.4" />
+</vector>

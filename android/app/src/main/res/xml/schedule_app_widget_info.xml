@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  周视图小部件。
+
+  默认尺寸 4×4：周视图要 4 行才装得下一周的格子。原来写的是 4×2，于是「添加小部件」里显示成
+  4×2、拖到桌面上也只有 2 行高。原生写法 targetCellWidth/targetCellHeight（API 31+），
+  minWidth/minHeight 按官方公式 70n−30 给 API < 31 回落。
+  minResizeWidth/minResizeHeight 单独写小：默认是 4×4，但允许用户自己缩回 4×2。
+  预览只声明 previewImage，不依赖运行时列表加载，也不会被桌面托管成可点击的预览布局
+  （原因见 today_course_app_widget_info.xml 顶部那段说明）；图由 `WidgetPreviewImageTest`
+  从真实布局渲染生成，浅色与深色各一套。
+
+  **声明 `android:configure`，但只有一张课表时不弹**：
+  配置页（选择本实例显示哪张课表）只在"确实有得选"的时候才出现 —— 见
+  `WeekScheduleAppWidgetConfigActivity.onCreate` 顶部那段同步判定。库里只有一张课表时它是
+  默认表，直接结束、不写登记：`AppWidgetUtils.refreshScheduleWidgets` 本来就有
+  「有登记就按登记的课表画，没有登记就用默认课表」的回退，结果完全一样，但用户少点一次。
+
+  放置那一刻的"预览/放置"界面是**宿主（桌面）自己的**，应用侧无法跳过；我们能决定的只有
+  自己这个配置页弹不弹。
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="courseclock.timetable.schedule_appwidget.WeekScheduleAppWidgetConfigActivity"
+    android:initialKeyguardLayout="@layout/schedule_app_widget"
+    android:initialLayout="@layout/schedule_app_widget"
+    android:minWidth="250dp"
+    android:minHeight="250dp"
+    android:minResizeWidth="250dp"
+    android:minResizeHeight="110dp"
+    android:previewImage="@drawable/week_widget_preview"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="4"
+    android:targetCellHeight="4"
+    android:updatePeriodMillis="10800000"
+    android:widgetCategory="home_screen" />

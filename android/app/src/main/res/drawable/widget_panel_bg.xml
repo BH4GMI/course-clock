@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 小部件底板：圆角 + 随主题的底色（浅色纯白 / 深色 #2A2F3A）。
+     必须用 shape 背景而不是 View#setBackgroundColor：后者是直角，圆角只有背景图能给。
+     圆角按 HyperOS 官方小部件规范交付（55px@1080p / 73px@2K），走 widget_corner_radius。 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/widget_panel_background" />
+    <corners android:radius="@dimen/widget_corner_radius" />
+</shape>

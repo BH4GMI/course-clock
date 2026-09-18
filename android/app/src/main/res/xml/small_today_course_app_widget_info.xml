@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  2×2「当天课程（小）」小部件 —— 设计稿三形态里的**小正方形**。
+
+  它与 4×2 的「当天课程」是同一个实现（[SmallTodayCourseAppWidget] 继承
+  TodayCourseAppWidget）、同一份渲染（TodayColorfulService 按实测宽高切换 focus / timeline /
+  singleLarge），差别只有**默认格数与预览**：桌面按 provider 的 targetCell* 决定"添加时摆多大"，
+  一个 provider 只有一个默认尺寸，所以要让用户能直接放一个 2×2，就必须有第二个 provider。
+
+  **预览图必须是它自己那一张**（`small_day_widget_preview`，1:1 的 440×440）。原来图省事直接指向
+  4×2 的 `day_widget_preview`，于是选择器里 2×2 那一格显示的是 2:1 的形状 —— 图标比例与实物不符，
+  用户没法从预览判断自己拿到的是哪一种。
+
+  为什么不靠"把 4×2 拖小"：能拖小是能力，但选择器里看不到"小正方形"这个东西存在，
+  用户不会知道要这么做 —— 这与"桌面按 provider 决定默认格数"是同一条平台约束的两面。
+
+  预览只声明 `previewImage`：`previewLayout` 会被 MIUI/HyperOS 的详情页托管，并在预览控件上
+  挂一个"打开本应用"的点击（见 today_course_app_widget_info.xml 里的同一段说明）。
+  图由 `WidgetPreviewImageTest` 从真实布局渲染生成，浅色与深色各一套。
+
+  minResize 写 110dp（= 2 格，官方公式 70n−30）：允许用户把它拉成 4×2 的横条，
+  形态由 TodayColorfulService 按实际可用宽高决定，不是三张固定比例位图。
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialKeyguardLayout="@layout/today_course_app_widget"
+    android:initialLayout="@layout/today_course_app_widget"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="110dp"
+    android:previewImage="@drawable/small_day_widget_preview"
+    android:resizeMode="vertical|horizontal"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="10800000"
+    android:widgetCategory="home_screen" />

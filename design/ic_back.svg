@@ -1,0 +1,9 @@
+<!--
+  返回箭头。它同时被三个小部件的 RemoteViews 布局使用，而 RemoteViews 跑在桌面进程里、
+  用的是系统资源加载器 —— 所以最终必须是 PNG（drawable-*dpi/ic_back.png），
+  不能在 API 21~23 上冒险用矢量。这份 SVG 是栅格化用的源。
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <path fill="none" stroke="#233A6B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"
+        d="M15.4,4.6 L8,12 L15.4,19.4"/>
+</svg>

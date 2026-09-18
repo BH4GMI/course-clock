@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  「次级容器」色的圆点（设计稿里的 card2 圆形）：导入课程里"从备份文件导入"那块左边的图标底。
+  直径由使用处的 layout_width/height 决定。
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@color/card2_background" />
+</shape>

@@ -1,0 +1,23 @@
+# 默认按内容自动判定文本/二进制；不做任何换行转换，避免检出一个文件就改动全仓库。
+* text=auto eol=lf
+
+# Windows 脚本必须保持 CRLF。
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Gradle wrapper 的可执行位在 Unix 上必须保留（gradlew 是 shell 脚本）。
+gradlew text eol=lf
+
+# 二进制资源：不参与 diff，也不做换行归一。
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ttf binary
+*.jar binary
+*.jks binary
+*.keystore binary
+
+# 生成物与锁文件：折叠进 diff，避免污染代码审阅。
+*.bin binary
+*.lock -diff

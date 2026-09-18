@@ -1,0 +1,8 @@
+<!--
+  自适应图标背景。纯色，刻意不用渐变：VectorDrawable 的 <gradient> 只从 API 24 起支持，
+  虽然自适应图标本身要 API 26+（所以其实是安全的），但纯色能让转换与排查都更简单，
+  视觉上也更稳。深靛蓝也与上游的品红/红完全区分开。
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108">
+  <path fill="#233A6B" d="M0,0h108v108h-108z"/>
+</svg>
