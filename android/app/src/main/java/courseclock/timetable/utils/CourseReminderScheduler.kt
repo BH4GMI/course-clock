@@ -63,7 +63,7 @@ import java.util.Locale
  * **把小部件的日期刷成新的今天**、**把滚动窗口向前滚一天并清掉已过期的闹钟**。
  *
  * 但"杂务"不等于"可以用非精确闹钟"。这里原先写着"正因为无害，它才配用非精确的 `set`，
- * 不为它付一次强制唤醒" —— 这句话在真机上被证伪：这台 Xiaomi/HyperOS 设备给非精确闹钟加
+ * 不为它付一次强制唤醒" —— 这句话在真机上被证伪：这台 HyperOS 3.0 真机给非精确闹钟加
  * 了一条 MIUI 私有的 `power_pending` 策略，把 `whenElapsed` 统一改成 `requester + 3 天`，
  * 于是"省下的那次唤醒"变成"这枚闹钟根本没在 00:05 响过"，跨天闭环整个断掉。
  * 实测数据见 [setExact]。一天多一枚精确唤醒换回闭环真的成立，这笔账是划算的。
@@ -330,7 +330,7 @@ object CourseReminderScheduler {
         // 下课倒计时只保留下一次该变的那一刻。它与上面两枚互不相干，所以放在最后单独接。
         armNextCountdownRefresh(appContext)
 
-        // 把 API 级别一并打出来：这台设备（Xiaomi/HyperOS，装有 LSPosed）的 `getprop` 报
+        // 把 API 级别一并打出来：这台设备（HyperOS 3.0，装有 LSPosed）的 `getprop` 报
         // ro.build.version.sdk=21、release=6.0.1，与它真实的框架版本矛盾（而且它连
         // ro.build.fingerprint 都查不到）。而 SDK_INT 决定了下面用 setExactAndAllowWhileIdle
         // 还是降级的 setExact —— 后者在 Doze 下会被推迟，正是本类要根治的那个缺陷。
@@ -493,7 +493,7 @@ object CourseReminderScheduler {
      *
      * ## 为什么"精确"不是优化，而是能不能响的前提（真机实证）
      *
-     * 这台设备（HyperOS 3.0 真机，2026-09-15 采集）的 `dumpsys alarm` 里，每条闹钟
+     * 这台设备（HyperOS 3.0，2026-09-15 采集）的 `dumpsys alarm` 里，每条闹钟
      * 都多打印一行 MIUI 私有的 `policyWhenElapsed`，其中 `power_pending` 是本类闹钟被推迟的元凶。
      * 最终 `whenElapsed` 取各策略的最大值，所以只要 `power_pending` 更大，原定时刻就被丢掉：
      *

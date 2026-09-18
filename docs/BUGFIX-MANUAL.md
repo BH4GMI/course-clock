@@ -2,7 +2,7 @@
 
 ## 2026-09-19：空状态（无课表）下主界面入口必崩
 
-- 触发：全新安装（或把课表删光）后，首页右下角「+」一点即崩——真机（Android 15 / HyperOS）
+- 触发：全新安装（或把课表删光）后，首页右下角「+」一点即崩——真机（HyperOS 3.0）
   实测 `kotlin.UninitializedPropertyAccessException: lateinit property table has not been
   initialized`，崩溃点 `ScheduleActivity.initEvent` 的 addBtn 监听。这是发布前实机验证发现的
   缺陷，与 R8 无关（同一行为在未混淆构建上同样存在）。
@@ -705,7 +705,7 @@ A 楼是「3」与「4-5」、B/C 楼是「3-4」与「5」，连格形状还不
 - **调用点**：`ScheduleFragment`（`viewModel.courseTimes`，`initView` 里先赋值的，
   早于 ViewPager 建视图）与 `ScheduleAppWidgetService`（`times`，非 lateinit，空表等同旧观感）。
 - **验证**：`SessionGridLineTest` 6 项（A/B/C 三套方案逐节钉住 + 用户报的 1-2 用例 +
-  自定义作息不吞线 + 无数据不吞线）；真机（Redmi/1220×2656）实机截图核对：
+  自定义作息不吞线 + 无数据不吞线）；真机（HyperOS 3.0，1220×2656）实机截图核对：
   1-2、3-4、6-7、8-9、10-11、12-13 之间**没有**横线，只在 2\|3、4\|5、5\|6、7\|8、9\|10 有。
 
 ### 12-4 核查通过、**不需要动**的部分（真实数据佐证）
@@ -1620,7 +1620,8 @@ R8 会改名、会删类、会内联分支，"源码里修好了"并不等于"�
 
 ### 25-1 拿不到发布口令时，怎么出一个可装机的 release 包
 
-`android/keystore.properties` 指向真实发布密钥库（`<发布密钥库路径，只存在于本机 android/keystore.properties>`），
+`android/keystore.properties` 指向本机的真实发布密钥库（该文件已被 `.gitignore` 排除，路径只写在
+本机那一份里，仓库与文档都不记录——密钥库必须在仓库树外，相对路径无从指向它），
 口令只在环境变量里。**没有口令就不该出发布包，更不该去要口令**。而验收要的是"R8 处理过的包"，
 不是"发布者那张证书"，所以走的是调试库：
 

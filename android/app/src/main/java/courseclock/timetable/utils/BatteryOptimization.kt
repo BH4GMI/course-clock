@@ -15,7 +15,7 @@ import android.provider.Settings
  * ## 为什么这个 App 必须管这件事（真机实测）
  *
  * 提醒走的是 `AlarmManager.setExactAndAllowWhileIdle`。按 AOSP 的设计，这类闹钟在 Doze 里
- * 也能送达，只受一个"每小时若干次"的配额限制。但在这台 Xiaomi/HyperOS 上实测不是这样：
+ * 也能送达，只受一个"每小时若干次"的配额限制。但在这台 HyperOS 3.0 真机上实测不是这样：
  *
  * ```
  * RTC_WAKEUP ... courseclock.timetable      tag=*walarm*:WAKEUP_REFRESH_TODAY

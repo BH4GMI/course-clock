@@ -29,10 +29,10 @@ import org.robolectric.annotation.GraphicsMode
  * 分层 URI。在真机（POSIX）上这得到 `file:///data/user/0/...`，是对的；在 Windows 测试宿主上
  * 得到的是 `file://C%3A%5CUsers%5C...` —— 整条绝对路径落在 **authority** 里，
  * `Uri.parse(...).getPath()` 返回**空串**，于是 `BitmapFactory.decodeFile("")` 解不出图、
- * `File("")` 找不到文件。实测输出：
+ * `File("")` 找不到文件。实测输出（用户名为占位，已脱敏）：
  *
  * ```
- * spec=file://C%3A%5CUsers%5C<本机用户名>%5C...%5Cbackground-source....png
+ * spec=file://C%3A%5CUsers%5C%3C本机用户名%3E%5C...%5Cbackground-source....png
  * Uri.parse(spec).path=          (空)
  * ```
  *
