@@ -135,7 +135,7 @@
 | PendingIntent 工厂"取或建"，永不返回 null | `nextDayPendingIntent` 等 | `FLAG_NO_CREATE` 版本曾导致全新安装每次重排都 NPE（类文档） |
 | 默认作息分组固定 B 方案，不随选课楼栋漂移 | `SuesEamsImporter.DEFAULT_SCHEME` | 左侧时间栏是学校公布的固定作息，不是统计结果 |
 | 课块行距全 App 唯一来源 | `ScheduleUI.rowGap` | 两处各算 2dp 曾导致每节多偏 1px 的真机 bug |
-| 统一身份认证证书告警必须用户决定，绝不静默放行 | `WebViewLoginFragment.onReceivedSslError` | 放行等于把密码暴露给中间人 |
+| 统一身份认证证书无效时取消连接，不提供绕过入口 | `WebViewLoginFragment.onReceivedSslError` | 遵循 WebView 官方要求，避免凭据经过不可信连接 |
 | 勾选复选框/点"跳过"只做不涉及凭据的小事，登录永远由用户本人完成 | `suesHandleCasLoginPage` 等 | 产品隐私边界（README 已对外承诺） |
 | 刷新小部件只能走 `AppWidgetManager.updateAppWidget`，不能自发 `APPWIDGET_UPDATE` 广播 | `AppWidgetUtils.refreshAllWidgets` 文档 | 受保护广播，自发自拒且静默失效（真机日志在注释里） |
 | 日视图一条列表绑头部那一天，不做 ViewFlipper 动画 | `refreshTodayWidget` 文档 | 动画版曾出"日期与内容对不上"的两个真机 bug |

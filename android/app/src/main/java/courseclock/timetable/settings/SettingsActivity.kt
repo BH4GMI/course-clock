@@ -311,22 +311,7 @@ class SettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDial
     private fun onHorizontalItemClick(item: HorizontalItem, position: Int, rowView: View) {
         when (item.id) {
             SettingRowId.BATTERY_UNRESTRICTED -> {
-                if (settingsList.batteryGranted()) {
-                    // 已经豁免时不要再弹系统框：那个框只在"还没豁免"时有意义，再点一次
-                    // 系统会直接忽略，用户会以为按钮坏了。
-                    MaterialAlertDialogBuilder(this)
-                            .setTitle("后台运行已设置")
-                            .setMessage("系统已经允许课钟在后台运行，上课提醒可以按时响。\n\n" +
-                                    "如果之后提醒又开始不准时，可以回到这里重新设置一遍。")
-                            .setPositiveButton("重新设置") { _, _ ->
-                                getPrefer().edit { putBoolean(Const.KEY_HYPEROS_BATTERY_CONFIRMED, false) }
-                                refreshBatteryRow()
-                                requestBatteryWhitelist()
-                            }
-                            .setNegativeButton("关闭", null).show()
-                } else {
-                    requestBatteryWhitelist()
-                }
+                requestBatteryWhitelist()
             }
             SettingRowId.CURRENT_TABLE -> {
                 launch {

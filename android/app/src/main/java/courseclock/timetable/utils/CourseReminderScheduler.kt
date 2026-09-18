@@ -330,11 +330,13 @@ object CourseReminderScheduler {
         // 下课倒计时只保留下一次该变的那一刻。它与上面两枚互不相干，所以放在最后单独接。
         armNextCountdownRefresh(appContext)
 
-        // 把 API 级别一并打出来：这台设备（HyperOS 3.0，装有 LSPosed）的 `getprop` 报
-        // ro.build.version.sdk=21、release=6.0.1，与它真实的框架版本矛盾（而且它连
-        // ro.build.fingerprint 都查不到）。而 SDK_INT 决定了下面用 setExactAndAllowWhileIdle
-        // 还是降级的 setExact —— 后者在 Doze 下会被推迟，正是本类要根治的那个缺陷。
-        // 日志里留一份自证，比事后猜可靠。
+        // 把 API 级别一并打出来：这台设备（HyperOS 3.0，装有 LSPosed 类兼容模块）在 **shell 里**
+        // `getprop ro.build.version.sdk` / `release` 报 21 / 6.0.1 —— 那是模块改写出来的兼容值，
+        // 不是框架真身，排查时按它判断会得出错误结论。App 进程内读到的是真值，本行日志即自证：
+        // SDK_INT=36、release=16；与 ro.system/ro.vendor.build.version.sdk=36、
+        // ro.build.fingerprint（`…/pandora:16/…`）三者一致。
+        // SDK_INT 决定了下面用 setExactAndAllowWhileIdle 还是降级的 setExact —— 后者在 Doze 下
+        // 会被推迟，正是本类要根治的那个缺陷，所以这里必须留一份不依赖 shell 的自证。
         appContext.getPrefer().edit().putLong(KEY_LAST_RESCHEDULE_AT, System.currentTimeMillis()).apply()
 
         Log.i(TAG, "重排完成：课程提醒 $registered 枚，跨天闹钟 1 枚（${format(nextDayAt)}）" +

@@ -44,6 +44,9 @@ interface CourseDao {
     @Query("select * from coursebasebean natural join coursedetailbean where tableId = :tableId")
     suspend fun getCourseOfTable(tableId: Int): List<CourseBean>
 
+    @Query("select * from coursebasebean natural join coursedetailbean where tableId = :tableId")
+    fun getCourseOfTableLiveData(tableId: Int): LiveData<List<CourseBean>>
+
     @Query("select * from coursebasebean natural join coursedetailbean where day = :day and tableId = :tableId")
     fun getCourseByDayOfTableLiveData(day: Int, tableId: Int): LiveData<List<CourseBean>>
 

@@ -86,7 +86,7 @@ class SettingsList(private val context: Context) {
         // 后台运行已设置」之间改名，同一行三个名字，用户下次根本找不到自己在看的是哪一条。
         // 状态改由右侧的值承担（「未设置 / 还需一步 / 已设置」）。
         batteryItem = HorizontalItem(SettingRowId.BATTERY_UNRESTRICTED, "后台运行不受限制",
-                batteryStateText(), desc = "不设置的话，手机待机久了提醒可能不响", arrow = NAVIGATE)
+                batteryStateText(), desc = "减少待机时提醒延迟", arrow = NAVIGATE)
         items += batteryItem!!
         items += gated(SwitchItem(SettingRowId.REMINDER_START, "上课提醒", reminderStart(),
                 "上课前提醒一次"))

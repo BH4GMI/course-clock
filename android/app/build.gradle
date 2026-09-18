@@ -135,8 +135,8 @@ android {
         minSdk 21
         targetSdk 29
         // 新包名即新血统：不继承上游的 90 / 3.621，从 1 / 1.0 起算。
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.1"
         // 依赖/单测：Robolectric 让单测拿到真的 Context / AlarmManager / NotificationManager
         // ——提醒链路里那些需要真 Context 的缺陷纯函数单测碰不到，只有真机跑才暴露。
         // 版本依据官方兼容表：4.16 支持 API 23→36；测试用 @Config(sdk = [29]) 与 targetSdk 对齐。

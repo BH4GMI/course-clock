@@ -10,6 +10,7 @@ import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Looper
 import android.os.PowerManager
+import android.provider.Settings
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
@@ -59,6 +60,25 @@ class SettingsSystemActionsTest {
                 View.MeasureSpec.makeMeasureSpec(2400, View.MeasureSpec.EXACTLY))
         recycler.layout(0, 0, 1080, 2400)
         assertTrue(recycler.findViewHolderForAdapterPosition(position)!!.itemView.performClick())
+    }
+
+    @Test
+    fun 已完成后台设置时再次点击打开系统电池优化列表() {
+        context.getPrefer().edit().clear()
+                .putBoolean(Const.KEY_HYPEROS_BATTERY_CONFIRMED, true).commit()
+        register(BatteryOptimization.miuiIntent(context), "com.miui.securitycenter", "VendorBattery")
+        val power = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        shadowOf(power).setIgnoringBatteryOptimizations(context.packageName, true)
+        val controller = Robolectric.buildActivity(SettingsActivity::class.java).setup()
+        val activity = controller.get()
+        click(activity, SettingRowId.BATTERY_UNRESTRICTED)
+        val started = shadowOf(activity).nextStartedActivityForResult
+        assertNotNull("已授权时仍应有可打开的系统设置入口", started)
+        assertEquals(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS, started.intent.action)
+        assertEquals("com.android.settings", started.intent.`package`)
+        assertNull("优化列表不接收单个应用的 package URI", started.intent.data)
+        controller.pause().stop().destroy()
+        shadowOf(power).setIgnoringBatteryOptimizations(context.packageName, false)
     }
 
     @Test

@@ -1,6 +1,7 @@
 package courseclock.timetable
 
 import android.content.Context
+import android.app.Application
 import android.database.sqlite.SQLiteDatabase
 import androidx.test.core.app.ApplicationProvider
 import java.io.File
@@ -31,10 +32,10 @@ private object LegacyDb {
         // 就白做了 —— 用例会以"旧数据还在"的形式假红（实测：整包一起跑时它数到的是别的用例
         // 留下的 tablebean，单独跑就正常）。关掉之后下一次取库才会真的重新走一遍版本判定，
         // 也就是这条用例要验的东西。
-        runCatching { AppDatabase.getDatabase(context).close() }
+        AppDatabase.getDatabase(context).close()
         val file: File = context.getDatabasePath("wakeup")
         file.parentFile?.mkdirs()
-        file.delete()
+        context.deleteDatabase("wakeup")
         SQLiteDatabase.openOrCreateDatabase(file, null).use { db ->
             db.execSQL("CREATE TABLE room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
             db.execSQL("INSERT INTO room_master_table (id, identity_hash) VALUES (42, 'legacy-hash')")
@@ -54,7 +55,7 @@ private object LegacyDb {
 }
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [29])
+@Config(sdk = [29], application = Application::class)
 class DatabaseUpgradeFromOldVersionTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -73,7 +74,7 @@ class DatabaseUpgradeFromOldVersionTest {
 }
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [29])
+@Config(sdk = [29], application = Application::class)
 class DatabaseDowngradeFromNewerVersionTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()

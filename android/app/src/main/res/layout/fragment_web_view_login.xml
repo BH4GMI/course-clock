@@ -86,9 +86,10 @@
             tools:text="点右下角按钮读取" />
 
         <!--
-            自动脚本接管导航时的遮罩：必须放在这一层容器的最后，才能盖住页面与右下角按钮并吞掉触摸。
-            只在脚本真正开始跳转之后显示；登录页绝不显示，否则用户自己也没法输密码、没法过人机验证。
-            遮罩上永远有停止按钮，不允许把用户锁死在自动流程里。
+            自动脚本接管时的遮罩：必须放在这一层容器的最后，才能盖住页面与右下角按钮并吞掉触摸。
+            只在脚本真正开始接管之后显示。登录输入阶段绝不显示（否则用户没法输密码）；
+            滑块自动验证阶段会在确认要自动拖的那一刻显示（那时用户已无事可做），
+            失败时立刻撤掉，把滑块交回给用户手动拖。遮罩上永远有停止按钮，不允许把用户锁死。
         -->
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/ll_auto_mask"
@@ -104,6 +105,7 @@
             android:visibility="gone">
 
             <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_auto_mask_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"

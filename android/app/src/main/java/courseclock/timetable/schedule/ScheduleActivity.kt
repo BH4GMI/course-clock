@@ -21,6 +21,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.app.ShareCompat
 import androidx.core.content.edit
 import androidx.core.view.GravityCompat
+import androidx.core.view.doOnLayout
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.viewpager.widget.ViewPager
@@ -43,7 +44,6 @@ import courseclock.timetable.schedule_settings.ScheduleSettingsActivity
 import courseclock.timetable.settings.SettingsActivity
 import courseclock.timetable.utils.*
 import es.dmoral.toasty.Toasty
-import kotlinx.coroutines.delay
 import splitties.activities.start
 import splitties.dimensions.dip
 import splitties.resources.styledDimenPxSize
@@ -820,15 +820,6 @@ class ScheduleActivity : BaseActivity() {
                 }, dip(48), dip(48))
             }
 
-            launch {
-                delay(1000)
-                // selectedWeek 为 0 表示尚未设置开学日期，此时没有对应周次的按钮，不能去 check(0)
-                if (viewModel.selectedWeek > 0 && ui.weekToggleGroup.checkedButtonId != viewModel.selectedWeek) {
-                    checkWeekSilently(viewModel.selectedWeek)
-                }
-                ui.weekScrollView.smoothScrollTo(if (viewModel.selectedWeek > 4) (viewModel.selectedWeek - 4) * dip(56) else 0, 0)
-            }
-
             ui.weekDayView.text = CourseUtils.getWeekday()
 
             initTheme()
@@ -842,6 +833,11 @@ class ScheduleActivity : BaseActivity() {
             viewModel.alphaInt = (255 * (viewModel.table.itemAlpha.toFloat() / 100)).roundToInt()
 
             initViewPage(viewModel.table.maxWeek, viewModel.table)
+            checkWeekSilently(ui.viewPager.currentItem + 1)
+            ui.weekScrollView.doOnLayout {
+                val week = ui.viewPager.currentItem + 1
+                ui.weekScrollView.scrollTo(if (week > 4) (week - 4) * dip(56) else 0, 0)
+            }
 
             // 先摘掉上一轮的观察者再重挂：initView 每次都会新建 LiveData（查询里带了新的
             // tableId），旧 LiveData 上的观察者不摘就会一直活着，按调用次数线性堆积。

@@ -38,9 +38,14 @@ class TimeSettingsFragment : BaseFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_time_settings, container, false)
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val recyclerView = view.findViewById<RecyclerView>(R.id.rv_time_detail)
         initAdapter(recyclerView)
-        viewModel.getTimeData(viewModel.timeTableList[position].id).observe(this, Observer {
+        viewModel.getTimeData(viewModel.timeTableList[position].id).observe(viewLifecycleOwner, Observer {
             if (it == null) return@Observer
             if (it.isEmpty()) {
                 launch {
@@ -52,7 +57,6 @@ class TimeSettingsFragment : BaseFragment() {
                 recyclerView.adapter?.notifyDataSetChanged()
             }
         })
-        return view
     }
 
     private fun initAdapter(recyclerView: RecyclerView) {

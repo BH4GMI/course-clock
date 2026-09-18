@@ -19,18 +19,13 @@ abstract class AppDatabase : RoomDatabase() {
         private var INSTANCE: AppDatabase? = null
 
         fun getDatabase(context: Context): AppDatabase {
-            // 单例可能**已经被关掉过**：`RoomDatabase.close()` 不会把 INSTANCE 置空，而把它继续
-            // 交出去，下一个使用者第一句查询就会抛
-            // "Cannot perform this operation because the connection pool has been closed."，
-            // 并且这个坏状态会一直留在进程里 —— 之后每一次取库拿到的都是同一个死实例。
-            // 单例的契约是"给我一个能用的库"，所以这里用 Room 自己的 `isOpen()` 判活，死了就重建。
-            // （`Room.databaseBuilder().build()` 会**立刻**打开库，所以刚建出来的实例 `isOpen()` 就是真，
-            //  不会出现"还没查过就被判死、于是每次调用都重建"的问题。）
+            // Room 首次查询时才打开连接；isOpen=false 也可能只是尚未查询，不能据此重建。
+            // 实例由 close() 显式释放，启动时的观察者、提醒和界面始终共享同一个库。
             val current = INSTANCE
-            if (current != null && current.isOpen) return current
+            if (current != null) return current
             return synchronized(AppDatabase::class.java) {
                 val existing = INSTANCE
-                if (existing != null && existing.isOpen) {
+                if (existing != null) {
                     existing
                 } else {
                     Room.databaseBuilder(context.applicationContext,
@@ -45,6 +40,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+    }
+
+    override fun close() {
+        synchronized(AppDatabase::class.java) {
+            super.close()
+            if (INSTANCE === this) INSTANCE = null
+        }
     }
 
     abstract fun courseDao(): CourseDao

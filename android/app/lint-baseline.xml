@@ -1071,17 +1071,6 @@
     <issue
         id="FragmentLiveDataObserve"
         message="Use viewLifecycleOwner as the LifecycleOwner."
-        errorLine1="        viewModel.getTimeData(viewModel.timeTableList[position].id).observe(this, Observer {"
-        errorLine2="                                                                            ~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/TimeSettingsFragment.kt"
-            line="43"
-            column="77"/>
-    </issue>
-
-    <issue
-        id="FragmentLiveDataObserve"
-        message="Use viewLifecycleOwner as the LifecycleOwner."
         errorLine1="        viewModel.getTimeTableList().observe(this, Observer {"
         errorLine2="                                             ~~~~">
         <location
@@ -1440,28 +1429,6 @@
             file="src/main/AndroidManifest.xml"
             line="113"
             column="10"/>
-    </issue>
-
-    <issue
-        id="WebViewClientOnReceivedSslError"
-        message="Permitting connections with SSL-related errors could allow eavesdroppers to intercept data sent by your app, which impacts the privacy of your users. Consider canceling the connections by invoking `SslErrorHandler#cancel()`."
-        errorLine1="                            handler.proceed()"
-        errorLine2="                            ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_import/WebViewLoginFragment.kt"
-            line="121"
-            column="29"/>
-    </issue>
-
-    <issue
-        id="WebViewClientOnReceivedSslError"
-        message="Permitting connections with SSL-related errors could allow eavesdroppers to intercept data sent by your app, which impacts the privacy of your users. Consider canceling the connections by invoking `SslErrorHandler#cancel()`."
-        errorLine1="                            handler.proceed()"
-        errorLine2="                            ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_import/WebViewLoginFragment.kt"
-            line="121"
-            column="29"/>
     </issue>
 
     <issue

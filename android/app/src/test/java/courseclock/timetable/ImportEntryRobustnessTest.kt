@@ -1,6 +1,11 @@
 package courseclock.timetable
 
 import android.content.Intent
+import android.net.http.SslCertificate
+import android.net.http.SslError
+import android.webkit.SslErrorHandler
+import android.webkit.WebView
+import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import courseclock.timetable.schedule_import.LoginWebActivity
 import courseclock.timetable.schedule_import.WebViewLoginFragment
@@ -11,6 +16,8 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadow.api.Shadow
 
 /**
  * 导入**入口**的健壮性：两处都曾经是"回调/参数来得不是时候就崩"。
@@ -25,6 +32,23 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [29])
 class ImportEntryRobustnessTest {
+
+    @Test
+    fun 登录证书无效时取消连接且不给出绕过入口() {
+        val intent = Intent(ApplicationProvider.getApplicationContext(), LoginWebActivity::class.java)
+                .putExtra("import_type", "sues").putExtra("url", "https://vpn.example/")
+        val controller = Robolectric.buildActivity(LoginWebActivity::class.java, intent).setup()
+        val activity = controller.get()
+        val webView = activity.findViewById<WebView>(R.id.wv_course)
+        val handler = Shadow.newInstanceOf(SslErrorHandler::class.java)
+        val error = SslError(SslError.SSL_UNTRUSTED,
+                Shadow.newInstanceOf(SslCertificate::class.java), "https://vpn.example/")
+        shadowOf(webView).webViewClient.onReceivedSslError(webView, handler, error)
+        assertTrue(shadowOf(handler).wasCancelCalled())
+        assertFalse(shadowOf(handler).wasProceedCalled())
+        assertTrue(activity.findViewById<TextView>(R.id.tv_auto_hint).text.contains("证书验证失败"))
+        controller.pause().stop().destroy()
+    }
 
     @Test
     fun 视图销毁之后探测入口不再触碰视图() {

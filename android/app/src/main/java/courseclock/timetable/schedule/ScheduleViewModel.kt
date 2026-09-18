@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.map
+import androidx.lifecycle.distinctUntilChanged
 import biweekly.Biweekly
 import biweekly.ICalVersion
 import biweekly.ICalendar
@@ -66,6 +68,8 @@ class ScheduleViewModel(application: Application) : AndroidViewModel(application
     var alphaInt = 225
     val tableSelectList = arrayListOf<TableSelectBean>()
     val allCourseList = Array(7) { MutableLiveData<List<CourseBean>>() }
+    private var observedTableId: Int? = null
+    private var observedCourses: LiveData<List<CourseBean>>? = null
     val daysArray = arrayOf("日", "一", "二", "三", "四", "五", "六", "日")
     var currentWeek = 1
 
@@ -97,7 +101,17 @@ class ScheduleViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun getRawCourseByDay(day: Int, tableId: Int): LiveData<List<CourseBean>> {
-        return courseDao.getCourseByDayOfTableLiveData(day, tableId)
+        return coursesOfTable(tableId).map { courses -> courses.filter { it.day == day } }
+                .distinctUntilChanged()
+    }
+
+    // 七天与所有预加载周共用 Room 的同一个观察查询，避免每个消费者各查一次数据库。
+    private fun coursesOfTable(tableId: Int): LiveData<List<CourseBean>> {
+        if (observedTableId != tableId || observedCourses == null) {
+            observedCourses = courseDao.getCourseOfTableLiveData(tableId)
+            observedTableId = tableId
+        }
+        return requireNotNull(observedCourses)
     }
 
     /**
@@ -150,11 +164,10 @@ class ScheduleViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun getShowCourseNumber(week: Int): LiveData<Int> {
-        return if (table.showOtherWeekCourse) {
-            courseDao.getShowCourseNumberWithOtherWeek(table.id, week)
-        } else {
-            courseDao.getShowCourseNumber(table.id, week)
-        }
+        val showOtherWeek = table.showOtherWeekCourse
+        return coursesOfTable(table.id).map { courses ->
+            courses.count { if (showOtherWeek) it.endWeek >= week else it.inWeek(week) }
+        }.distinctUntilChanged()
     }
 
     suspend fun deleteCourseBean(courseBean: CourseBean) {

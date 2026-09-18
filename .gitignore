@@ -43,3 +43,7 @@ device_db/
 
 # 例外：测试夹具是构建输入，必须入库，不能被上面那条规则吞掉。
 !android/app/src/test/resources/*.wakeup_schedule
+
+# 滑块求解器全语料对拍用的临时夹具（162 个文件，只在本机跑，不入库）。
+# 注意：gitignore 不支持行内注释——注释必须单独占一行，否则整行（连注释）都会被当成模式。
+android/app/src/test/resources/sues_captcha_full/

@@ -277,8 +277,9 @@
 ## 2026-09-17：HyperOS / AOSP 后台权限分步设置与小部件入口
 
 - 电池入口：检测 HyperOS 电池管理处理器后，首次点击“后台运行不受限制”明确打开 `com.miui.securitycenter` 的应用电池管理；返回后由用户确认已设“无限制”。厂商没有公开查询接口，确认记录仅表示用户完成该步骤，不代表 AOSP 授权。
-- 第二步：厂商步骤完成后显示“加入 AOSP 白名单”，明确向 `com.android.settings` 发出 `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`，避免 HyperOS 的高优先级处理器截获；不可用时退回 Android 设置的电池优化列表，再失败则给出提示。
-- 状态：AOSP 是否加入只查 `PowerManager.isIgnoringBatteryOptimizations`，不再使用历史 `battery_whitelist_confirmed` 或 Activity 结果码推断。返回前台重新查询，系统撤销授权后恢复申请入口。新偏好 `hyperos_battery_confirmed` 仅保存厂商步骤的人工确认，`hyperos_battery_pending` 保留待确认的返回流程。完成后可通过“重新设置”再次进入。
+- 第二步（2026-09-19 更新）：厂商步骤确认后，行名仍为“后台运行不受限制”。再次点击明确交给 `com.android.settings`，未获豁免时发出 `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`，已获豁免时发出 `IGNORE_BATTERY_OPTIMIZATION_SETTINGS` 打开优化列表；不再以“已设置”对话框阻断入口。授权页不可用时退回优化列表，再失败则提示。下方说明精简为“减少待机时提醒延迟”。
+- 状态：AOSP 是否加入只查 `PowerManager.isIgnoringBatteryOptimizations`，不再使用历史 `battery_whitelist_confirmed` 或 Activity 结果码推断。返回前台重新查询，系统撤销授权后恢复申请入口。新偏好 `hyperos_battery_confirmed` 仅保存厂商步骤的人工确认，`hyperos_battery_pending` 保留待确认的返回流程。
+- 依据：2026-09-19 在线核对 [AOSP RequestIgnoreBatteryOptimizations](https://android.googlesource.com/platform/packages/apps/Settings/+/refs/heads/main/src/com/android/settings/fuelgauge/RequestIgnoreBatteryOptimizations.java)，已获豁免时该 Activity 直接 `finish()`。采用平台现有的授权页/管理列表两个入口，无新增依赖。新增真实设置行点击回归测试，修复前失败；本次不做真机实测。
 - 小部件：默认桌面为 `com.miui.home` 且注册了 `widget://picker` 时，按钮直接打开 `com.miui.personalassistant` 的小部件中心，提示搜索课钟或进入安卓小部件。其他桌面继续使用标准 pin 请求；没有支持、请求失败或确认窗口未出现时提供明确提示及返回桌面入口。请求返回 true 仅表示接收请求，只有实际回调才能表示添加完成。**（已废弃：这条入口在 2026-09-17 晚被整体移除，原因与删除清单见文末「26.」——厂商桌面要么不支持 pin，要么接受请求却既不出确认框也不落实例，剩下的路都是把用户丢进第三方列表。）**
 - 设备核对仅使用 ADB 包管理查询：这台手机默认电池请求由 `com.miui.securitycenter` 优先处理，同时注册了 `com.android.settings/.fuelgauge.RequestIgnoreBatteryOptimizations`；`widget://picker` 可解析到 HyperOS 的 `PickerHomeActivity`。没有截图或自行检查渲染。
 - 回归：`SettingsSystemActionsTest` 覆盖设置行点击、厂商确认到 AOSP 的分步跳转、旧确认记录不误判、白名单撤销、HyperOS 小部件中心入口和其他桌面回退。无数据库或课表格式变更。
@@ -1178,7 +1179,7 @@ null/空、后果是崩溃还是静默失败" → 对最像真崩溃的写**临�
 - 两个小部件服务的 `lateinit table`：都有 `this::table.isInitialized` 守卫（没课表时出空图）。
 - `CourseReminderReceiver`：`when(action)` 对 null action 自然落空；提醒广播**再查一次总闸**处理
   "取消与派发之间"的竞态；重活走 `goAsync` + 协程；刷小部件包了 try/catch。
-- WebView 的 SSL 错误：弹框让用户决定，没有静默 `proceed()`。
+- WebView 的 SSL 错误（2026-09-19 更新）：取消连接并显示证书错误，不再提供 `proceed()` 入口。
 - `splitties` 里那些 `Fragment.context!!` 与 lint 报的 `context!!` 一族：都包在
   `lifecycleScope.launch { lifecycle.whenStarted { … } }` 里 —— 销毁时协程先取消，而 `context`
   变 null 发生在 `onDetach`（在 `onDestroy` 之后）→ 取不到 null（与 §20 同一结论）。

@@ -120,11 +120,14 @@ object BatteryOptimization {
 
     /**
      * 明确交给 Android 设置，避免 HyperOS 优先级更高的处理器截获。
-     * 结果码不代表授权；返回前台后重新调用 isExempt。返回值表示页面是否打开。
+     * 已豁免时打开优化列表，授权页会直接退出。结果码不代表授权；返回后重新查询。
      */
     @SuppressLint("BatteryLife")
     fun requestForResult(activity: Activity, requestCode: Int): Boolean {
-        val intent = aospIntent(activity)
+        val intent = if (isExempt(activity)) {
+            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                    .setPackage("com.android.settings")
+        } else aospIntent(activity)
         return try {
             activity.startActivityForResult(intent, requestCode)
             true

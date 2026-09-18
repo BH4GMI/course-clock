@@ -112,6 +112,46 @@ android/app/build/outputs/apk/release/app-release.apk
 
 ## 常见问题
 
+### 静态检查与回归
+
+在 `android` 目录执行 `./gradlew :app:lintDebug :app:testDebugUnitTest :app:assembleDebug`。
+Lint 使用现有 `lint-baseline.xml`，通过只表示没有未豁免的错误，不能视为历史问题已清零。
+详细结果见 `app/build/reports/lint-results-debug.html`；不要通过扩大基线或禁用规则消除告警。
+
+2026-09-19 本轮修复：
+
+- 作息编辑页在 `onViewCreated` 使用 `viewLifecycleOwner` 观察数据，防止视图重建后继续刷新旧列表。
+  `TimeSettingsLifecycleTest` 验证销毁、数据库修改、重建后旧列表不刷新且新列表获得最新数据。
+- 首页周次按钮在 ViewPager 定位后同步，滚动使用现有 AndroidX Core 1.12.0 的 `doOnLayout`，
+  不再固定等待一秒。此项减少人为等待，不代表完整课表加载耗时缩短一秒。
+- 登录 WebView 对无效证书一律 `cancel()`，停止自动流程并显示错误；
+  `ImportEntryRobustnessTest` 验证取消连接且不继续。移除对应的三条已修复 Lint 基线记录。
+
+采用依据：Android 官方 [Fragment 视图生命周期](https://developer.android.com/reference/androidx/fragment/app/Fragment#getViewLifecycleOwner())、
+[doOnLayout](https://developer.android.com/reference/kotlin/androidx/core/view/package-summary#doOnLayout(android.view.View,kotlin.Function1))、
+[WebViewClient 证书错误处理](https://developer.android.com/reference/android/webkit/WebViewClient#onReceivedSslError(android.webkit.WebView,android.webkit.SslErrorHandler,android.net.http.SslError))。
+复用现有 AndroidX 与平台 API，未新增依赖。仅本地验证，未进行真机实测。
+
+### 启动与课表加载验证
+
+数据库实例按创建/关闭生命周期复用，不用 `RoomDatabase.isOpen` 判断实例是否有效：
+Room 2.6.1 在首次查询前允许连接尚未打开。`DatabaseLifecycleTest` 覆盖首次查询前复用、
+关闭后重建以及旧引用重复关闭。
+
+首页七天课程与预加载周的空状态共用同一个 Room `LiveData` 整表查询，代替七次按天查询
+和每周一次计数查询；按天分发使用 AndroidX `distinctUntilChanged`，未变化的课程列不重绘。
+`ScheduleLoadingTest` 覆盖单双周、未来课程、空课表切换及删除后的刷新。未新增依赖，
+未改变数据库 schema、预加载范围或提醒机制。
+
+采用依据：[Room 官方异步查询文档](https://developer.android.com/training/data-storage/room/async-queries)。
+复用项目已有 Room 2.6.1 和 AndroidX LiveData；不引入新的缓存框架或轮询任务。
+
+2026-09-19 在已连接 Android 设备上的 debug 冷启动小样本：数据库修复前 `TotalTime`
+为 587 / 473 / 529 ms，修复后为 352 / 348 / 314 ms，中位数分别为 529 / 348 ms。
+测量命令为 `adb shell am start -S -W -n courseclock.timetable/.schedule.ScheduleActivity`。
+这组数字只反映首帧，不是完整课表可交互耗时；共享课程查询优化发生在该组测量之后，
+不能用这组结果宣称完整课表加载提升了相同比例。三次样本也不能排除设备负载和缓存的影响。
+
 **`gradlew` 报 “running scripts is disabled on this system”**
 用 `powershell -ExecutionPolicy Bypass -File ...` 调用 `coursetime/verify.ps1`，或先执行
 `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`。
