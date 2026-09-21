@@ -22,7 +22,15 @@ import courseclock.timetable.schedule_settings.ScheduleSettingsActivity
 import courseclock.timetable.settings.items.*
 import courseclock.timetable.utils.BatteryOptimization
 import courseclock.timetable.utils.Const
+import courseclock.timetable.utils.CourseReminderNotifier
 import courseclock.timetable.utils.CourseReminderScheduler
+import courseclock.timetable.utils.CourseNotificationSettings
+import courseclock.timetable.utils.AndroidLiveNotification
+import courseclock.timetable.utils.appScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import android.app.NotificationManager
 import courseclock.timetable.utils.getPrefer
 import courseclock.timetable.widget.colorpicker.ColorPickerFragment
 import splitties.dimensions.dip
@@ -83,7 +91,7 @@ class SettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDial
         // 列表第一组的组标题贴顶会显得挤，留出一点呼吸；卡片左右 16dp 的契约不受影响。
         mRecyclerView.setPadding(0, dip(4), 0, 0)
         // 从主界面「捷径 → 上课提醒」进来时直接定位到那一节，不把用户丢在列表顶部。
-        reminderSectionIndex = items.indexOfFirst { it is CategoryItem && it.title == "上课提醒" }
+        reminderSectionIndex = items.indexOfFirst { it is CategoryItem && it.title == "课程通知" }
                 .coerceAtLeast(0)
         if (intent.getStringExtra(EXTRA_SECTION) == SECTION_REMINDER) {
             mRecyclerView.scrollToPosition(reminderSectionIndex)
@@ -115,10 +123,6 @@ class SettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDial
         // 时机上容易让人以为"没保存上"的（要重启、要切页面、要下一次提醒），把时机写进
         // SettingsList 的行副标题里常驻显示，而不是每次都弹一条全宽的 Snackbar 挡住列表。
         when (item.id) {
-            SettingRowId.SCHEDULE_PRE_LOAD -> {
-                getPrefer().edit { putBoolean(Const.KEY_SCHEDULE_PRE_LOAD, isChecked) }
-                setSwitch(item, isChecked, rowView)
-            }
             SettingRowId.SCHEDULE_BLANK_AREA -> {
                 getPrefer().edit { putBoolean(Const.KEY_SCHEDULE_BLANK_AREA, isChecked) }
                 setSwitch(item, isChecked, rowView)
@@ -152,7 +156,7 @@ class SettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDial
                 // 改了总闸就必须立刻重排，否则要等下一次跨天闹钟才生效。重排要同步读三张表
                 // 再循环几百枚 PendingIntent，丢到协程里，不在主线程上等它
                 // （BaseActivity.launch 挂在生命周期上，页面销毁自动取消）。
-                launch { CourseReminderScheduler.reschedule(applicationContext) }
+                applyNotifications()
                 item.checked = isChecked
                 // 总闸一动，它下面依赖它的行的可用性要整体重算 —— 规则只在 SettingsList 里，
                 // 这里只负责"算完刷新"。刷新用整表通知：受影响的是跨多个位置的若干行，
@@ -164,27 +168,24 @@ class SettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDial
                     warnIfBatteryRestricted()
                 }
             }
-            SettingRowId.REMINDER_ON_GOING -> {
-                getPrefer().edit { putBoolean(Const.KEY_REMINDER_ON_GOING, isChecked) }
-                setSwitch(item, isChecked, rowView)
-                // 常驻通知对**下一次**提醒才变样，这个时机写在那行的副标题里，不弹窗。
-            }
             // 下面三个都在总闸之下，改完必须重排：关掉的类别要撤掉已注册的闹钟，
             // 开回来的类别要立刻补排，否则得等到下一次跨天。
             SettingRowId.REMINDER_START -> {
                 getPrefer().edit { putBoolean(CourseReminderScheduler.KEY_REMINDER_START_ENABLED, isChecked) }
                 setSwitch(item, isChecked, rowView)
-                launch { CourseReminderScheduler.reschedule(applicationContext) }
+                refreshDependencies()
+                applyNotifications()
             }
             SettingRowId.REMINDER_END -> {
                 getPrefer().edit { putBoolean(CourseReminderScheduler.KEY_REMINDER_END_ENABLED, isChecked) }
                 setSwitch(item, isChecked, rowView)
-                launch { CourseReminderScheduler.reschedule(applicationContext) }
+                refreshDependencies()
+                applyNotifications()
             }
             SettingRowId.REMINDER_MERGE -> {
                 getPrefer().edit { putBoolean(CourseReminderScheduler.KEY_REMINDER_MERGE_ENABLED, isChecked) }
                 setSwitch(item, isChecked, rowView)
-                launch { CourseReminderScheduler.reschedule(applicationContext) }
+                applyNotifications()
             }
         }
     }
@@ -210,6 +211,79 @@ class SettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDial
         rowView?.contentDescription = item.rowContentDescription
     }
 
+    private fun refreshDependencies() {
+        if (settingsList.refreshAvailability()) mAdapter.notifyDataSetChanged()
+    }
+
+    private fun applyNotifications() {
+        // 设置落盘后由进程级 IO 任务完成重排，离开页面不能取消已接受的用户操作。
+        appScope.launch {
+            try {
+                CourseReminderScheduler.reschedule(applicationContext)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                android.util.Log.e("CourseReminder", "通知设置已保存，但排程失败", e)
+                withContext(Dispatchers.Main) {
+                    android.widget.Toast.makeText(applicationContext,
+                            "通知设置已保存，但提醒排程失败，请重新进入设置重试并检查系统权限", android.widget.Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+        refreshNotificationHealth()
+    }
+
+    private var notificationHealth = "检查中"
+
+    private fun refreshNotificationHealth() {
+        launch {
+            val result = withContext(Dispatchers.IO) {
+                val enabled = NotificationManagerCompat.from(applicationContext).areNotificationsEnabled()
+                val reminder = CourseReminderNotifier.canPost(applicationContext, CourseReminderNotifier.CHANNEL_ID)
+                val status = CourseReminderNotifier.canPost(applicationContext, CourseReminderNotifier.ONGOING_CHANNEL_ID)
+                val focus = AndroidLiveNotification.availability(applicationContext).label
+                val headline = when {
+                    !CourseNotificationSettings.enabled(applicationContext) -> "应用内已关闭"
+                    !enabled -> "未生效：系统通知已关闭"
+                    !reminder || !status -> "部分通知受限"
+                    else -> "通知权限正常"
+                }
+                headline to "系统通知：${if (enabled) "允许" else "关闭"}\n" +
+                        "课程提醒渠道：${if (reminder) "允许" else "关闭"}\n" +
+                        "课程状态渠道：${if (status) "允许" else "关闭"}\n" +
+                        "Android 实时通知：$focus\n后台运行：${settingsList.batteryStateText()}"
+            }
+            notificationHealth = result.second
+            val index = items.indexOfFirst { it is HorizontalItem && it.id == SettingRowId.NOTIFICATION_HEALTH }
+            if (index >= 0) {
+                (items[index] as HorizontalItem).value = result.first
+                mAdapter.notifyItemChanged(index)
+            }
+            val soundIndex = items.indexOfFirst { it is HorizontalItem && it.id == SettingRowId.NOTIFICATION_SOUND }
+            if (soundIndex >= 0 && Build.VERSION.SDK_INT >= 26) {
+                val channel = (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
+                        .getNotificationChannel(CourseReminderNotifier.CHANNEL_ID)
+                (items[soundIndex] as HorizontalItem).value = when {
+                    channel == null || channel.importance == NotificationManager.IMPORTANCE_NONE -> "渠道已关闭"
+                    channel.sound == null && !channel.shouldVibrate() -> "静音"
+                    else -> "按系统设置"
+                }
+                mAdapter.notifyItemChanged(soundIndex)
+            }
+        }
+    }
+
+    private fun openNotificationSettings(channel: String? = null) {
+        val target = if (Build.VERSION.SDK_INT >= 26) {
+            Intent(if (channel == null) Settings.ACTION_APP_NOTIFICATION_SETTINGS else Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    .apply { channel?.let { putExtra(Settings.EXTRA_CHANNEL_ID, it) } }
+        } else Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, android.net.Uri.parse("package:$packageName"))
+        if (target.resolveActivity(packageManager) == null) {
+            mRecyclerView.longSnack("无法打开通知设置，请在系统设置中进入课钟的应用信息")
+        } else startActivity(target)
+    }
+
     /**
      * 通知权限被关掉时明确告诉用户「提醒不会出现」。
      *
@@ -229,8 +303,7 @@ class SettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDial
                 .setMessage("上课提醒是靠通知发出来的。现在通知权限是关闭状态，" +
                         "到了上课时间也不会有任何提醒。\n\n点下面的按钮到系统设置里重新打开。")
                 .setPositiveButton("去开启") { _, _ ->
-                    startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                            .putExtra(Settings.EXTRA_APP_PACKAGE, packageName))
+                    openNotificationSettings()
                 }
                 .setNegativeButton("稍后再说", null)
                 .show()
@@ -295,6 +368,8 @@ class SettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDial
         // 用户可能刚从系统那个确认框（或厂商的省电策略页）回来，状态文本要跟着变；
         // 列表本身不会重建。
         refreshBatteryRow()
+        refreshNotificationHealth()
+        appScope.launch { CourseReminderScheduler.refreshStatus(applicationContext) }
         if (getPrefer().getBoolean(Const.KEY_HYPEROS_BATTERY_PENDING, false)) {
             getPrefer().edit { putBoolean(Const.KEY_HYPEROS_BATTERY_PENDING, false) }
             MaterialAlertDialogBuilder(this)
@@ -310,6 +385,22 @@ class SettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDial
 
     private fun onHorizontalItemClick(item: HorizontalItem, position: Int, rowView: View) {
         when (item.id) {
+            "time_lab" -> courseclock.timetable.utils.CourseClock.openControls(this)
+            SettingRowId.REMINDER_ON_GOING -> {
+                val modes = CourseNotificationSettings.StatusMode.values()
+                ChoicePopup.show(rowView, modes.map { it.label }, CourseNotificationSettings.mode(this).ordinal) { picked ->
+                    getPrefer().edit { putString(CourseNotificationSettings.KEY_STATUS_MODE, modes[picked].name) }
+                    item.value = modes[picked].label
+                    mAdapter.notifyItemChanged(position)
+                    applyNotifications()
+                }
+            }
+            SettingRowId.NOTIFICATION_SOUND -> openNotificationSettings(CourseReminderNotifier.CHANNEL_ID)
+            SettingRowId.NOTIFICATION_HEALTH -> MaterialAlertDialogBuilder(this)
+                    .setTitle("通知与后台状态").setMessage(notificationHealth)
+                    .setPositiveButton("通知设置") { _, _ -> openNotificationSettings() }
+                    .setNeutralButton("后台设置") { _, _ -> requestBatteryWhitelist() }
+                    .setNegativeButton("关闭", null).show()
             SettingRowId.BATTERY_UNRESTRICTED -> {
                 requestBatteryWhitelist()
             }
@@ -422,13 +513,13 @@ class SettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDial
                         putInt(CourseReminderScheduler.KEY_REMINDER_BEFORE_START, valueInt)
                     }
                     // 提前量变了，已排的提醒时刻全部作废，必须立刻重排（丢协程，不占主线程）。
-                    launch { CourseReminderScheduler.reschedule(applicationContext) }
+                    applyNotifications()
                 }
                 SettingRowId.REMINDER_BEFORE_END -> {
                     getPrefer().edit {
                         putInt(CourseReminderScheduler.KEY_REMINDER_BEFORE_END, valueInt)
                     }
-                    launch { CourseReminderScheduler.reschedule(applicationContext) }
+                    applyNotifications()
                 }
             }
             item.valueInt = valueInt

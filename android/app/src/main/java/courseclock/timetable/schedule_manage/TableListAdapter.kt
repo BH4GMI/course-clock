@@ -1,9 +1,9 @@
 package courseclock.timetable.schedule_manage
 
 import android.graphics.Color
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.appcompat.widget.TooltipCompat
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import courseclock.timetable.R
@@ -19,7 +19,8 @@ import splitties.resources.styledColor
  * 调色板同源（getCustomizedColor 那套），视觉上能和「正在用这套课表」对得上。
  */
 class TableListAdapter(layoutResId: Int, data: MutableList<TableSelectBean>,
-                       private val courseCounts: Map<Int, Int>) :
+                       private val courseCounts: Map<Int, Int>,
+                       private val onActions: (TableSelectBean) -> Unit) :
         BaseQuickAdapter<TableSelectBean, BaseViewHolder>(layoutResId, data) {
 
     override fun convert(helper: BaseViewHolder, item: TableSelectBean?) {
@@ -48,13 +49,14 @@ class TableListAdapter(layoutResId: Int, data: MutableList<TableSelectBean>,
         helper.setText(R.id.tv_table_name, name)
         val count = courseCounts[item.id] ?: 0
         helper.setText(R.id.tv_table_subtitle, when {
-            count == 0 -> context.getString(R.string.table_empty_subtitle)
             isCurrent -> context.getString(R.string.table_current_subtitle, count)
+            count == 0 -> context.getString(R.string.table_empty_subtitle)
             else -> context.getString(R.string.table_courses_subtitle, count)
         })
-        helper.setVisible(R.id.tv_current_check, isCurrent)
-        helper.setVisible(R.id.iv_chevron, !isCurrent)
-        helper.getView<AppCompatImageView>(R.id.iv_chevron).setColorFilter(
-                context.styledColor(R.attr.colorOnBackground))
+        helper.getView<androidx.appcompat.widget.AppCompatImageButton>(R.id.btn_table_actions).apply {
+            contentDescription = context.getString(R.string.table_actions_description, name)
+            TooltipCompat.setTooltipText(this, context.getString(R.string.table_actions))
+            setOnClickListener { onActions(item) }
+        }
     }
 }

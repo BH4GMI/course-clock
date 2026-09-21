@@ -34,7 +34,7 @@ internal class AlphaPatternDrawable(rectangleSize: Int) : Drawable() {
     }
 
     override fun getOpacity(): Int {
-        return 0
+        return PixelFormat.OPAQUE
     }
 
     override fun setAlpha(alpha: Int) {

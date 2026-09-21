@@ -14,6 +14,66 @@
 
 ## 0. 总体结论
 
+### 2026-09-21：课程通知实现更新
+
+本节记录当前实现，取代旧版「连堂抑制下一课提醒」「通知跟随小组件每分钟更新」规则。
+
+- `CourseNotificationSettings` 保存用户意愿：总闸默认关；新安装上课偏好开、提前 20 分钟，
+  下课偏好关、提前 0 分钟；同时提醒合并默认开。升级保留旧开关，旧常驻开启迁移为仅通知栏。
+- `CourseReminderScheduler.Occurrence` 是提醒与状态共用的课程实例，含完整名称、教室、起止绝对时间。
+  下课墙钟早于上课按次日处理；起止相等或缺失作息不生成实例。昨日跨夜课、今日与次日均参与状态校验。
+  免听课不提醒，遵守学期、单双周和作息分组。合并只发生在相同触发时刻，不压掉或延后下一课。
+- 保留 `schedule_reminder` 高重要级、`schedule_ongoing` 低重要级两个既有渠道，不绕过系统声音设置。
+  普通通知展开保留每门课的完整名称、时段与教室，锁屏使用私密可见性及脱敏 `publicVersion`。
+  课前提醒开课失效，准点上课提醒最多五分钟且不超过下课，下课提醒结束后五分钟失效。
+  投递前重新校验当前课表及开关；持久记录清理已投递通知，跨午夜重复广播不会重新弹出。
+- 状态模式为关闭、自动（Android 实时通知）、仅通知栏。有有效的当前或未来课程时持续显示；课前显示
+  “距离上课 X 小时 Y 分钟”，分钟向上取整，跨日课程注明日期。正在上课显示当前所有冲突课程，
+  学期内无后续有效课程时撤销。课表和作息在同一 Room 事务中读取，每条安排只展开最近的未隐藏实例，
+  包含仍有效的隐藏实例供边界清理；遵守单双周、周日起始、学期范围、免听及跨午夜规则。
+  纯文字下一分钟刷新使用 `setExact(RTC)`，休眠时等待设备唤醒；课程起止边界独立排一枚
+  `RTC_WAKEUP`，不依赖文字刷新链续排，普通提醒保持原精度。API 24+ 继续用系统 Chronometer。
+  小组件仍独立刷新。隐藏本次持久到本次课程结束，下一次实例不受影响；系统 timeout 的 deleteIntent
+  依据展示有效期判定，不当成用户隐藏。总闸关、改课或换表立即重算、清理旧通知。
+- 自动模式使用 Android 16 `NotificationManager.canPostPromotedNotifications` 查询权限，声明
+  `POST_PROMOTED_NOTIFICATIONS`，通过官方 `EXTRA_REQUEST_PROMOTED_ONGOING` 请求提升同一条标准通知。
+  仅进行中的课程请求提升；未开始课程、低版本、未授权时保留标准通知。不再调用任何厂商焦点协议。
+  模拟时间不能使用系统真实倒计时，使用 `setShortCriticalText` 显示虚拟剩余分钟。
+- 设置的两个提前量分别依赖总闸及对应提醒开关；声音设置跳系统渠道页，权限状态与应用开关分开显示。
+  后台限制仍使用既有 `BatteryOptimization` 引导。无新增依赖、服务、root 要求或导出接收器。
+
+调研选型：保留现有 AndroidX Core 1.12.0、Gson 和 AlarmManager/NotificationManager；
+采用 [Android 原生 Live Updates 文档](https://developer.android.google.cn/develop/ui/views/notifications/live-update?hl=en)
+（2026-09-16 更新，2026-09-21 在线核验），compileSdk 36；minSdk 21、targetSdk 29 不变。
+标准 BigTextStyle、非最低重要级、ongoing、标题、非自定义布局满足基础展示约束，实际提升由系统决定。
+SDK 36.1 才导出 Java 常量 `EXTRA_REQUEST_PROMOTED_ONGOING`，当前 SDK 36 使用同一公开 extras 键
+`android.requestPromotedOngoing`，不反射方法、不伪造提升成功标志。课程状态由用户主动开启，且保留隐藏本次动作。
+
+历史故障：旧 HyperOS 适配缺少 `textButton[].actionTitle`，实机 `ModuleTextButton4ViewHolder`
+在 `Html.fromHtml` 路径空指针并反复重启 SystemUI。已备份测试包设置并退回 SHADE 止损。
+根据用户要求，不再保留修补后的厂商方案，而是彻底移除厂商实现与对应测试；新增 Android 16 原生请求、
+权限关闭、仅通知栏、未来课程不提升以及低版本回退测试。课表数据不因故障恢复而修改。
+未采用云推送（本地课表无须服务端）、前台服务（无持续任务）、私有 API 反射或 Hook。
+不将未来日历提醒提升为 Live Update，遵守官方使用场景要求。
+系统超时触发删除回调的依据为 [AOSP NotificationManagerService](https://github.com/aosp-mirror/platform_frameworks_base/blob/master/services/core/java/com/android/server/notification/NotificationManagerService.java) 的 `REASON_TIMEOUT` 路径。
+
+验证覆盖：迁移、开关依赖、同刻合并、冲突、跨夜、隐藏/超时区别、通知隐私、失效与去重、广播载荷及焦点参数。
+原生权限查询、提升请求与实际展示是不同验收，不能仅凭请求字段存在就宣称已提升；旧 Android 真机兼容性仍需独立设备验证。
+
+日视图课前超过 60 分钟显示“约 X.X 小时”，按向上取整的剩余分钟四舍五入到十分之一小时；
+例如 61 分钟为“约 1.0 小时”、90 分钟为“约 1.5 小时”、99 分钟为“约 1.7 小时”。
+60 分钟以内显示“还有N分钟上课”，不足一分钟显示 1 分钟，开课后切换原有上课/下课状态。
+小时变化约每六分钟一次，仅排变化刻度；两个日视图 provider 都参与刷新，通知开关不影响小组件。
+窄布局使用平台 `RelativeSizeSpan(0.85f)` 收小小数部分，仍不足时允许状态换行，保持原有蓝色及信息优先级。
+
+本轮机制核验（2026-09-21）：主站连接超时后，已在线读取官方中国站
+[AlarmManager](https://developer.android.google.cn/reference/android/app/AlarmManager)、
+[RelativeSizeSpan](https://developer.android.google.cn/reference/android/text/style/RelativeSizeSpan) 和
+[Android 14 通知行为](https://developer.android.google.cn/about/versions/14/behavior-changes-all)。
+复用 compileSdk 36、AndroidX Core 1.12.0、Room 2.6.1，无新增依赖。
+不使用每分钟唤醒、前台保活服务或强制防划走：Android 14 起 ongoing 通知仍允许用户主动划走，
+应用尊重隐藏本次；“常驻”表示有课程时持续展示，不表示绕过系统与用户控制。
+
 这是一个实现质量**远高于平均水平的单校定制 fork**。提醒调度（`CourseReminderScheduler`）、
 分楼作息模型（`CourseTimes`）、时间轴渲染（`ScheduleUI` + `blockBox`）、SUES 导入链
 （`WebViewLoginFragment` + `SuesEamsImporter`）都有真机实证支撑的设计文档与 95+ 项单元
@@ -33,39 +93,43 @@
 
 ## 1. 必须保留的设计（改进时不得倒退）
 
-### 日程三形态与空间分配（2026-09-18）
+### 小组件自适应显示（2026-09-20）
 
-此节替代此前固定 4×2、单课居中色卡方案；下文其他审查建议保留原审查日期，不代表本批次已全部实施。
+本节描述当前实现，替代 2026-09-18 的固定空间降级顺序。底板、圆角、配色、字体家族、强调色和倒计时刷新机制不变。
 
-- **三个可放置入口**：4×2「当天课程」、2×2「当天课程（小）」、4×4「一周课程」。前两个共用同一份实现与渲染（`SmallTodayCourseAppWidget` 继承 `TodayCourseAppWidget`，画面同样由 `TodayColorfulService` 按实测宽高在 focus / timeline / singleLarge 之间切换），差别只有默认格数与预览。之所以必须是两个 provider：桌面按 **provider** 决定"添加小部件时摆多大"，一个 provider 只有一个默认尺寸，而同一个 `<receiver android:name>` 不能在清单里出现两次 —— 只靠"让用户把 4×2 拖小"的话，选择器里根本看不到"小正方形"存在。形态仍按实例的可用宽高切换：小正方形突出当前课程；横条把课程与状态并排；大正方形展示整周。
-- 大卡单课时分为课程、开始/结束时间、地点三个区域。先测各区域文字自然高度，再均分剩余高度，不固定三等分挤压长课名。多课时间轴同样先测量再分配余量；可用空间不足时显示明确的余课数量。
-- 已结束课程来自统一的 `DayWidgetSchedule.completedCourses`，课间与最后一课仍保留历史。显示顺序为已结束在上、当前居中、后续在下，历史容量不足时在上方显示数量；不再限定"最后一节正在上"才出现历史。**但"今天全部上完"是例外：那一档给空态**（见下一条），不把最后一节已结束的课留在正文里 —— 这是按设计稿改的口径，与"全部结束均保留历史"的旧说法相反。
-- 空态一共四种，都由 `TodayColorfulService.empty()` 出一份**整体居中**的"图标 + 一句话"：没有课表 → `还没有课表`；开学日期无效 → `请检查开学日期`；今天没有课 → `今天没有课`；**今天全部上完 → `今天的课都上完了`**（判据是 `courses.isNotEmpty() && remaining.isEmpty()`，必须同时要求"今天本来有课"，否则那三种空情况下 `remaining` 也是空的）。居中的做法：竖向靠 root 的 `Gravity.CENTER_VERTICAL` 把整块居中，横向靠"图标视图铺满（`FIT_CENTER` 把图摆在正中）+ 文字自身 `gravity=CENTER`"——图标**不能**用 `wrap_content`，那样它会跟着文字左边缘走、整块偏左。`DayWidgetSparseLayoutTest` 在"全部上完"那一档同时量上留白与下留白（两者之差 ≤1px），只量一边会让"内容堆在顶上"这种错悄悄过去。大卡的月份日历只在"今天没有课"那一档出现；"全部上完"不画日历（今天已经没有内容可看）。
-- 保留原来的下课前 20 分钟倒计时和每分钟刷新调度，不修改通知准时性、闹钟窗口或设备数据。
-- 尺寸使用 `AppWidgetManager` 实例 options：竖屏取 minWidth / maxHeight，横屏取 maxWidth / minHeight；缺失 options 时使用 provider 默认尺寸。不再把宿主报告的 110dp 强制抬高到 176dp，也不再用手机屏幕宽度代替组件宽度。
-- `onAppWidgetOptionsChanged` 触发当前实例重排。允许双向拖动，最小可调整尺寸为 110×110dp（= 2 格，按官方公式 70n−30）——这一档必须真的缩得到，"小正方形"才存在；原来写 170×150dp 把 2×2 挡在外面，形态再多用户也只看得见横条。布局不是三张固定比例位图：中间尺寸继续按真实文字测量。时间和地点保留，长文字使用可见省略号。小部件本体**不挂任何点击入口**（纯展示）：`RemoteViews` 无法区分"桌面上"和"选择器里"，挂上点击就会在选择器预览里被误触；用户要进应用点图标即可。详见 §1「小部件预览只声明 previewImage」。
-- 周课表同样接 `onAppWidgetOptionsChanged`。它是一整张位图（`ScheduleAppWidgetService` 的 `getCount() == 1`，整周画进 `iv_schedule`），不重画就一直是拖动前那份格子尺寸。回调只重画被改的那一个实例（`AppWidgetUtils.refreshScheduleWidgetFor`），不顺手重排桌面上所有实例。今天那一列表头用 `colorPrimary`（强调色），不再用"全对比 vs 60% 透明"表达今天——后者在深色底上几乎看不出差别。
-- 日视图表头是**一行小字**（设计稿 `.head`：左标题右计数，同为 12sp）—— 不是原先的"大号日号 + 第二行摘要"。标题随形态变，判据与正文**同一个** `TodayColorfulService.dayWidgetForm`：横条写「今日日程」（它正文左列本来就有大号日号 + 星期，表头再写日期是重复），小正方形写日期 `9月18日 · 周五`（它正文没有日期）。另一头是课程计数 `3节 · 已上1节`（设计稿写的是 `3节 · 已上1`；用户要求两个数字都带单位，"已上"后面直接跟数字会被读成时刻或序号），课程数必须与正文出自**同一份装载结果**（`TodayColorfulService.loadDay`）——表头与正文各查一次库会因为"读的时刻不同"而对不上，那正是用户一眼能看出来的错；表头的**时刻**也必须是同一个（`refreshTodayWidget` 的 `now` 参数），否则会出现「3节 · 已上3节」配「正在上课」。格宽不足 180dp（2 格 = 110dp）时不写计数，把一个用户永远看不全的截断串换成完整的标题。没有课表 / 开学日期无效 / 当天没有课时不显示计数，交给正文空态说明。
-- 形态判据 `TodayColorfulService.dayWidgetForm` 只看宿主给这一格的**整卡**像素尺寸，表头与正文共用它；整卡尺寸也只有一个来源 `TodayColorfulService.cardBoxPx`。这两处原先各有各的一份实现，正是"表头说自己画横条、正文画的是小正方形"这类错的温床。大正方形（日视图被拖成大方块）这一档设计稿没有覆盖（它的大正方形是"整周课表"，属于另一个 provider），表头同样写「今日日程」—— 这是判断，不是照抄设计稿。
-- 周视图里"此刻正在上"的那一格描边改用强调色（`TipTextView.accentStroke`，**默认关**，只由周视图服务打开）。主课表与周视图共用 `TipTextView`，主课表不开这个开关，所以主课表一行都不变。判据复用 `DayWidgetSchedule.isOngoing`，与日视图、下课提醒同一份。
-- 日视图横条的正文结构（设计稿 `widget-morphology.html`）：左「日期块」大号日号 + 星期、中「课名 / 教室 / 时段」**三行**、右「状态列」；状态列在下课前 20 分钟窗口内是**大号数字 + 分钟**两行，其余是小字文字状态。小正方形则是强调色状态行 → 大号数字（倒计时优先，否则开始时间）→ 课名 → 教室 → 页脚「时段 · 另有N节」。时段用 **en dash**（`09:55–11:15`），与设计稿逐字一致；`DayWidgetSchedule.timeRange` 仍用半角连字符（主课表、提醒文案、导出都在用，只在这一处换显示字符）。下一节文案为 `接下来 HH:mm · 课名[ · 另有N节]`，余课数并进这一行、不另起一行；历史摘要为 `已结束 N 节 · 名称`。倒计时窗口复用 `DayWidgetSchedule.countdownMinutes`，不另写一份。
-- **形态按宿主给的整卡尺寸判**（`hostBoxPx()`），不按正文区的宽高比：设计稿的三种形态是按格数定义的（2×2 / 4×2 / 4×4），而正文区已经扣掉表头与内边距、比例与卡片本身不同。原先用正文区比例判，4×2 会掉进窄形态（渲染探针把这件事打了出来）。
-- **日视图正文的三级降级**（`TodayColorfulService.focus`）。设计稿只定义了 180×180 以上的形态，而这一格允许被拖到 110dp；那点高度放不下三段正文，所以按"先动间距、最后才动内容"的顺序降级，并且每一级都只在上一级仍然放不下时才做：①收起与时段开始时刻重复的大号时间（只在小正方形里有）；②收紧纵向间距并把课名收成一行 —— 收紧必须**递归到文字行**，因为横条里 `main` 的直接孩子是 `row` 这个容器，真正带间距的是容器内的三行文字，只清直接孩子的 padding 在横条里等于没做；③仍然放不下才让出两条副信息，顺序是"先下一节、再历史摘要"（当前课是这一格存在的理由，历史摘要最先让）。设计稿自己的降级同向：`.compact-text` 就是收紧 padding 与间距、把课名收成一行。
-- `focus` 里两条副信息的 padding 必须在**量高度之前**设好：`availableMain` 的含义是"正文这一块真正能拿到多少像素"，等于 `高度 − 两条副信息的真实高度`。先量高度、后加 padding 会让这个值恒定高估两条 inner padding 之和，使"空间不足"那一级永远不触发，末行文字被父布局按 `AT_MOST(剩余)` 压扁 —— 表现为文字只剩半行高，而代码看上去什么都没做错。空余高度按各组自然高度均分（`slack`），不是全交给 `main` 的 weight（那会把余量堆在一头）。
-- "当前显示哪一周"这个状态**已随箭头一起删除**：周视图现在只画本周，不再有 `schedule_widget_next_week_<id>` 登记。日视图同理，只画今天。
-- **两个小组件都没有箭头**。日视图删掉了右上角的「切明天 / 切回今天」，周视图删掉了「下一周 / 回到本周」；随之删净的是整套"每个实例记住自己在看哪一天（哪一周）"的状态（`day_widget_tomorrow_<id>`、`schedule_widget_next_week_<id>`、`isNextDay`/`isNextWeek`、data URI 里的标志位、两个 provider 的 `ACTION_SHOW_*`/`ACTION_*_WEEK`）。理由是一样的：**箭头占掉的宽度正好是表头最需要的地方** —— 日视图 2×2 那一格里它把表头挤到只剩约 60dp，日期都会被截断。删掉后表头文字铺到最右边，日视图表头能放下完整的标题与 `3节 · 已上1节`，周视图能完整显示 `我的课表 | 第 N 周　周 X`。
-- **小部件预览只声明 `previewImage`，不声明 `previewLayout`**（2026-09-18 真机定位）。桌面「添加小部件 → 点条目文字 → 详情页」会把 `previewLayout` 用 `AppWidgetHostView` 托管起来，**并给预览控件挂一个"打开本应用"的点击**：用户点一下预览图就被带回主界面，看起来像误触。真机证据：详情页控件树是 `item_details_preview → AppWidgetHostView → ImageView(click=true)`，那个 `ImageView` 的内容描述来自 `day_widget_preview.xml`（全工程只有这一处写「当天课程示例」），它的 bounds `[372,752][848,1209]` 与启动日志里的 `bnds=[372,752][848,1209]` 完全一致，而启动方是 `com.miui.home`（uid 10151）用 **LAUNCHER 意图**发起的 —— 与小部件自身的点击入口无关。只给 `previewImage` 时详情页退化成普通 `ImageView`、不挂点击，与哔哩哔哩等第三方小部件的行为一致。预览位图由 `WidgetPreviewImageTest` 从**真实布局**渲染，浅色（`drawable-nodpi`）与深色（`drawable-night-nodpi`）各一套，`-night` 限定符由 `previewImage` 的 `@drawable` 引用自动解析。
-- 整个正文使用一幅 ARGB_8888 位图和一个列表项，避免多行独立测量、槽位重复拉伸与组件内部滚动。仅缓存当前批次尺寸，不增加图片历史缓存；刷新数据前清空状态，删除默认课表后不会残留旧课程。正文提供完整文本的无障碍描述，导航有可读名称。
-- 4×6 改为 5×9 后可以按宿主给出的新宽度重排，但是否自动从四列扩大为五列由桌面控制，应用不能承诺全宽自动扩展。API 31+ 仍采用通用 options 回调路径，未新增 `RemoteViews(Map<SizeF, RemoteViews>)` 变体集合。
+- 入口为 2×2「当天课程（小）」、4×2「当天课程」、4×4「一周课程」。前两个共用日视图实现；放大日视图不会自动变成周课表。支持拖动到 5×2 和其他中间尺寸，格数对应的实际 dp 由桌面决定。
+- 尺寸统一从 `AppWidgetUtils.cardBoxPx` 读取：竖屏 minWidth/maxHeight，横屏 maxWidth/minHeight；缺失时取 provider 的默认尺寸。日视图大卡从整卡 250×250dp 起生效，横条要求至少 250dp 宽且宽高比不小于 1.65。判据由表头、正文共享。
+- 日视图使用 Android 原生测量确定空间预算。先收紧间距、收起已结束摘要，再去掉重复大数字，随后让下一节摘要、状态让位；优先保住课名、地点、完整时段。短课名不会挤掉长课名的当前课程。多门同时上课优先于历史记录，后续摘要会区分「同时上课」和「接下来」。
+- 横条仍是日期、课程信息、状态三列；仅当完整时段和课程识别宽度足够时保留两侧辅助列，不再固定挤占中列。宽 5×2 可保留更多文字，小 4×2 可以省去重复日期。日视图正文不靠滚动。
+- 课名尽量保持两行；空间不足时先收至正文基准字号，再改为一行。极小格的核心文字最低 12sp；时段宽度不足时可单独收至 10sp，再不足才分行，不省略起止时刻。系统放大字体仍参与实际测量，而不是按固定字符数裁切。
+- 长课名和地点优先保留首尾；多行文字仅在最后一行中间省略，保留课程分册、实验编号与房间号。单行中间省略用 `singleLine`，避免 `maxLines=1` 在部分设备的已知兼容性问题。无障碍描述保留课程完整信息，不把省略后的显示文本当作唯一信息源。
+- 表头仍为左标题、右计数的一行 12sp 字。按实际字体宽度决定是否显示计数；窄格先省去星期、保留月日，不使用固定 180dp 阈值。计数和正文复用 `TodayColorfulService.loadDay`，固定时钟测试同时驱动表头与正文。
+- 四种空态保持：没有课表、开学日期无效、今天无课、全部上完。小格允许提示换行，先为完整提示留空间，再决定是否保留图标；整体居中。大日视图仅在今天无课时展示月份日历，全部上完不展示日历。
+- 周视图按实例实际宽度减去内容边距绘图，不再先画屏幕宽截图再缩放。仍保留七日网格、用户行高和课程色块；一屏放不下时由原生 `ListView` 上下滚动，不能承诺任何高度都一屏显示整周。时间栏和星期表头使用一致的列宽权重，避免时间被挤出边界。
+- 周课程块按完整文字行分配容量：课名优先至少两行（有足够行数时），其次地点，再是重复时间、单双周等辅助信息。窄列内边距为 2dp，字号按可用宽度适度缩小但不低于 10dp；用户原本设为 8/9dp 时不强制放大。地点最后一行优先保留尾部编号。实际文字换行与省略使用 `StaticLayout`/`TextUtils`，不手写字符宽度算法。
+- 周课程块按 `CourseTimes.blockBox` 的真实区域判断覆盖，处理连堂和不同开始节次的部分交叠。本周正常课优先于免听、非本周；被覆盖课程不再绘制相互遮挡的文字，保留原有三角标记，有余量时显示「另有 N 门」。完整本周课程仍在无障碍描述中，详细冲突信息可在应用课表查看。
+- 周视图服务身份改为 `content:<tableId>#<widgetId>`，日视图仍是 `content:<widgetId>`。实例 id 必须参与 `Intent.FilterComparison`，防止同一课表不同尺寸的组件共用工厂。旧周视图 URI 在下一次更新时替换，不涉及数据库迁移。
+- 改变尺寸仍通过 `onAppWidgetOptionsChanged` 重画当前实例；不新增缓存历史，不增加轮询。主课表不启用周小组件专用文字预算，`TipTextView` 改尺寸或重新绑定文字时会清理旧排版缓存。
+- 小组件保持纯展示，不新增点击或周次切换按钮。选择器继续只声明 `previewImage`，不启用会被厂商宿主拦截点击的 `previewLayout`。三种入口各有浅色、深色预览，来自真实布局；周预览展示实际可视部分，不把整周位图压扁。
 
-采用现有 Android `LinearLayout`、`TextView`、`View.MeasureSpec`、`RemoteViewsService` 与项目 `CourseTimes`，没有引入依赖或更换 UI 框架。没有采用 Compose/Glance，因为现有 provider 和集合点击契约可直接复用，引入新框架会扩大本次修改范围。
+#### 选型与核验
 
-调研依据：
+复用 Android 平台 `AppWidgetManager`、`View.MeasureSpec`、`TextView`、`StaticLayout`、`TextUtils`、`Rect.intersects`，以及现有 AndroidX Core 1.12.0、Robolectric 4.16。保持 minSdk 21 / compileSdk 34 / targetSdk 29，没有新增依赖、数据库 schema、构建或部署配置。
 
-- 小米官方《Widget适配建议及示例》：https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1585 ，本次在线访问成功（2026-09-18）；本地文档更新时间 2024-10-17，示例使用 options 选择布局。
-- Android 官方布局指南：https://developer.android.com/develop/ui/views/appwidgets/layouts ，本次连接超时，**未完成在线验证**。回调、dp 单位和尺寸范围契约已核对本机 Android SDK 36.1 的 `AppWidgetManager.java`、`AppWidgetProvider.java`；产品仍为 minSdk 21 / compileSdk 34。
+2026-09-20 在线核验 Android 官方中国镜像（主站连接超时）：
+- [小组件布局与尺寸](https://developer.android.google.cn/develop/ui/views/appwidgets/layouts?hl=en)
+- [StaticLayout.Builder](https://developer.android.google.cn/reference/android/text/StaticLayout.Builder?hl=en)
+- [TextUtils.TruncateAt](https://developer.android.google.cn/reference/android/text/TextUtils.TruncateAt?hl=en)
 
-验证：`DayWidgetSparseLayoutTest` 使用 Room 夹具和 Robolectric NATIVE，覆盖 20 场景 × 7 尺寸 × 2 课程字号 × 2 主题，共 560 组，逐级检查文字及子视图边界；另测同实例尺寸变化、倒计时边界、实例隔离、查看日期保持和空库刷新。旧多行色卡截图断言已替换成整幅日程尺寸与内容断言，未降低倒计时与时间/地点检查。原生 PNG 输出在 `_crop/morphology-*.png`，属于桌面宿主验收前的渲染验证，不能称为真机截图。
+未采用 Compose/Glance：当前 RemoteViews 服务及原生文字测量足以完成本次调整，迁移会扩大范围。未采用按字符数截断或全图缩放：前者不能适应中英文和字体比例，后者使课程文字与表头比例失真。未引入新库，因而无新增许可、下载体积或供应链风险。
+
+#### 验证入口
+
+`WidgetAdaptiveLayoutTest` 覆盖 12 个尺寸、2 个课程字号、长短文本、浅深色，检查所有子视图边界和文字完整行；另测 1.1/1.3 倍系统字体、最小空态、默认 4×4、周实例隔离、周视图实际出图宽度、部分覆盖和课程块文字预算。`DayWidgetSparseLayoutTest` 保留原有 560 组场景，包括缺地点、缺作息、单课、多课和全部结束。倒计时测试使用普通 Application 隔离显示夹具与 App 启动写库，不禁用生产逻辑或改动倒计时断言。
+
+2026-09-20 本地验证：`:app:testDebugUnitTest` 共 357 项通过，失败、错误、跳过均为 0；`:app:lintDebug` 和 `:app:assembleDebug` 成功，保留既有 Lint baseline 与告警，未禁用规则。构建使用 Android Studio 自带 JBR；测试报告位于 `android/app/build/reports/tests/testDebugUnitTest/index.html`，调试包位于 `android/app/build/outputs/apk/debug/app-debug.apk`。
+
+原生渲染图位于 `android/app/build/reports/widget-adaptive/`，不是手机截图。真机只验证了现有 2×2、4×2 日视图空态和拉高/恢复后的重排；手机字体 1.1 倍，实际组件为 505×565px / 1077×565px。未修改设备课表、系统时钟或字体，未进行设备上的有课状态和 5×2、4×4 全覆盖。用户要求暂停后停止实机操作；后续改动通过本地测试和截图复核，最终调试包未重新安装，手机仍是暂停前的中间版本。设备数据库备份与截图仅在被忽略的 build 目录，不进入版本库。
 
 ### 底部面板统一：三个按钮同一种效果
 
@@ -130,7 +194,7 @@
 | 提醒一律 `setExactAndAllowWhileIdle`，不用非精确闹钟/WorkManager | `CourseReminderScheduler.setExact` | 实测 HyperOS `power_pending` 策略把非精确闹钟统一推迟 3 天；WorkManager 在 Doze 下不运行（类文档已论证） |
 | 未来 7 天滚动窗口，当天提醒不依赖任何每日触发器 | `CourseReminderScheduler.WINDOW_DAYS` | 00:05 闹钟/小部件更新全部可能被推迟，窗口是唯一保证 |
 | 时刻一律按 `(节次, 分组)` 查表，绝不按 node 索引计算 | `CourseTimes` | 上午 3~5 节三套方案两两交叠、互不包含 |
-| 通知剩余分钟在触发一刻现算（`targetAt` 进 Intent） | `ReminderPayload` / `notificationText` | 闹钟被系统推迟后回放设置值等于对用户说谎 |
+| 广播携带完整课程实例，投递前校验课表、偏好和有效期 | `ReminderPayload` / `validEntries` | 防止已改课、已关开关和已过期广播仍然提醒；时间使用绝对时段与系统计时器 |
 | requestCode 分段（START/END 各 250）与 cancelAll 扫描上界是同一个数 | `MAX_REMINDERS_PER_KIND` | 两个用途必须同一常量，否则静默丢闹钟/取消不掉 |
 | PendingIntent 工厂"取或建"，永不返回 null | `nextDayPendingIntent` 等 | `FLAG_NO_CREATE` 版本曾导致全新安装每次重排都 NPE（类文档） |
 | 默认作息分组固定 B 方案，不随选课楼栋漂移 | `SuesEamsImporter.DEFAULT_SCHEME` | 左侧时间栏是学校公布的固定作息，不是统计结果 |
@@ -139,8 +203,8 @@
 | 勾选复选框/点"跳过"只做不涉及凭据的小事，登录永远由用户本人完成 | `suesHandleCasLoginPage` 等 | 产品隐私边界（README 已对外承诺） |
 | 刷新小部件只能走 `AppWidgetManager.updateAppWidget`，不能自发 `APPWIDGET_UPDATE` 广播 | `AppWidgetUtils.refreshAllWidgets` 文档 | 受保护广播，自发自拒且静默失效（真机日志在注释里） |
 | 日视图一条列表绑头部那一天，不做 ViewFlipper 动画 | `refreshTodayWidget` 文档 | 动画版曾出"日期与内容对不上"的两个真机 bug |
-| 连堂判定单位是一天、抑制在两遍扫描里绑定 | `alarmsForDay` 文档 | 早期拆开版有两条真实丢提醒的路径 |
-| 小部件实例身份必须进 data URI，不能只放 extras | `AppWidgetUtils.dayUri` / `ScheduleAppWidgetService` | `Intent.FilterComparison` 不比较 extras，两个实例会被合并成同一个 `RemoteViewsService` 工厂，尺寸与缓存全串（2026-09-18）。"这个实例在看哪一天/哪一周"的标志位已随箭头删除，现在 URI 里就是实例 id 本身（`content://<appWidgetId>`），解析只用 `schemeSpecificPart.toIntOrNull()`；测试也必须用 `AppWidgetUtils.dayUri` 构造，手写旧格式 `"0,<id>"` 会解析失败并悄悄回落到 provider 默认尺寸 |
+| 仅合并同刻触发，不以连堂为由抑制下一节提醒 | `alarmsForDay` | 下一节提前提醒不得被延后到上一节下课 |
+| 小部件实例身份必须进 data URI，不能只放 extras | `AppWidgetUtils.dayUri` / `AppWidgetUtils.weekIntent` | `Intent.FilterComparison` 不比较 extras，否则不同尺寸实例会共用 `RemoteViewsService` 工厂。日视图为 `content:<widgetId>`，周视图为 `content:<tableId>#<widgetId>`；生产和测试均使用对应工厂方法，避免旧格式解析错误或实例身份丢失 |
 | 背景图渐变底座只认自己记的叶子 Drawable（`bg_image_current`） | `BackgroundImageLoader.attach` | 直接取 `view.drawable` 会把 TransitionDrawable 套进 TransitionDrawable，历次 Bitmap 永久挂在引用链上（2026-09-18） |
 | View 复用时必须失效背景图在途请求（无背景分支必须调 `cancel`） | `BackgroundImageLoader.cancel` | 不清占位 key 会把上一条数据的图贴到复用后的条目上（2026-09-18） |
 | 背景图解码按 `CENTER_OUTSIDE` 采样 + 密度缩放，解码后密度归位 | `BackgroundImageLoader.applyScaling` / `decode` | 纯整数采样让极端长宽比的图整图进堆（实测 48 MB）；不归位密度会被 `BitmapDrawable` 二次缩放（2026-09-18） |
@@ -461,7 +525,13 @@
 
 ---
 
-## 7. 完成定义核对（对本手册自身）
+## 时间测试版实现补充
+
+独立 `simulation` 变体已提供日期定位、时间拖动、暂停及倍速控制，详见
+[时间测试版手册](TIME-LAB.md)。正式版不包含测试控制页或测试计时服务；此前“无新增常驻服务”
+的描述针对普通版课程通知。模拟器通过统一课程时间源驱动原业务，不更改系统时间或普通版数据。
+
+## 7. 完成定义核对（对本手册原始审计）
 
 - [x] 每条建议都有：证据（`文件:行` 或引用原文）、更优实现、原生机制、来源、验证方式
 - [x] 联网调研：KSP/kapt、appcompat/material/biweekly/BRVAH/Toasty 版本现状、jcenter/NumberPickerView、

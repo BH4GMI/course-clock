@@ -25,6 +25,8 @@ import courseclock.timetable.utils.AppWidgetUtils
 import es.dmoral.toasty.Toasty
 import splitties.dimensions.dip
 import splitties.resources.color
+import kotlinx.coroutines.CancellationException
+import android.util.Log
 
 /**
  * 多课表管理（设计稿 7）：每张课表一张卡片。
@@ -32,9 +34,7 @@ import splitties.resources.color
  * 交互按设计稿副标题的口径：
  * - **点卡片 = 切换**到这张课表（换掉默认表后刷新小部件；主页回来时经
  *   `onActivityResult → initView()` 重载）。
- * - **长按卡片 = 进操作**：编辑课表信息（改名等，跳课表设置）、查看课程（进课程管理）、
- *   删除课表（二次确认）。旧版把「删除」藏在卡片按钮的长按里、把「切换」完全没做，
- *   这里三个动作都有明确入口。
+ * - 卡片右侧操作按钮与长按共用课表设置、管理课程、删除课表菜单；删除须二次确认。
  * - 「+ 新建课表」是一条明确的按钮，不再用右下角加号。
  */
 class ScheduleManageFragment : BaseFragment() {
@@ -73,8 +73,8 @@ class ScheduleManageFragment : BaseFragment() {
         val context = context ?: return
         val data = viewModel.initTableSelectList()
         val counts = viewModel.getCourseCounts()
-        val view = binding.root
-        adapter = TableListAdapter(R.layout.item_table_card, data, counts)
+        val view = _binding?.root ?: return
+        adapter = TableListAdapter(R.layout.item_table_card, data, counts, ::showTableActions)
         adapter.setOnItemClickListener { _, _, position ->
             switchTo(data[position])
         }
@@ -113,19 +113,15 @@ class ScheduleManageFragment : BaseFragment() {
         }
     }
 
-    /**
-     * 长按卡片：编辑 / 查看课程 / 删除。当前表不给「删除」——旧版按钮的口径就是默认表不可删，
-     * 删掉正在用的表会把整个首页拖进「没有课表」的引导。
-     */
+    /** 可见操作按钮与长按共用菜单；当前表也可删除，默认表转移由 DAO 事务维护。 */
     private fun showTableActions(table: TableSelectBean) {
         val name = table.tableName.ifEmpty { "我的课表" }
-        val items = mutableListOf("编辑课表信息", "查看课程")
-        if (table.type != 1) items.add("删除课表")
+        val items = listOf("课表设置", "管理课程", "删除课表")
         MaterialAlertDialogBuilder(requireActivity())
                 .setTitle(name)
                 .setItems(items.toTypedArray()) { _, which ->
                     when (items[which]) {
-                        "编辑课表信息" -> launch {
+                        "课表设置" -> launch {
                             val task = viewModel.getTableById(table.id)
                             if (task != null) {
                                 // 带结果启动：课表设置页自己保存后返回，本页刷新卡片
@@ -135,10 +131,10 @@ class ScheduleManageFragment : BaseFragment() {
                                     putExtra("tableData", task)
                                 }, REQUEST_EDIT_TABLE)
                             } else {
-                                Toasty.error(requireContext().applicationContext, "读取课表异常>_<")
+                                Toasty.error(requireContext().applicationContext, "课表不存在，请返回刷新").show()
                             }
                         }
-                        "查看课程" -> {
+                        "管理课程" -> {
                             val bundle = Bundle()
                             bundle.putParcelable("selectedTable", table)
                             Navigation.findNavController(binding.root)
@@ -154,18 +150,29 @@ class ScheduleManageFragment : BaseFragment() {
     private fun confirmDelete(table: TableSelectBean) {
         MaterialAlertDialogBuilder(requireActivity())
                 .setTitle("删除课表")
-                .setMessage("确定要删除「${table.tableName.ifEmpty { "我的课表" }}」吗？" +
-                        "它的所有课程都会一并删除，且无法恢复。")
-                .setPositiveButton(R.string.sure) { _, _ ->
+                .setMessage("删除「${table.tableName.ifEmpty { "我的课表" }}」及其中全部课程？此操作无法撤销。" +
+                        if (table.type == 1) "\n删除后使用剩余课表；没有其他课表时显示无课表页面。" else "")
+                .setPositiveButton("删除") { _, _ ->
                     launch {
+                        val appContext = requireContext().applicationContext
                         try {
                             viewModel.deleteTable(table.id)
-                            Toasty.success(requireContext(), "删除成功~").show()
-                            // 默认表可能已经换成别的课表，两个小部件要跟着重画。
-                            AppWidgetUtils.refreshAllWidgets(requireActivity().applicationContext)
-                            reloadList()
+                        } catch (e: CancellationException) {
+                            throw e
                         } catch (e: Exception) {
-                            Toasty.error(requireContext(), "操作失败>_<${e.message}").show()
+                            Log.e("ScheduleManage", "删除课表失败", e)
+                            Toasty.error(appContext, "删除失败，课表未删除，请重试").show()
+                            return@launch
+                        }
+                        Toasty.success(appContext, "课表已删除").show()
+                        try {
+                            reloadList()
+                            AppWidgetUtils.refreshAllWidgets(appContext)
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (e: Exception) {
+                            Log.e("ScheduleManage", "课表已删除，视图刷新失败", e)
+                            Toasty.error(appContext, "课表已删除，显示未更新，请重新打开应用").show()
                         }
                     }
                 }

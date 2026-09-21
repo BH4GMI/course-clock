@@ -12,6 +12,7 @@
         兜底在 CourseReminderNotifier（areNotificationsEnabled 检查 + 日志）。
     -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
     <!--
         重启会清空 AlarmManager 里的全部闹钟，课程提醒必须靠这条广播重排。
         normal 权限，不弹框。刻意**没有** SCHEDULE_EXACT_ALARM / USE_EXACT_ALARM：

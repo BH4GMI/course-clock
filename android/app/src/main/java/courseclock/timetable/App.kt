@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import courseclock.timetable.utils.BackgroundImageLoader
 import courseclock.timetable.utils.Const
+import courseclock.timetable.utils.CourseReminderNotifier
 import courseclock.timetable.utils.CourseReminderScheduler
 import courseclock.timetable.utils.TimetableChangeWatcher
 import courseclock.timetable.utils.UpdateUtils
@@ -62,12 +63,18 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        courseclock.timetable.utils.CourseClock.initialize(this)
+        courseclock.timetable.utils.CourseNotificationSettings.initialize(this)
         Toasty.Config.getInstance()
                 .setToastTypeface(Typeface.DEFAULT_BOLD)
                 .setTextSize(12)
                 .apply()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel(this, "schedule_reminder", "课程提醒", NotificationManager.IMPORTANCE_HIGH)
+            createNotificationChannel(this, CourseReminderNotifier.CHANNEL_ID, "课程提醒",
+                    NotificationManager.IMPORTANCE_HIGH, showBadge = true)
+            // 状态与一次性提醒分渠道；状态更新不发声音、振动、横幅或角标。
+            createNotificationChannel(this, CourseReminderNotifier.ONGOING_CHANNEL_ID, "课程状态",
+                    NotificationManager.IMPORTANCE_LOW, showBadge = false)
         }
         timetableWatcher = TimetableChangeWatcher(this)
         renewReminderWindow()
@@ -92,9 +99,10 @@ class App : Application() {
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    private fun createNotificationChannel(context: Context, channelId: String, channelName: String, importance: Int) {
+    private fun createNotificationChannel(context: Context, channelId: String, channelName: String,
+                                          importance: Int, showBadge: Boolean) {
         val channel = NotificationChannel(channelId, channelName, importance)
-        channel.setShowBadge(true)
+        channel.setShowBadge(showBadge)
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
     }

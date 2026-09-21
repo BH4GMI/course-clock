@@ -30,7 +30,7 @@ import org.robolectric.shadows.ShadowToast
  * 状态变化就是回执，生效时机改由 [courseclock.timetable.settings.SettingsList] 的行副标题
  * 常驻说明（只在"回来看不到效果"的行上写：重启/切页面/下一次提醒）。
  *
- * 这里在真的 Activity 上把五个开关各拨一次，钉两件事：偏好真的落盘（"静默"不等于"没保存"），
+ * 这里在真的 Activity 上把四个开关各拨一次，钉两件事：偏好真的落盘（"静默"不等于"没保存"），
  * 以及全程不出现任何 toast。谁往回加弹窗，这条就红。
  */
 @RunWith(RobolectricTestRunner::class)
@@ -61,13 +61,11 @@ class SettingsSwitchQuietApplyTest {
         toggle(activity, SettingRowId.SCHEDULE_DETAIL_TIME)
         toggle(activity, SettingRowId.SCHEDULE_BLANK_AREA)
         toggle(activity, SettingRowId.SHOW_EMPTY_VIEW)
-        toggle(activity, SettingRowId.SCHEDULE_PRE_LOAD)
 
         assertFalse("开关状态必须落盘", context.getPrefer().getBoolean(Const.KEY_SCHEDULE_GRID, true))
         assertFalse(context.getPrefer().getBoolean(Const.KEY_SCHEDULE_DETAIL_TIME, true))
         assertFalse(context.getPrefer().getBoolean(Const.KEY_SCHEDULE_BLANK_AREA, true))
         assertFalse(context.getPrefer().getBoolean(Const.KEY_SHOW_EMPTY_VIEW, true))
-        assertFalse(context.getPrefer().getBoolean(Const.KEY_SCHEDULE_PRE_LOAD, true))
 
         shadowOf(Looper.getMainLooper()).idle()
         assertNull("拨开关不允许弹任何提示", ShadowToast.getLatestToast())

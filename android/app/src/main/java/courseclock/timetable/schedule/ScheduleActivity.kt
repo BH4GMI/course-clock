@@ -49,6 +49,7 @@ import splitties.dimensions.dip
 import splitties.resources.styledDimenPxSize
 import splitties.snackbar.longSnack
 import java.io.IOException
+import kotlinx.coroutines.Job
 import kotlin.math.roundToInt
 
 class ScheduleActivity : BaseActivity() {
@@ -59,16 +60,15 @@ class ScheduleActivity : BaseActivity() {
     private lateinit var ui: ScheduleActivityUI
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
 
-    private val preLoad by lazy(LazyThreadSafetyMode.NONE) {
-        getPrefer().getBoolean(Const.KEY_SCHEDULE_PRE_LOAD, true)
-    }
-
     /**
      * 七天课程数据的观察者登记。initView 会随每次从设置页返回而重跑，重挂前先摘掉旧的，
      * 否则观察者按调用次数线性堆积：课程表每变一次，旧的查询全部重跑、课表被重复刷新 N 遍。
      */
     private var courseObservers:
             List<Pair<LiveData<List<CourseBean>>, Observer<List<CourseBean>>>> = emptyList()
+
+    /** 当前首页初始化任务；重复触发时只保留最后一次，避免并发读库和重复重建页面。 */
+    private var initViewJob: Job? = null
 
     /**
      * 首次启动的「许可与免费声明」还没讲完。
@@ -551,10 +551,9 @@ class ScheduleActivity : BaseActivity() {
         if (mAdapter == null) {
             mAdapter = SchedulePagerAdapter(maxWeek, supportFragmentManager)
             ui.viewPager.adapter = mAdapter
-            // 「页面预加载」开关现在管的是缓存几页：开（默认）缓存左右各两周——快速连滑
-            // 时落点页早已装配完；关只缓存左右各一页（ViewPager 的下限就是 1）。
-            // 数据装配本身不因开关延迟：页面一创建就装（见 ScheduleFragment.onViewCreated）。
-            ui.viewPager.offscreenPageLimit = if (preLoad) 2 else 1
+            // 只保留旧版 ViewPager 的最低邻页缓存。课程数据由共享 Room LiveData 按需观察，
+            // 不额外保留两侧页面，减少内存占用和无效视图重绘。
+            ui.viewPager.offscreenPageLimit = 1
         }
         mAdapter!!.maxWeek = maxWeek
         mAdapter!!.notifyDataSetChanged()
@@ -755,11 +754,33 @@ class ScheduleActivity : BaseActivity() {
         suppressWeekTick = false
     }
 
+    private var clockRevision = CourseClock.revision
+    private var clockDay = CourseReminderScheduler.startOfDayMillis(CourseClock.nowMillis())
+    private val clockHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val clockRefresh = object : Runnable {
+        override fun run() {
+            val day = CourseReminderScheduler.startOfDayMillis(CourseClock.nowMillis())
+            if (clockRevision != CourseClock.revision || clockDay != day) {
+                clockRevision = CourseClock.revision
+                clockDay = day
+                ui.dateView.text = CourseUtils.getTodayDate()
+                initView()
+            }
+            clockHandler.postDelayed(this, 1000)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
+        if (CourseClock.controlsAvailable) clockHandler.post(clockRefresh)
         if (appliedAxisScheme != null && appliedAxisScheme != currentAxisScheme()) {
             initView()
         }
+    }
+
+    override fun onPause() {
+        clockHandler.removeCallbacks(clockRefresh)
+        super.onPause()
     }
 
     /** 设置里选的时间栏作息方案：空串 = 自动（导入时按占比写进默认分组的那一套）。 */
@@ -767,7 +788,10 @@ class ScheduleActivity : BaseActivity() {
             getPrefer().getString(Const.KEY_TIME_AXIS_SCHEME, "").orEmpty()
 
     private fun initView() {
-        launch {
+        initViewJob?.cancel()
+        courseObservers.forEach { (liveData, observer) -> liveData.removeObserver(observer) }
+        courseObservers = emptyList()
+        initViewJob = launch {
             // 一张课表都没有（用户把课表删光了）时，后面所有初始化都没有依据 ——
             // 直接引导导入并结束，不要拿 null 去渲染界面和列表。
             val table = viewModel.getDefaultTable() ?: run {
@@ -839,13 +863,11 @@ class ScheduleActivity : BaseActivity() {
                 ui.weekScrollView.scrollTo(if (week > 4) (week - 4) * dip(56) else 0, 0)
             }
 
-            // 先摘掉上一轮的观察者再重挂：initView 每次都会新建 LiveData（查询里带了新的
-            // tableId），旧 LiveData 上的观察者不摘就会一直活着，按调用次数线性堆积。
-            courseObservers.forEach { (liveData, observer) -> liveData.removeObserver(observer) }
+            // 每次只为当前课表保留一组观察者；旧观察者已在 initView 开始时摘除，
+            // 避免重载触发重复查询和重复刷新。
             courseObservers = (1..7).map { day ->
                 val liveData = viewModel.getRawCourseByDay(day, viewModel.table.id)
                 val observer = Observer<List<CourseBean>> { list ->
-                    if (list == null) return@Observer
                     if (list.isNotEmpty() && list[0].tableId != viewModel.table.id) return@Observer
                     viewModel.allCourseList[day - 1].value = list
                 }

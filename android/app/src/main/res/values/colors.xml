@@ -45,9 +45,6 @@
          深色下由 values-night 置成全透明：用户要求深色模式不要这条线 —— 它贴着深色壁纸
          就是一条多余的蓝灰亮线，而底板圆角已经交代了边界。
          放在颜色资源里而不是代码里，表头下面那个 View 就一行代码都不用碰。 -->
-    <color name="widget_divider">#14000000</color>
-
-    <color name="grey">#9aa3a3a3</color>
     <color name="deep_grey">#9a505050</color>
     <color name="nodeIndex" >#00000000</color>
 
@@ -56,7 +53,6 @@
     <color name="pink">#fa6278</color>
     <color name="blue">#2979ff</color>
     <color name="green">#1DE9B6</color>
-    <color name="yellow">#ffea00</color>
     <color name="purple">#a375ff</color>
     <color name="orange">#ff9100</color>
     <color name="deepOrange">#ff3d00</color>

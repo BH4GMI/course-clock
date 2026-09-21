@@ -46,7 +46,7 @@ class TimeTableFragment : BaseFragment() {
                               savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.time_table_fragment, container, false)
         recyclerView = view.findViewById(R.id.rv_time_table)
-        initRecyclerView(view)
+        initRecyclerView()
 
         // viewLifecycleOwner：本页是导航起点，视图会随往返销毁重建而实例保留——
         // 挂 fragment 生命周期的话每往返一次就多叠一个观察者，同一批数据会被处理 N 遍。
@@ -74,7 +74,7 @@ class TimeTableFragment : BaseFragment() {
         }
     }
 
-    private fun initRecyclerView(fragmentView: View) {
+    private fun initRecyclerView() {
         val context = context ?: return
         adapter = TimeTableAdapter(R.layout.item_time_table, viewModel.timeTableList, viewModel.selectedId)
         adapter.setOnItemClickListener { _, _, position ->

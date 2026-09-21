@@ -25,7 +25,6 @@ object Const {
     const val KEY_SHOW_EMPTY_VIEW = "show_empty_view"
     const val KEY_THEME_COLOR = "nav_bar_color"
     const val KEY_HAS_INTRO = "has_intro"
-    const val KEY_SCHEDULE_PRE_LOAD = "schedule_pre_load"
     const val KEY_SCHEDULE_BLANK_AREA = "schedule_blank_area"
     const val KEY_SCHEDULE_DETAIL_TIME = "schedule_detail_time"
     const val KEY_SCHEDULE_GRID = "schedule_grid"

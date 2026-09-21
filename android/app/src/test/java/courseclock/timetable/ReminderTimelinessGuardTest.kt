@@ -43,6 +43,10 @@ class ReminderTimelinessGuardTest {
                 "src/main/java/courseclock/timetable/utils/CourseReminderScheduler.kt").readText())
     }
 
+    private val nativeClockCode: String by lazy {
+        stripComments(File(moduleDir, "src/main/java/courseclock/timetable/utils/CourseTime.kt").readText())
+    }
+
     /**
      * 去掉 `//` 行注释与 `/* */` 块注释，保留字符串字面量里的内容。
      *
@@ -89,8 +93,8 @@ class ReminderTimelinessGuardTest {
 
     @Test
     fun 调度器只使用精确闹钟() {
-        val scheduled = Regex("""alarmManager\.(set\w*)\(""")
-                .findAll(schedulerCode)
+        val scheduled = Regex("""(?:alarmManager|manager)\.(set\w*)\(""")
+                .findAll(schedulerCode + nativeClockCode)
                 .map { it.groupValues[1] }
                 .toSet()
 
@@ -104,19 +108,17 @@ class ReminderTimelinessGuardTest {
     }
 
     @Test
-    fun 每一枚闹钟都用墙上时钟的唤醒类型() {
+    fun 课程边界唤醒而纯显示刷新不唤醒() {
         assertFalse("RTC_WAKEUP 之外的类型必须在决定前重新论证（ELAPSED_REALTIME 用开机时长，关机/重启后就错位）",
-                schedulerCode.contains("ELAPSED_REALTIME"))
+                (schedulerCode + nativeClockCode).contains("ELAPSED_REALTIME"))
 
-        val schedulingCalls = Regex("""alarmManager\.set\w*\(""").findAll(schedulerCode).count()
-        val wakeupUses = Regex("""AlarmManager\.RTC_WAKEUP""").findAll(schedulerCode).count()
-        assertTrue("每次排闹钟都要显式写 RTC_WAKEUP（排 $schedulingCalls 次，只看到 $wakeupUses 处）",
-                wakeupUses >= schedulingCalls)
+        assertTrue(nativeClockCode.contains("setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP"))
+        assertTrue(nativeClockCode.contains("setExact(if (idle) AlarmManager.RTC_WAKEUP else AlarmManager.RTC"))
     }
 
     @Test
     fun 不使用会被系统延迟的调度框架() {
-        val lowered = schedulerCode.lowercase()
+        val lowered = (schedulerCode + nativeClockCode).lowercase()
         for (forbidden in listOf("workmanager", "jobscheduler", "setalarmclock")) {
             assertFalse("提醒不得改走 $forbidden：它们在 Doze/待机下会被延迟，" +
                     "而本 App 的 7 天滚动窗口依赖闹钟真的在那一刻响",
@@ -132,7 +134,8 @@ class ReminderTimelinessGuardTest {
 
         assertTrue("倒计时刷新必须走 setExact（window = 0）。改成非精确的 set()/setWindow() 之后，" +
                 "这一枚同样会被 power_pending 推后，每分钟的数字就不再准时跳",
-                display.contains("setExact("))
+                display.contains("CourseClock.schedule(") && display.contains("idle = false") &&
+                        nativeClockCode.contains("else manager.setExact("))
         assertFalse("倒计时刷新链不得使用非精确排法",
                 display.contains("setWindow(") || Regex("""\bset\(""").containsMatchIn(display))
     }

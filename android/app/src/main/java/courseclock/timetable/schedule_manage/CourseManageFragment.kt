@@ -62,10 +62,10 @@ class CourseManageFragment : BaseFragment() {
         val act = activity as ScheduleManageActivity
         act.subButton?.setOnClickListener {
             MaterialAlertDialogBuilder(requireActivity())
-                    .setTitle("提示")
-                    .setMessage("真的要清空课表吗？这将无法恢复。")
+                    .setTitle("清空课程")
+                    .setMessage("删除这张课表中的全部课程，保留课表及其设置？此操作无法撤销。")
                     .setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton(R.string.sure) { _, _ ->
+                    .setPositiveButton("清空") { _, _ ->
                         launch {
                             try {
                                 viewModel.clearTable(table!!.id)
@@ -101,7 +101,6 @@ class CourseManageFragment : BaseFragment() {
 
     /** 拉整表课程并按基础课归组：展示字段取最早的一个时间段（卡片只负责「认出这门课」）。 */
     private suspend fun loadCourses() {
-        val context = context ?: return
         if (table == null) return
         val courses = viewModel.getCourseListOfTable(table!!.id)
         allItems = courses.groupBy { it.id }.map { (_, rows) ->

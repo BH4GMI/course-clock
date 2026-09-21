@@ -4,7 +4,7 @@
 
 | 部分 | 要求 |
 | --- | --- |
-| Android 应用 | JDK 21、Android SDK（`compileSdk 34`）。Gradle 由 wrapper 自带（8.13），无需单独安装 |
+| Android 应用 | JDK 21、Android SDK（`compileSdk 36`）。Gradle 由 wrapper 自带（8.13），无需单独安装 |
 | 作息换算模块 | JDK 8 或更高。只用到 `javac` / `java` |
 | 教务工具 | Python 3，只用标准库 |
 
@@ -73,6 +73,25 @@ cd android
 
 发布包用你自己的密钥库签名。口令不写进任何文件，也不经过命令行。
 
+使用已配置的本机 `sign-apk.ps1` 时，可对现成 APK 执行：
+
+```powershell
+pwsh -File "<签名工具目录>/sign-apk.ps1" sign -Apk "<APK绝对路径>"
+```
+
+该工具的口令由 Windows DPAPI 管理，不读取凭据文件，也不向自动化助手提供口令。
+成功退出后最后一行 `SIGNED_APK=...` 指向已独立验证的产物。退出码 4 或 5 表示需要由使用者
+在本机交互执行 `setup`，不得将密码发送到对话或写进仓库。工具和密钥不随源码发布。
+
+签名只改变签名，不改变构建类型。`assembleDebug` 产物即使用发布证书签名也仍可调试，
+不能作为正式 Release 附件；正式附件应来自启用 R8 和资源压缩的 `release` 构建，且
+`android:debuggable` 为 `false`。普通版 `debug` / `release` 均使用 `src/standard` 的真实时钟，
+不包含独立测试包的时间实验室及计时服务。
+
+当前 Gradle 发布任务仍要求内置签名配置，并未提供外部签名用的未签名 Release 构建入口。
+DPAPI 工具可签名现有 APK，但不会替 Gradle 配置构建。准备发布时应先确认发布构建流程，
+不得绕过口令保护或把 debug 产物改名为 release。下文为 Gradle 内置发布签名流程。
+
 ### 1. 准备 `keystore.properties`
 
 复制 `android/keystore.properties.example` 为 `android/keystore.properties`，至少写入
@@ -108,6 +127,19 @@ cd android
 android/app/build/outputs/apk/release/app-release.apk
 ```
 
+### 提交与发布内容
+
+源码提交只包含本次相关代码、运行资源、构建与测试配置、测试夹具和必要说明。
+保留 `LICENSE`、`NOTICE` 及源码版权声明。不要使用未经核对的 `git add .` 或 `git add -A`。
+
+APK、AAB、日志、数据库备份、真实课表、截图、设计草稿、IDE 状态、本机路径与签名配置不入库；
+密钥、口令、令牌及会话数据不得进入提交或 Release 附件。正式 Release 附件仅使用已核验的
+普通版 release APK，可附同名 SHA-256 校验文件；不附测试包、mapping、构建目录或调试现场。
+准备清单与发布草稿保存在已忽略的 `android/app/build/release-preparation/` 中。
+
+发布说明使用简洁、书面的中文，说明实际变化、兼容范围和已知限制，不包含营销内容、
+推广、联系方式、机器路径，或未经测量的性能与功耗承诺。提交、推送、打标签和发布分别确认后执行。
+
 ---
 
 ## 常见问题
@@ -138,10 +170,11 @@ Lint 使用现有 `lint-baseline.xml`，通过只表示没有未豁免的错误�
 Room 2.6.1 在首次查询前允许连接尚未打开。`DatabaseLifecycleTest` 覆盖首次查询前复用、
 关闭后重建以及旧引用重复关闭。
 
-首页七天课程与预加载周的空状态共用同一个 Room `LiveData` 整表查询，代替七次按天查询
+首页七天课程与相邻页的空状态共用同一个 Room `LiveData` 整表查询，代替七次按天查询
 和每周一次计数查询；按天分发使用 AndroidX `distinctUntilChanged`，未变化的课程列不重绘。
-`ScheduleLoadingTest` 覆盖单双周、未来课程、空课表切换及删除后的刷新。未新增依赖，
-未改变数据库 schema、预加载范围或提醒机制。
+课表页固定使用旧版 `ViewPager` 的最低邻页缓存 `offscreenPageLimit=1`，不再提供额外的
+“页面预加载”开关；页面仍按需创建，数据观察绑定到视图生命周期。`ScheduleLoadingTest`
+覆盖单双周、未来课程、空课表切换及删除后的刷新。未新增依赖，未改变数据库 schema 或提醒机制。
 
 采用依据：[Room 官方异步查询文档](https://developer.android.com/training/data-storage/room/async-queries)。
 复用项目已有 Room 2.6.1 和 AndroidX LiveData；不引入新的缓存框架或轮询任务。

@@ -7,6 +7,7 @@ import android.os.Build
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.TextUtils
 import android.view.View
 import androidx.core.content.ContextCompat
 import courseclock.timetable.R
@@ -61,15 +62,31 @@ class TipTextView(context: Context) : View(context) {
     private var otherWeekTextAlpha = 255
     private var otherWeekBgAlpha = 255
     private var otherWeekStrokeAlpha = 255
+    private var widgetContent: List<String>? = null
+    private var preferredTextSize = 0f
+    internal var widgetOverlapCount = 0
+        set(value) {
+            field = value
+            mStaticLayout = null
+            invalidate()
+        }
+
+    internal fun setWidgetContent(title: String, location: String, time: String, metadata: String) {
+        widgetContent = listOf(title, location, time, metadata)
+        contentDescription = widgetContent?.filter { it.isNotBlank() }?.joinToString("，")
+        mStaticLayout = null
+    }
 
     fun init(text: String, txtSize: Int, txtColor: Int, bgColor: Int, bgAlpha: Int, stroke: Int) {
         this.text = text
+        mStaticLayout = null
         mTextPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
             // textSize = mSize * resources.displayMetrics.scaledDensity
             textSize = txtSize * dpUnit
             typeface = Typeface.DEFAULT_BOLD
             color = txtColor
         }
+        preferredTextSize = mTextPaint.textSize
         mPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = txtColor
             isDither = true
@@ -113,6 +130,59 @@ class TipTextView(context: Context) : View(context) {
         setMeasuredDimension(width, height)
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        mStaticLayout = null
+    }
+
+    private fun layoutText(value: CharSequence, availableWidth: Int): StaticLayout =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                StaticLayout.Builder.obtain(value, 0, value.length, mTextPaint, availableWidth)
+                        .setIncludePad(false).build()
+            } else {
+                @Suppress("DEPRECATION")
+                StaticLayout(value, mTextPaint, availableWidth, Layout.Alignment.ALIGN_NORMAL, 1f, 0f, false)
+            }
+
+    internal fun widgetTextLayout(): StaticLayout {
+        val parts = requireNotNull(widgetContent)
+        val availableWidth = (width - paddingRight - paddingLeft).coerceAtLeast(1)
+        mTextPaint.textSize = preferredTextSize
+        val twoCharacters = mTextPaint.measureText("课程")
+        if (twoCharacters > availableWidth) {
+            mTextPaint.textSize = minOf(preferredTextSize,
+                    maxOf(10 * dpUnit, preferredTextSize * availableWidth / twoCharacters))
+        }
+        val full = layoutText(parts.joinToString("\n"), availableWidth)
+        val lineHeight = (0 until full.lineCount).maxOf { full.getLineBottom(it) - full.getLineTop(it) }.coerceAtLeast(1)
+        val lines = (height - paddingTop - paddingBottom) / lineHeight
+        if (lines <= 0) return layoutText("", availableWidth)
+        val (title, location, time, metadata) = parts
+        val titleMinimum = minOf(2, layoutText(title, availableWidth).lineCount)
+        val roomLines = if (location.isBlank() || lines <= titleMinimum) 0 else
+            minOf(2, layoutText(location, availableWidth).lineCount, lines - titleMinimum)
+        val meta = if (widgetOverlapCount > 0) "另有${widgetOverlapCount}门" else metadata
+        val titleWanted = minOf(3, layoutText(title, availableWidth).lineCount)
+        val spare = (lines - roomLines - titleWanted).coerceAtLeast(0)
+        val showTime = time.isNotEmpty() && spare > 0
+        val showMeta = meta.isNotEmpty() && spare > (if (showTime) 1 else 0)
+        val titleLines = lines - roomLines - (if (showTime) 1 else 0) - (if (showMeta) 1 else 0)
+        fun fit(value: String, count: Int): CharSequence {
+            val layout = layoutText(value, availableWidth)
+            if (layout.lineCount <= count) return value
+            val start = layout.getLineStart(count - 1)
+            val tail = TextUtils.ellipsize(value.substring(start).replace('\n', ' '), mTextPaint,
+                    availableWidth.toFloat(), if (value == location) TextUtils.TruncateAt.START else TextUtils.TruncateAt.MIDDLE)
+            return if (start == 0) tail else value.substring(0, start).trimEnd() + "\n" + tail
+        }
+        val values = ArrayList<CharSequence>()
+        if (showTime) values.add(fit(time, 1))
+        values.add(fit(title, titleLines))
+        if (roomLines > 0) values.add(fit(location, roomLines))
+        if (showMeta) values.add(fit(meta, 1))
+        return layoutText(values.joinToString("\n"), availableWidth)
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         // 放在透明度那段之前：`strokePaint.color = ...` 会把 alpha 一起重置成 255，
@@ -127,23 +197,8 @@ class TipTextView(context: Context) : View(context) {
             bgPaint.alpha = otherWeekBgAlpha
         }
         if (mStaticLayout == null) {
-            mStaticLayout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                StaticLayout
-                        .Builder
-                        .obtain(text, 0, text.length, mTextPaint, width - paddingRight - paddingLeft)
-                        .setIncludePad(false)
-                        .build()
-            } else {
-                StaticLayout(
-                        text,
-                        mTextPaint,
-                        width - paddingRight - paddingLeft,
-                        Layout.Alignment.ALIGN_NORMAL,
-                        1.0f,
-                        0f,
-                        false
-                )
-            }
+            val availableWidth = (width - paddingRight - paddingLeft).coerceAtLeast(1)
+            mStaticLayout = if (widgetContent != null) widgetTextLayout() else layoutText(text, availableWidth)
         }
         canvas.drawRoundRect(rect, 4 * dpUnit, 4 * dpUnit, bgPaint)
         canvas.drawRoundRect(rect, 4 * dpUnit, 4 * dpUnit, strokePaint)

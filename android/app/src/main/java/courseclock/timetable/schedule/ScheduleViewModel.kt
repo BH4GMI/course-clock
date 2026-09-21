@@ -105,7 +105,7 @@ class ScheduleViewModel(application: Application) : AndroidViewModel(application
                 .distinctUntilChanged()
     }
 
-    // 七天与所有预加载周共用 Room 的同一个观察查询，避免每个消费者各查一次数据库。
+    // 七天与已创建的周页面共用 Room 的同一个观察查询，避免每个消费者各查一次数据库。
     private fun coursesOfTable(tableId: Int): LiveData<List<CourseBean>> {
         if (observedTableId != tableId || observedCourses == null) {
             observedCourses = courseDao.getCourseOfTableLiveData(tableId)

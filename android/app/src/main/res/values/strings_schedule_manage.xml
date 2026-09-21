@@ -11,7 +11,6 @@
 <resources>
     <string name="course_manage_search_hint">搜索课程、教师或教室</string>
     <string name="course_manage_add_course">添加课程</string>
-    <string name="course_manage_count">共 %1$d 门课程</string>
     <string name="course_manage_count_hint">共 %1$d 门课程 · 轻触编辑，长按删除</string>
     <string name="course_manage_found">找到 %1$d 门课程</string>
     <string name="course_manage_empty">还没有课程，点右下角加号添加一门</string>

@@ -121,7 +121,8 @@ class SettingsRenderTest {
         recycler.adapter = SettingItemAdapter().apply { data = items }
         recycler.measure(
                 View.MeasureSpec.makeMeasureSpec(dip(360), View.MeasureSpec.EXACTLY),
-                View.MeasureSpec.makeMeasureSpec(dip(1400), View.MeasureSpec.EXACTLY))
+                // 整表几何测试必须测量全部行，不能把固定视口之外的回收行当作已挂载视图。
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED))
         recycler.layout(0, 0, recycler.measuredWidth, recycler.measuredHeight)
         return Rendered(list, items, recycler)
     }
@@ -170,6 +171,25 @@ class SettingsRenderTest {
         }
         assertTrue("列表里找不到 $id 这一行", position >= 0)
         return position
+    }
+
+    @Test
+    fun 设置文案区分时间栏课程与通知作用范围() {
+        val items = SettingsList(context).build()
+        val ids = items.mapNotNull { it.rowId() }
+        assertEquals("同一设置不应重复出现", ids.size, ids.toSet().size)
+        fun horizontal(id: String) = items[positionOf(items, id)] as HorizontalItem
+        fun switch(id: String) = items[positionOf(items, id)] as SwitchItem
+        val table = horizontal(SettingRowId.CURRENT_TABLE)
+        assertEquals("当前课表设置", table.title)
+        assertTrue("说明不能挤在右侧值中", table.value.isEmpty())
+        assertTrue(table.desc.contains("课程作息"))
+        assertEquals("左侧显示时间", switch(SettingRowId.SCHEDULE_DETAIL_TIME).title)
+        assertTrue(horizontal(SettingRowId.TIME_AXIS_SCHEME).desc.contains("各课程仍按自身作息"))
+        assertTrue(switch(SettingRowId.COURSE_REMIND).desc.contains("不影响小组件"))
+        assertTrue(horizontal(SettingRowId.REMINDER_ON_GOING).desc.contains("始终静默"))
+        assertTrue(horizontal(SettingRowId.NOTIFICATION_SOUND).desc.contains("仅影响一次性提醒"))
+        assertFalse(switch(SettingRowId.DAY_WIDGET_COLOR).desc.contains("右上角"))
     }
 
     @Test
@@ -363,7 +383,7 @@ class SettingsRenderTest {
         // 提前量是课前偏好，也不灰。
         for (id in listOf(SettingRowId.REMINDER_BEFORE_START, SettingRowId.REMINDER_BEFORE_END)) {
             val position = seekBarPositionOf(off.items, id)
-            assertTrue("提前量不该跟着总闸变灰", off.items[position].isRowEnabled)
+            assertTrue("提前量依赖总闸和对应提醒开关", !off.items[position].isRowEnabled)
         }
     }
 

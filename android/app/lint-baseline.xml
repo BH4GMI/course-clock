@@ -2,58 +2,80 @@
 <issues format="6" by="lint 8.7.3" type="baseline" client="gradle" dependencies="false" name="AGP (8.7.3)" variant="all" version="8.7.3">
 
     <issue
-        id="UseGetLayoutInflater"
-        message="Use of LayoutInflater.from(Context) detected. Consider using layoutInflater instead"
-        errorLine1="        LayoutInflater.from(context).inflate(layoutId, cardView, true)"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        id="ExifInterface"
+        message="Avoid using `android.media.ExifInterface`; use `androidx.exifinterface.media.ExifInterface` instead"
+        errorLine1="import android.media.ExifInterface"
+        errorLine2="       ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/courseclock/timetable/base_view/BaseDialogFragment.kt"
-            line="36"
-            column="9"/>
+            file="src/main/java/courseclock/timetable/utils/BackgroundImageLoader.kt"
+            line="15"
+            column="8"/>
     </issue>
 
     <issue
         id="InlinedApi"
         message="Field requires API level 23 (current min is 21): `android.provider.Settings#ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`"
-        errorLine1="        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {"
-        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="    fun miuiIntent(context: Context): Intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)"
+        errorLine2="                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/courseclock/timetable/utils/BatteryOptimization.kt"
+            line="52"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 23 (current min is 21): `android.provider.Settings#ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`"
+        errorLine1="    fun aospIntent(context: Context): Intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)"
+        errorLine2="                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/utils/BatteryOptimization.kt"
             line="69"
-            column="29"/>
+            column="55"/>
     </issue>
 
     <issue
         id="InlinedApi"
         message="Field requires API level 23 (current min is 21): `android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`"
-        errorLine1="            context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)"
-        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="                context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)"
+        errorLine2="                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/utils/BatteryOptimization.kt"
-            line="79"
-            column="42"/>
+            line="113"
+            column="46"/>
     </issue>
 
     <issue
         id="InlinedApi"
-        message="Field requires API level 26 (current min is 21): `android.provider.Settings#ACTION_APP_NOTIFICATION_SETTINGS`"
-        errorLine1="                    startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)"
-        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        message="Field requires API level 23 (current min is 21): `android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`"
+        errorLine1="            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/courseclock/timetable/settings/SettingsActivity.kt"
-            line="270"
-            column="42"/>
+            file="src/main/java/courseclock/timetable/utils/BatteryOptimization.kt"
+            line="128"
+            column="20"/>
     </issue>
 
     <issue
         id="InlinedApi"
-        message="Field requires API level 26 (current min is 21): `android.provider.Settings#EXTRA_APP_PACKAGE`"
-        errorLine1="                            .putExtra(Settings.EXTRA_APP_PACKAGE, packageName))"
-        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        message="Field requires API level 23 (current min is 21): `android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`"
+        errorLine1="                activity.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)"
+        errorLine2="                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/courseclock/timetable/settings/SettingsActivity.kt"
-            line="271"
-            column="39"/>
+            file="src/main/java/courseclock/timetable/utils/BatteryOptimization.kt"
+            line="136"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 23 (current min is 21): `android.view.HapticFeedbackConstants#CONTEXT_CLICK`"
+        errorLine1="    fun tap(view: View) = feedback(view, HapticFeedbackConstants.CONTEXT_CLICK, Build.VERSION_CODES.M)"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/courseclock/timetable/utils/Haptics.kt"
+            line="36"
+            column="42"/>
     </issue>
 
     <issue
@@ -74,7 +96,7 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/xml/schedule_app_widget_info.xml"
-            line="22"
+            line="32"
             column="5"/>
     </issue>
 
@@ -85,7 +107,29 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/xml/schedule_app_widget_info.xml"
-            line="23"
+            line="33"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `targetCellWidth` is only used in API level 31 and higher (current min is 21)"
+        errorLine1="    android:targetCellWidth=&quot;2&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/xml/small_today_course_app_widget_info.xml"
+            line="33"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `targetCellHeight` is only used in API level 31 and higher (current min is 21)"
+        errorLine1="    android:targetCellHeight=&quot;2&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/xml/small_today_course_app_widget_info.xml"
+            line="34"
             column="5"/>
     </issue>
 
@@ -96,7 +140,7 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/xml/today_course_app_widget_info.xml"
-            line="24"
+            line="33"
             column="5"/>
     </issue>
 
@@ -107,976 +151,30 @@
         errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/xml/today_course_app_widget_info.xml"
-            line="25"
+            line="34"
             column="5"/>
     </issue>
 
     <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        dialog?.window?.setLayout(context!!.dip(280), ViewGroup.LayoutParams.WRAP_CONTENT)"
-        errorLine2="                                  ~~~~~~~~~">
+        id="BatteryLife"
+        message="Use of `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` violates the Play Store Content Policy regarding acceptable use cases, as described in https://developer.android.com/training/monitoring-device-state/doze-standby.html"
+        errorLine1="    fun miuiIntent(context: Context): Intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)"
+        errorLine2="                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/courseclock/timetable/base_view/BaseDialogFragment.kt"
-            line="33"
-            column="35"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireArguments() instead of arguments!!"
-        errorLine1="        showAlphaSlider = arguments!!.getBoolean(&quot;alpha&quot;)"
-        errorLine2="                          ~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/widget/colorpicker/ColorPickerFragment.kt"
-            line="35"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireArguments() instead of arguments!!"
-        errorLine1="        dialogId = arguments!!.getInt(&quot;id&quot;)"
-        errorLine2="                   ~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/widget/colorpicker/ColorPickerFragment.kt"
-            line="36"
-            column="20"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireArguments() instead of arguments!!"
-        errorLine1="        color = savedInstanceState?.getInt(&quot;color&quot;) ?: arguments!!.getInt(&quot;color&quot;)"
-        errorLine2="                                                       ~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/widget/colorpicker/ColorPickerFragment.kt"
-            line="37"
-            column="56"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                val imm = activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager"
-        errorLine2="                          ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/widget/colorpicker/ColorPickerFragment.kt"
-            line="62"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                val imm = activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager"
-        errorLine2="                          ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/widget/colorpicker/ColorPickerFragment.kt"
-            line="77"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                val imm = activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager"
-        errorLine2="                          ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/widget/colorpicker/ColorPickerFragment.kt"
-            line="77"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                val imm = activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager"
-        errorLine2="                          ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/widget/colorpicker/ColorPickerFragment.kt"
-            line="114"
-            column="27"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="            dialog?.window?.setLayout(context!!.dip(280), ViewGroup.LayoutParams.WRAP_CONTENT)"
-        errorLine2="                                      ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="53"
-            column="39"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="            container!!.layoutParams.width = context!!.dip(280)"
-        errorLine2="                                             ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="59"
-            column="46"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="            activity!!.start&lt;AddCourseActivity> {"
-        errorLine2="            ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="118"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                        Toasty.success(context!!.applicationContext, &quot;删除成功&quot;).show()"
-        errorLine2="                                       ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="139"
-            column="40"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                        AppWidgetUtils.refreshAllWidgets(activity!!.applicationContext)"
-        errorLine2="                                                         ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="141"
-            column="58"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                        Toasty.error(context!!.applicationContext, &quot;出现异常>_&lt;\n&quot; + e.message).show()"
-        errorLine2="                                     ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="144"
-            column="38"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                    Toasty.success(context!!.applicationContext, &quot;删除成功&quot;).show()"
-        errorLine2="                                   ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="154"
-            column="36"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                    AppWidgetUtils.refreshAllWidgets(activity!!.applicationContext)"
-        errorLine2="                                                     ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="156"
-            column="54"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                    Toasty.error(context!!.applicationContext, &quot;出现异常>_&lt;\n&quot; + e.message).show()"
-        errorLine2="                                 ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="159"
-            column="34"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        val space = context!!.dip(8)"
-        errorLine2="                    ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="48"
-            column="21"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="            MaterialAlertDialogBuilder(activity!!)"
-        errorLine2="                                       ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="70"
-            column="40"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                                Toasty.success(activity!!, &quot;操作成功~&quot;).show()"
-        errorLine2="                                               ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="80"
-            column="48"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                                Toasty.error(activity!!, &quot;操作失败>_&lt;${e.message}&quot;).show()"
-        errorLine2="                                             ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="82"
-            column="46"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="            activity!!.start&lt;AddCourseActivity> {"
-        errorLine2="            ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="100"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="            MaterialAlertDialogBuilder(activity!!)"
-        errorLine2="                                       ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="108"
-            column="40"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                            Toasty.success(context!!, &quot;删除成功~&quot;).show()"
-        errorLine2="                                           ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="115"
-            column="44"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                            AppWidgetUtils.refreshAllWidgets(activity!!.applicationContext)"
-        errorLine2="                                                             ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="118"
-            column="62"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        adapter.addHeaderView(AppCompatTextView(context!!).apply {"
-        errorLine2="                                                ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="125"
-            column="49"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        adapter.addFooterView(View(context!!).apply {"
-        errorLine2="                                   ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="131"
-            column="36"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        adapter.setEmptyView(LinearLayoutCompat(context!!).apply {"
-        errorLine2="                                                ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="134"
-            column="49"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="            addView(AppCompatImageView(context!!).apply {"
-        errorLine2="                                       ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="138"
-            column="40"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="            Toasty.info(activity!!, &quot;请自行选择导出的地方\n不要修改文件的扩展名哦&quot;, Toasty.LENGTH_LONG).show()"
-        errorLine2="                        ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ExportSettingsFragment.kt"
-            line="43"
-            column="25"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="            Toasty.info(activity!!, &quot;请自行选择导出的地方\n不要修改文件的扩展名哦&quot;, Toasty.LENGTH_LONG).show()"
-        errorLine2="                        ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ExportSettingsFragment.kt"
-            line="55"
-            column="25"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        ViewUtils.resizeStatusBar(context!!.applicationContext, binding.vStatus)"
-        errorLine2="                                  ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_import/FileImportFragment.kt"
-            line="32"
-            column="35"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="            activity!!.finish()"
-        errorLine2="            ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_import/FileImportFragment.kt"
-            line="47"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="            activity!!.startActivityForResult("
-        errorLine2="            ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ImportChooseFragment.kt"
-            line="40"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                activity!!.startActivityForResult("
-        errorLine2="                ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ImportChooseFragment.kt"
+            file="src/main/java/courseclock/timetable/utils/BatteryOptimization.kt"
             line="52"
-            column="17"/>
+            column="64"/>
     </issue>
 
     <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="        MaterialAlertDialogBuilder(activity!!)"
-        errorLine2="                                   ~~~~~~~~~~">
+        id="BatteryLife"
+        message="Use of `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` violates the Play Store Content Policy regarding acceptable use cases, as described in https://developer.android.com/training/monitoring-device-state/doze-standby.html"
+        errorLine1="    fun aospIntent(context: Context): Intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)"
+        errorLine2="                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/courseclock/timetable/schedule/ImportChooseFragment.kt"
-            line="63"
-            column="36"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        viewpager.pageMargin = context!!.dip(32)"
-        errorLine2="                               ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/MultiCourseFragment.kt"
-            line="47"
-            column="32"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        viewpager.pageMargin = context!!.dip(32)"
-        errorLine2="                               ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/MultiCourseFragment.kt"
-            line="47"
-            column="32"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        ui = ScheduleUI(context!!, viewModel.table, if (week == viewModel.currentWeek) weekDay else -1)"
-        errorLine2="                        ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="52"
-            column="25"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        ui.showTimeDetail = context!!.getPrefer().getBoolean(Const.KEY_SCHEDULE_DETAIL_TIME, true)"
-        errorLine2="                            ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="53"
-            column="29"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                val img = AppCompatImageView(context!!).apply {"
-        errorLine2="                                             ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="94"
-            column="46"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                ui.root.addView(LinearLayoutCompat(context!!).apply {"
-        errorLine2="                                                   ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="97"
-            column="52"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                    marginStart = context!!.dip(32)"
-        errorLine2="                                  ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="116"
-            column="35"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                    marginStart = context!!.dip(32)"
-        errorLine2="                                  ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="116"
-            column="35"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                    marginEnd = context!!.dip(32)"
-        errorLine2="                                ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="117"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                    marginEnd = context!!.dip(32)"
-        errorLine2="                                ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="117"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                Toasty.info(context!!, R.string.error_course_data, Toast.LENGTH_LONG).show()"
-        errorLine2="                            ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="203"
-            column="29"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                Toasty.info(context!!, R.string.error_course_data, Toast.LENGTH_LONG).show()"
-        errorLine2="                            ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="208"
-            column="29"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                Toasty.info(context!!, R.string.error_course_node, Toast.LENGTH_LONG).show()"
-        errorLine2="                            ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="213"
-            column="29"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                Toasty.info(context!!, R.string.error_course_node, Toast.LENGTH_LONG).show()"
-        errorLine2="                            ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="218"
-            column="29"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="            val textView = TipTextView(context!!)"
-        errorLine2="                                       ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="221"
-            column="40"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="            textView.setPadding(context!!.dip(4))"
-        errorLine2="                                ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="227"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                c.color = &quot;#${Integer.toHexString(ViewUtils.getCustomizedColor(activity!!, c.id % 9))}&quot;"
-        errorLine2="                                                                               ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="230"
-            column="80"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                            ViewUtils.getCustomizedColor(activity!!, c.id % 9)),"
-        errorLine2="                                                         ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="296"
-            column="58"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                    Toasty.error(activity!!.applicationContext,"
-        errorLine2="                                 ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="307"
-            column="34"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="            val dialog = MaterialAlertDialogBuilder(context!!)"
-        errorLine2="                                                    ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="52"
-            column="53"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                            Toasty.success(context!!, &quot;新建成功~&quot;).show()"
-        errorLine2="                                           ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="71"
-            column="44"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                            Toasty.error(context!!, &quot;操作失败>_&lt;&quot;).show()"
-        errorLine2="                                         ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="73"
-            column="42"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                            activity!!.start&lt;ScheduleSettingsActivity> {"
-        errorLine2="                            ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="99"
-            column="29"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                            Toasty.error(context!!.applicationContext, &quot;读取课表异常>_&lt;&quot;)"
-        errorLine2="                                         ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="103"
-            column="42"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                    Toasty.info(activity!!.applicationContext, &quot;长按删除课程表哦~&quot;).show()"
-        errorLine2="                                ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="108"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                    MaterialAlertDialogBuilder(activity!!)"
-        errorLine2="                                               ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="118"
-            column="48"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                                        Toasty.success(context!!, &quot;删除成功~&quot;).show()"
-        errorLine2="                                                       ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="127"
-            column="56"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                                        AppWidgetUtils.refreshAllWidgets(activity!!.applicationContext)"
-        errorLine2="                                                                         ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="129"
-            column="74"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                                        Toasty.error(context!!, &quot;操作失败>_&lt;${e.message}&quot;).show()"
-        errorLine2="                                                     ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="131"
-            column="54"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        adapter.addHeaderView(AppCompatTextView(context!!).apply {"
-        errorLine2="                                                ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_manage/ScheduleManageFragment.kt"
-            line="148"
-            column="49"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        colorSurface = context!!.styledColor(R.attr.colorOnSurface)"
-        errorLine2="                       ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/course_add/SelectWeekFragment.kt"
-            line="42"
-            column="24"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                binding.tvAll.background = ContextCompat.getDrawable(context!!, R.drawable.select_textview_bg)"
-        errorLine2="                                                                     ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/course_add/SelectWeekFragment.kt"
-            line="46"
-            column="70"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                binding.tvAll.background = ContextCompat.getDrawable(context!!, R.drawable.select_textview_bg)"
-        errorLine2="                                                                     ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/course_add/SelectWeekFragment.kt"
-            line="46"
-            column="70"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                binding.tvType1.background = ContextCompat.getDrawable(context!!, R.drawable.select_textview_bg)"
-        errorLine2="                                                                       ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/course_add/SelectWeekFragment.kt"
-            line="55"
-            column="72"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                binding.tvType1.background = ContextCompat.getDrawable(context!!, R.drawable.select_textview_bg)"
-        errorLine2="                                                                       ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/course_add/SelectWeekFragment.kt"
-            line="55"
-            column="72"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                binding.tvType2.background = ContextCompat.getDrawable(context!!, R.drawable.select_textview_bg)"
-        errorLine2="                                                                       ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/course_add/SelectWeekFragment.kt"
-            line="63"
-            column="72"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                binding.tvType2.background = ContextCompat.getDrawable(context!!, R.drawable.select_textview_bg)"
-        errorLine2="                                                                       ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/course_add/SelectWeekFragment.kt"
-            line="63"
-            column="72"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="                Toasty.error(context!!.applicationContext, &quot;请至少选择一周&quot;).show()"
-        errorLine2="                             ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/course_add/SelectWeekFragment.kt"
-            line="161"
-            column="30"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                Toasty.error(activity!!, &quot;默认时间表不能改名呢>_&lt;&quot;).show()"
-        errorLine2="                             ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/TimeSettingsFragment.kt"
-            line="119"
-            column="30"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="            val dialog = MaterialAlertDialogBuilder(context!!)"
-        errorLine2="                                                    ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/TimeSettingsFragment.kt"
-            line="122"
-            column="53"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                    Toasty.info(activity!!.applicationContext, &quot;长按确认删除哦~&quot;).show()"
-        errorLine2="                                ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/TimeTableFragment.kt"
-            line="65"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="            val dialog = MaterialAlertDialogBuilder(context!!)"
-        errorLine2="                                                    ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/TimeTableFragment.kt"
-            line="102"
-            column="53"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                            Toasty.success(activity!!.applicationContext, &quot;新建成功~&quot;).show()"
-        errorLine2="                                           ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/TimeTableFragment.kt"
-            line="119"
-            column="44"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="                            Toasty.error(activity!!.applicationContext, &quot;发生异常>_&lt;${e.message}&quot;).show()"
-        errorLine2="                                         ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/TimeTableFragment.kt"
-            line="121"
-            column="42"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireContext() instead of context!!"
-        errorLine1="        ViewUtils.resizeStatusBar(context!!.applicationContext, binding.root.findViewById(R.id.v_status))"
-        errorLine2="                                  ~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_import/WebViewLoginFragment.kt"
-            line="73"
-            column="35"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="        MaterialAlertDialogBuilder(activity!!)"
-        errorLine2="                                   ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_import/WebViewLoginFragment.kt"
-            line="78"
-            column="36"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="            val dialog = MaterialAlertDialogBuilder(activity!!)"
-        errorLine2="                                                    ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_import/WebViewLoginFragment.kt"
-            line="170"
-            column="53"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="            Toasty.warning(activity!!, reason, Toast.LENGTH_LONG).show()"
-        errorLine2="                           ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_import/WebViewLoginFragment.kt"
-            line="309"
-            column="28"/>
-    </issue>
-
-    <issue
-        id="UseRequireInsteadOfGet"
-        message="Use requireActivity() instead of activity!!"
-        errorLine1="        Toasty.warning(activity!!, &quot;已停止自动脚本，页面交给你自己操作&quot;, Toast.LENGTH_LONG).show()"
-        errorLine2="                       ~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule_import/WebViewLoginFragment.kt"
-            line="337"
-            column="24"/>
-    </issue>
-
-    <issue
-        id="WrongConstant"
-        message="Must be one of: PixelFormat.UNKNOWN, PixelFormat.TRANSLUCENT, PixelFormat.TRANSPARENT, PixelFormat.OPAQUE"
-        errorLine1="        return 0"
-        errorLine2="               ~">
-        <location
-            file="src/main/java/courseclock/timetable/widget/colorpicker/AlphaPatternDrawable.kt"
-            line="37"
-            column="16"/>
-    </issue>
-
-    <issue
-        id="WrongConstant"
-        message="Must be one or more of: Gravity.LEFT, Gravity.RIGHT, GravityCompat.START, GravityCompat.END, Gravity.NO_GRAVITY"
-        errorLine1="            gravity = Gravity.START"
-        errorLine2="                      ~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleActivityUI.kt"
-            line="265"
-            column="23"/>
-    </issue>
-
-    <issue
-        id="FragmentLiveDataObserve"
-        message="Use viewLifecycleOwner as the LifecycleOwner."
-        errorLine1="        viewModel.getTimeTableList().observe(this, Observer {"
-        errorLine2="                                             ~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/TimeTableFragment.kt"
-            line="37"
-            column="46"/>
+            file="src/main/java/courseclock/timetable/utils/BatteryOptimization.kt"
+            line="69"
+            column="64"/>
     </issue>
 
     <issue
@@ -1108,8 +206,19 @@
         errorLine2="                                                                                    ~~~~">
         <location
             file="src/main/java/courseclock/timetable/course_add/AddCourseActivity.kt"
-            line="235"
+            line="225"
             column="85"/>
+    </issue>
+
+    <issue
+        id="InflateParams"
+        message="Avoid passing `null` as the view root (needed to resolve layout parameters on the inflated layout&apos;s root element)"
+        errorLine1="            LayoutInflater.from(ctx).inflate(R.layout.nav_header, null, false).apply {"
+        errorLine2="                                                                  ~~~~">
+        <location
+            file="src/main/java/courseclock/timetable/schedule/ScheduleActivityUI.kt"
+            line="457"
+            column="67"/>
     </issue>
 
     <issue
@@ -1119,30 +228,19 @@
         errorLine2="                                                                                           ~~~~">
         <location
             file="src/main/java/courseclock/timetable/settings/TimeSettingsFragment.kt"
-            line="76"
+            line="80"
             column="92"/>
     </issue>
 
     <issue
         id="InflateParams"
         message="Avoid passing `null` as the view root (needed to resolve layout parameters on the inflated layout&apos;s root element)"
-        errorLine1="        val view = LayoutInflater.from(activity).inflate(R.layout.item_add_course_btn, null)"
-        errorLine2="                                                                                       ~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/TimeTableFragment.kt"
-            line="98"
-            column="88"/>
-    </issue>
-
-    <issue
-        id="InflateParams"
-        message="Avoid passing `null` as the view root (needed to resolve layout parameters on the inflated layout&apos;s root element)"
-        errorLine1="                    .inflate(R.layout.today_course_app_widget, null)"
-        errorLine2="                                                               ~~~~">
+        errorLine1="            val root = LayoutInflater.from(applicationContext).inflate(R.layout.today_course_app_widget, null)"
+        errorLine2="                                                                                                         ~~~~">
         <location
             file="src/main/java/courseclock/timetable/today_appwidget/TodayColorfulService.kt"
-            line="189"
-            column="64"/>
+            line="108"
+            column="106"/>
     </issue>
 
     <issue
@@ -1152,7 +250,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/AndroidManifest.xml"
-            line="40"
+            line="69"
             column="13"/>
     </issue>
 
@@ -1163,30 +261,8 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/AndroidManifest.xml"
-            line="55"
+            line="106"
             column="13"/>
-    </issue>
-
-    <issue
-        id="RestrictedApi"
-        message="AppCompatCheckBox.setSupportButtonTintList can only be called from within the same library group prefix (referenced groupId=`androidx.appcompat` with prefix androidx from groupId=`android`)"
-        errorLine1="                supportButtonTintList = ColorStateList(states, colors)"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/provider/SwitchItemProvider.kt"
-            line="66"
-            column="17"/>
-    </issue>
-
-    <issue
-        id="RestrictedApi"
-        message="AppCompatCheckBox.setSupportButtonTintList can only be called from within the same library group prefix (referenced groupId=`androidx.appcompat` with prefix androidx from groupId=`android`)"
-        errorLine1="                supportButtonTintList = ColorStateList(states, colors)"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/settings/provider/SwitchItemProvider.kt"
-            line="66"
-            column="17"/>
     </issue>
 
     <issue
@@ -1196,7 +272,7 @@
         errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivityUI.kt"
-            line="462"
+            line="777"
             column="38"/>
     </issue>
 
@@ -1207,7 +283,7 @@
         errorLine2="                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivityUI.kt"
-            line="465"
+            line="780"
             column="46"/>
     </issue>
 
@@ -1218,7 +294,7 @@
         errorLine2="                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivityUI.kt"
-            line="465"
+            line="780"
             column="46"/>
     </issue>
 
@@ -1229,7 +305,7 @@
         errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivityUI.kt"
-            line="466"
+            line="781"
             column="39"/>
     </issue>
 
@@ -1240,7 +316,7 @@
         errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivityUI.kt"
-            line="466"
+            line="781"
             column="39"/>
     </issue>
 
@@ -1251,7 +327,7 @@
         errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivityUI.kt"
-            line="472"
+            line="787"
             column="39"/>
     </issue>
 
@@ -1262,7 +338,7 @@
         errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivityUI.kt"
-            line="472"
+            line="787"
             column="39"/>
     </issue>
 
@@ -1273,7 +349,7 @@
         errorLine2="                        ~~~~">
         <location
             file="src/main/java/courseclock/timetable/base_view/BaseListActivity.kt"
-            line="114"
+            line="128"
             column="25"/>
     </issue>
 
@@ -1284,7 +360,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/AndroidManifest.xml"
-            line="40"
+            line="69"
             column="13"/>
     </issue>
 
@@ -1295,7 +371,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/AndroidManifest.xml"
-            line="55"
+            line="106"
             column="13"/>
     </issue>
 
@@ -1308,17 +384,6 @@
             file="src/main/java/courseclock/timetable/utils/ViewUtils.kt"
             line="76"
             column="44"/>
-    </issue>
-
-    <issue
-        id="UseCompatLoadingForColorStateLists"
-        message="Use `AppCompatResources.getColorStateList()`"
-        errorLine1="        resources.getColorStateList(colorRes)"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/splitties/resources/ColorResources.kt"
-            line="37"
-            column="9"/>
     </issue>
 
     <issue
@@ -1361,7 +426,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule_import/WebViewLoginFragment.kt"
-            line="87"
+            line="139"
             column="9"/>
     </issue>
 
@@ -1377,80 +442,36 @@
     </issue>
 
     <issue
-        id="IntentFilterExportedReceiver"
-        message="As of Android 12, `android:exported` must be set; use `true` to make the activity available to other apps, and `false` otherwise."
-        errorLine1="        &lt;activity"
-        errorLine2="         ~~~~~~~~">
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort."
+        errorLine1="                adapter.notifyDataSetChanged()"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/AndroidManifest.xml"
-            line="38"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="IntentFilterExportedReceiver"
-        message="As of Android 12, `android:exported` must be set; use `true` to make the activity available to other apps, and `false` otherwise."
-        errorLine1="        &lt;receiver"
-        errorLine2="         ~~~~~~~~">
-        <location
-            file="src/main/AndroidManifest.xml"
-            line="64"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="IntentFilterExportedReceiver"
-        message="As of Android 12, `android:exported` must be set; use `true` to make the activity available to other apps, and `false` otherwise. For launcher activities, this should be set to `true`."
-        errorLine1="        &lt;activity"
-        errorLine2="         ~~~~~~~~">
-        <location
-            file="src/main/AndroidManifest.xml"
-            line="90"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="IntentFilterExportedReceiver"
-        message="As of Android 12, `android:exported` must be set; use `true` to make the activity available to other apps, and `false` otherwise."
-        errorLine1="        &lt;activity"
-        errorLine2="         ~~~~~~~~">
-        <location
-            file="src/main/AndroidManifest.xml"
-            line="105"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="IntentFilterExportedReceiver"
-        message="As of Android 12, `android:exported` must be set; use `true` to make the activity available to other apps, and `false` otherwise."
-        errorLine1="        &lt;receiver"
-        errorLine2="         ~~~~~~~~">
-        <location
-            file="src/main/AndroidManifest.xml"
-            line="113"
-            column="10"/>
-    </issue>
-
-    <issue
-        id="DrawAllocation"
-        message="Avoid object allocations during draw/layout operations (preallocate and reuse instead)"
-        errorLine1="                StaticLayout("
-        errorLine2="                ^">
-        <location
-            file="src/main/java/courseclock/timetable/widget/TipTextView.kt"
-            line="102"
+            file="src/main/java/courseclock/timetable/course_add/AddCourseActivity.kt"
+            line="84"
             column="17"/>
     </issue>
 
     <issue
         id="NotifyDataSetChanged"
         message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort."
-        errorLine1="                                adapter.notifyDataSetChanged()"
-        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="                adapter.notifyDataSetChanged()"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/java/courseclock/timetable/schedule_manage/CourseManageFragment.kt"
-            line="79"
-            column="33"/>
+            file="src/main/java/courseclock/timetable/course_add/AddCourseActivity.kt"
+            line="101"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort."
+        errorLine1="        notifyDataSetChanged()"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/courseclock/timetable/schedule_manage/CourseCardAdapter.kt"
+            line="62"
+            column="9"/>
     </issue>
 
     <issue
@@ -1460,7 +481,7 @@
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivity.kt"
-            line="109"
+            line="126"
             column="17"/>
     </issue>
 
@@ -1471,19 +492,30 @@
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule_settings/ScheduleSettingsActivity.kt"
-            line="86"
+            line="88"
             column="17"/>
     </issue>
 
     <issue
         id="NotifyDataSetChanged"
         message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort."
-        errorLine1="            mAdapter.notifyDataSetChanged()"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="                mAdapter.notifyDataSetChanged()"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/settings/SettingsActivity.kt"
-            line="309"
-            column="13"/>
+            line="169"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="NotifyDataSetChanged"
+        message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort."
+        errorLine1="        if (settingsList.refreshAvailability()) mAdapter.notifyDataSetChanged()"
+        errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/courseclock/timetable/settings/SettingsActivity.kt"
+            line="219"
+            column="49"/>
     </issue>
 
     <issue
@@ -1493,7 +525,7 @@
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/settings/TimeSettingsFragment.kt"
-            line="52"
+            line="57"
             column="17"/>
     </issue>
 
@@ -1504,7 +536,7 @@
         errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/settings/TimeSettingsFragment.kt"
-            line="64"
+            line="68"
             column="21"/>
     </issue>
 
@@ -1515,18 +547,18 @@
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/settings/TimeSettingsFragment.kt"
-            line="109"
+            line="113"
             column="17"/>
     </issue>
 
     <issue
         id="NotifyDataSetChanged"
         message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort."
-        errorLine1="            recyclerView.adapter?.notifyDataSetChanged()"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="            adapter.notifyDataSetChanged()"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/settings/TimeTableFragment.kt"
-            line="41"
+            line="73"
             column="13"/>
     </issue>
 
@@ -1537,19 +569,19 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/settings/TimeTableFragment.kt"
-            line="53"
+            line="83"
             column="13"/>
     </issue>
 
     <issue
         id="NotifyDataSetChanged"
         message="It will always be more efficient to use more specific change events if you can. Rely on `notifyDataSetChanged` as a last resort."
-        errorLine1="                adapter.notifyDataSetChanged()"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="            adapter.notifyDataSetChanged()"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule_appwidget/WeekScheduleAppWidgetConfigActivity.kt"
-            line="86"
-            column="17"/>
+            line="117"
+            column="13"/>
     </issue>
 
     <issue
@@ -1603,836 +635,63 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule_import/WebViewLoginFragment.kt"
-            line="88"
+            line="140"
             column="13"/>
     </issue>
 
     <issue
         id="Overdraw"
-        message="Possible overdraw: Root element paints background `?android:attr/selectableItemBackground` with a theme that also paints a background (inferred theme is `@style/AppTheme`)"
-        errorLine1="    android:background=&quot;?android:attr/selectableItemBackground&quot;>"
-        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        message="Possible overdraw: Root element paints background `@color/page_background` with a theme that also paints a background (inferred theme is `@style/AppTheme`)"
+        errorLine1="    android:background=&quot;@color/page_background&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/layout/item_time_table.xml"
-            line="6"
+            file="src/main/res/layout/fragment_course_manage.xml"
+            line="16"
             column="5"/>
     </issue>
 
     <issue
-        id="UnusedResources"
-        message="The resource `R.color.widget_divider` appears to be unused"
-        errorLine1="    &lt;color name=&quot;widget_divider&quot;>#14000000&lt;/color>"
-        errorLine2="           ~~~~~~~~~~~~~~~~~~~~~">
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/page_background` with a theme that also paints a background (inferred theme is `@style/AppTheme`)"
+        errorLine1="    android:background=&quot;@color/page_background&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/colors.xml"
-            line="28"
-            column="12"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.color.yellow` appears to be unused"
-        errorLine1="    &lt;color name=&quot;yellow&quot;>#ffea00&lt;/color>"
-        errorLine2="           ~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/colors.xml"
-            line="39"
-            column="12"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.drawable.course_card_clip` appears to be unused"
-        errorLine1="&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
-        errorLine2="^">
-        <location
-            file="src/main/res/drawable/course_card_clip.xml"
-            line="12"
-            column="1"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.drawable.cpv_alpha` appears to be unused">
-        <location
-            file="src/main/res/drawable-hdpi/cpv_alpha.png"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.drawable.muticards_bg` appears to be unused"
-        errorLine1="&lt;layer-list xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
-        errorLine2="^">
-        <location
-            file="src/main/res/drawable/muticards_bg.xml"
-            line="2"
-            column="1"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_back` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_back&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="7"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_send` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_send&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="8"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_share` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_share&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="9"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_more` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_more&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="10"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_heart` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_heart&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="12"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_delete` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_delete&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="14"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_upload` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_upload&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
+            file="src/main/res/layout/fragment_table_manage.xml"
             line="15"
-            column="13"/>
+            column="5"/>
     </issue>
 
     <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_setting` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_setting&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `?android:attr/selectableItemBackground` with a theme that also paints a background (inferred theme is `@style/AppTheme`)"
+        errorLine1="    android:background=&quot;?android:attr/selectableItemBackground&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/values/strings.xml"
-            line="17"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_search` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_search&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="18"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_info` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_info&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="19"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_refresh` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_refresh&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="20"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_done` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_done&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="22"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_doc` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_doc&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="23"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_msg` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_msg&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="24"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_download` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_download&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="25"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_star` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_star&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="26"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.icon_nav` appears to be unused"
-        errorLine1="    &lt;string name=&quot;icon_nav&quot; translatable=&quot;false&quot;>&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="28"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.text_login_web_title` appears to be unused"
-        errorLine1="    &lt;string name=&quot;text_login_web_title&quot;>登录教务系统&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="31"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.hint_student_id` appears to be unused"
-        errorLine1="    &lt;string name=&quot;hint_student_id&quot;>学号&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="32"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.hint_password` appears to be unused"
-        errorLine1="    &lt;string name=&quot;hint_password&quot;>密码&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="33"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.hint_check_code` appears to be unused"
-        errorLine1="    &lt;string name=&quot;hint_check_code&quot;>验证码&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="34"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.toast_check_code_get_error` appears to be unused"
-        errorLine1="    &lt;string name=&quot;toast_check_code_get_error&quot;>获取验证码失败&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="35"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.text_login` appears to be unused"
-        errorLine1="    &lt;string name=&quot;text_login&quot;>登录&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="36"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.text_node` appears to be unused"
-        errorLine1="    &lt;string name=&quot;text_node&quot;>节&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="38"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.text_week` appears to be unused"
-        errorLine1="    &lt;string name=&quot;text_week&quot;>周&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="39"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.appwidget_text` appears to be unused"
-        errorLine1="    &lt;string name=&quot;appwidget_text&quot;>EXAMPLE&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="40"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.add_widget` appears to be unused"
-        errorLine1="    &lt;string name=&quot;add_widget&quot;>Add widget&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="43"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.hello_blank_fragment` appears to be unused"
-        errorLine1="    &lt;string name=&quot;hello_blank_fragment&quot;>Hello blank fragment&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="44"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.school_BeijingLinYeDaXue` appears to be unused"
-        errorLine1="    &lt;string name=&quot;school_BeijingLinYeDaXue&quot;>北京林业大学&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="45"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.school_SuzhouDaXue` appears to be unused"
-        errorLine1="    &lt;string name=&quot;school_SuzhouDaXue&quot;>苏州大学&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="46"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.school_GuangdongWaiYuWaiMaoDaXue` appears to be unused"
-        errorLine1="    &lt;string name=&quot;school_GuangdongWaiYuWaiMaoDaXue&quot;>广东外语外贸大学&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="47"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.school_DalianWaiGuoYuDaxue` appears to be unused"
-        errorLine1="    &lt;string name=&quot;school_DalianWaiGuoYuDaxue&quot;>大连外国语大学&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="48"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.school_ChangchunDaXue` appears to be unused"
-        errorLine1="    &lt;string name=&quot;school_ChangchunDaXue&quot;>长春大学&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="49"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.school_TianjinZhongYiYaoDaXue` appears to be unused"
-        errorLine1="    &lt;string name=&quot;school_TianjinZhongYiYaoDaXue&quot;>天津中医药大学&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="50"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.type_ZhengFang` appears to be unused"
-        errorLine1="    &lt;string name=&quot;type_ZhengFang&quot;>正方教务&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="51"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.type_NewZhengFang` appears to be unused"
-        errorLine1="    &lt;string name=&quot;type_NewZhengFang&quot;>新正方教务&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="52"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.type_QiangZhi` appears to be unused"
-        errorLine1="    &lt;string name=&quot;type_QiangZhi&quot;>强智教务&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="54"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_class_time` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_class_time&quot;>上课时间&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="60"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_term_start_date` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_term_start_date&quot;>学期开始日期&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="61"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_nodes` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_nodes&quot;>一天课程节数&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="62"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_weeks` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_weeks&quot;>学期周数&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="63"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_sunday_first` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_sunday_first&quot;>周日为每周第一天&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="64"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_show_sat` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_show_sat&quot;>显示周六&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="65"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_show_sun` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_show_sun&quot;>显示周日&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="66"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_show_time` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_show_time&quot;>在格子内显示上课时间&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="67"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_background` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_background&quot;>课程表背景&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="68"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_header_color` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_header_color&quot;>界面文字颜色&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="69"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_course_text_color` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_course_text_color&quot;>课程文字颜色&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="70"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_stroke_color` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_stroke_color&quot;>格子边框颜色&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="71"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_item_height` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_item_height&quot;>课程格子高度&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="72"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_item_alpha` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_item_alpha&quot;>课程格子不透明度&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="73"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_course_text_size` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_course_text_size&quot;>课程显示文字大小&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="74"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_show_other_week` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_show_other_week&quot;>显示非本周课程&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="75"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_widget_item_height` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_widget_item_height&quot;>小部件格子高度&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="77"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_widget_item_alpha` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_widget_item_alpha&quot;>小部件格子不透明度&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="78"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_widget_text_size` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_widget_text_size&quot;>小部件显示文字大小&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="79"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_widget_header_color` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_widget_header_color&quot;>小部件标题颜色&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="80"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_widget_course_text_color` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_widget_course_text_color&quot;>小部件课程颜色&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="81"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_widget_stroke_color` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_widget_stroke_color&quot;>小部件格子边框颜色&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="82"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_auto_check_update` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_auto_check_update&quot;>自动检查更新&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="84"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_show_day_widget_bg` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_show_day_widget_bg&quot;>显示日视图背景&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="85"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_show_suda_life` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_show_suda_life&quot;>显示侧栏「苏大生活」&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="86"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_setup_schedule` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_setup_schedule&quot;>设置当前课表&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="87"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.string.setting_day_night_theme` appears to be unused"
-        errorLine1="    &lt;string name=&quot;setting_day_night_theme&quot;>显示主题&lt;/string>"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/values/strings.xml"
-            line="88"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.layout.today_course_app_widget_1` appears to be unused"
-        errorLine1="&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
-        errorLine2="^">
-        <location
-            file="src/main/res/layout/today_course_app_widget_1.xml"
-            line="2"
-            column="1"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.drawable.week_widget_cell_bg` appears to be unused"
-        errorLine1="&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
-        errorLine2="^">
-        <location
-            file="src/main/res/drawable/week_widget_cell_bg.xml"
-            line="9"
-            column="1"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.drawable.widget_frame_shape` appears to be unused"
-        errorLine1="&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
-        errorLine2="^">
-        <location
-            file="src/main/res/drawable/widget_frame_shape.xml"
-            line="13"
-            column="1"/>
-    </issue>
-
-    <issue
-        id="UnusedResources"
-        message="The resource `R.drawable.widget_panel_shape` appears to be unused"
-        errorLine1="&lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
-        errorLine2="^">
-        <location
-            file="src/main/res/drawable/widget_panel_shape.xml"
+            file="src/main/res/layout/item_time_table.xml"
             line="12"
-            column="1"/>
+            column="5"/>
     </issue>
 
     <issue
-        id="MonochromeLauncherIcon"
-        message="The application adaptive icon is missing a monochrome tag"
-        errorLine1="&lt;adaptive-icon xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
-        errorLine2="^">
+        id="Overdraw"
+        message="Possible overdraw: Root element paints background `@color/page_background` with a theme that also paints a background (inferred theme is `@style/AppTheme`)"
+        errorLine1="    android:background=&quot;@color/page_background&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/mipmap-anydpi-v26/ic_launcher.xml"
-            line="2"
-            column="1"/>
+            file="src/main/res/layout/time_table_fragment.xml"
+            line="16"
+            column="5"/>
     </issue>
 
     <issue
-        id="IconDensities"
-        message="Missing the following drawables in `drawable-mdpi`: cpv_alpha.png (found in drawable-hdpi, drawable-xhdpi, drawable-xxhdpi)">
+        id="SmallSp"
+        message="Avoid using sizes smaller than `11sp`: `10sp`"
+        errorLine1="                android:textSize=&quot;10sp&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/drawable-mdpi"/>
+            file="src/main/res/layout/item_table_card.xml"
+            line="59"
+            column="17"/>
     </issue>
 
     <issue
@@ -2444,6 +703,17 @@
             file="src/main/res/layout/item_table_select_main.xml"
             line="41"
             column="9"/>
+    </issue>
+
+    <issue
+        id="ViewConstructor"
+        message="Custom view `ArrowView` is missing constructor used by tools: `(Context)` or `(Context,AttributeSet)` or `(Context,AttributeSet,int)`"
+        errorLine1="class ArrowView("
+        errorLine2="      ~~~~~~~~~">
+        <location
+            file="src/main/java/courseclock/timetable/settings/ArrowView.kt"
+            line="19"
+            column="7"/>
     </issue>
 
     <issue
@@ -2491,80 +761,25 @@
     </issue>
 
     <issue
-        id="ContentDescription"
-        message="Missing `contentDescription` attribute on image"
-        errorLine1="    &lt;ImageView"
-        errorLine2="     ~~~~~~~~~">
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        binding.courseCounter.text = &quot;重叠课程  ${selected + 1} / ${courses.size}&quot;"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/layout/schedule_app_widget.xml"
-            line="99"
-            column="6"/>
-    </issue>
-
-    <issue
-        id="ContentDescription"
-        message="Missing `contentDescription` attribute on image"
-        errorLine1="    &lt;ImageView"
-        errorLine2="     ~~~~~~~~~">
-        <location
-            file="src/main/res/layout/schedule_app_widget.xml"
-            line="110"
-            column="6"/>
-    </issue>
-
-    <issue
-        id="ContentDescription"
-        message="Missing `contentDescription` attribute on image"
-        errorLine1="    &lt;ImageView"
-        errorLine2="     ~~~~~~~~~">
-        <location
-            file="src/main/res/layout/today_course_app_widget.xml"
-            line="59"
-            column="6"/>
-    </issue>
-
-    <issue
-        id="ContentDescription"
-        message="Missing `contentDescription` attribute on image"
-        errorLine1="    &lt;ImageView"
-        errorLine2="     ~~~~~~~~~">
-        <location
-            file="src/main/res/layout/today_course_app_widget.xml"
-            line="70"
-            column="6"/>
+            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
+            line="154"
+            column="38"/>
     </issue>
 
     <issue
         id="SetTextI18n"
         message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="        binding.includeDetail.etWeeks.text = &quot;第${course.startWeek} - ${course.endWeek}周    $type&quot;"
-        errorLine2="                                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        errorLine1="        binding.courseCounter.text = &quot;重叠课程  ${selected + 1} / ${courses.size}&quot;"
+        errorLine2="                                              ~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="95"
-            column="46"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="            binding.includeDetail.etTime.text = &quot;第${course.startNode} - ${course.startNode + course.step - 1}节    ${viewModel.courseTimes.startOf(course)} - ${viewModel.courseTimes.endOf(course)}&quot;"
-        errorLine2="                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="97"
-            column="49"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="            binding.includeDetail.etTime.text = &quot;第${course.startNode} - ${course.startNode + course.step - 1}节    ${viewModel.courseTimes.startOf(course)} - ${viewModel.courseTimes.endOf(course)}&quot;"
-        errorLine2="                                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/CourseDetailFragment.kt"
-            line="97"
-            column="75"/>
+            line="154"
+            column="47"/>
     </issue>
 
     <issue
@@ -2574,7 +789,7 @@
         errorLine2="                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivity.kt"
-            line="492"
+            line="636"
             column="40"/>
     </issue>
 
@@ -2585,7 +800,7 @@
         errorLine2="                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivity.kt"
-            line="497"
+            line="641"
             column="40"/>
     </issue>
 
@@ -2596,7 +811,7 @@
         errorLine2="                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivity.kt"
-            line="583"
+            line="828"
             column="40"/>
     </issue>
 
@@ -2607,96 +822,8 @@
         errorLine2="                           ~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleActivity.kt"
-            line="595"
+            line="840"
             column="28"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="        ((view as ConstraintLayout).getViewById(R.id.anko_tv_title0) as AppCompatTextView).text = weekDate[0] + &quot;\n月&quot;"
-        errorLine2="                                                                                                  ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="65"
-            column="99"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="        ((view as ConstraintLayout).getViewById(R.id.anko_tv_title0) as AppCompatTextView).text = weekDate[0] + &quot;\n月&quot;"
-        errorLine2="                                                                                                                ~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="65"
-            column="113"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="                textView.text = viewModel.daysArray[i] + &quot;\n${weekDate[7]}&quot;"
-        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="71"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="                textView.text = viewModel.daysArray[i] + &quot;\n${weekDate[7]}&quot;"
-        errorLine2="                                                         ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="71"
-            column="58"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="                textView.text = viewModel.daysArray[i] + &quot;\n${weekDate[ui.dayMap[i] + 1]}&quot;"
-        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="73"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="                textView.text = viewModel.daysArray[i] + &quot;\n${weekDate[ui.dayMap[i] + 1]}&quot;"
-        errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="73"
-            column="58"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="                textView.text = viewModel.daysArray[i] + &quot;\n${weekDate[ui.dayMap[i]]}&quot;"
-        errorLine2="                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="75"
-            column="33"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="                textView.text = viewModel.daysArray[i] + &quot;\n${weekDate[ui.dayMap[i]]}&quot;"
-        errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/schedule/ScheduleFragment.kt"
-            line="75"
-            column="58"/>
     </issue>
 
     <issue
@@ -2706,8 +833,19 @@
         errorLine2="                           ~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule/ScheduleUI.kt"
-            line="185"
+            line="259"
             column="28"/>
+    </issue>
+
+    <issue
+        id="SetTextI18n"
+        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+        errorLine1="        weekText.text = &quot;1-${item.maxWeek} 周&quot;"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/courseclock/timetable/schedule_manage/TableListAdapter.kt"
+            line="43"
+            column="25"/>
     </issue>
 
     <issue
@@ -2717,7 +855,7 @@
         errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/settings/TimeSettingsFragment.kt"
-            line="97"
+            line="101"
             column="26"/>
     </issue>
 
@@ -2728,30 +866,8 @@
         errorLine2="                                    ~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/settings/TimeSettingsFragment.kt"
-            line="100"
+            line="104"
             column="37"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Number formatting does not take into account locale settings. Consider using `String.format` instead."
-        errorLine1="                            text = c.startNode.toString()"
-        errorLine2="                                   ~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/today_appwidget/TodayColorfulService.kt"
-            line="306"
-            column="36"/>
-    </issue>
-
-    <issue
-        id="SetTextI18n"
-        message="Do not concatenate text displayed with `setText`. Use resource string with placeholders."
-        errorLine1="                            text = &quot;${c.startNode + c.step - 1}&quot;"
-        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/java/courseclock/timetable/today_appwidget/TodayColorfulService.kt"
-            line="316"
-            column="39"/>
     </issue>
 
     <issue
@@ -2761,74 +877,52 @@
         errorLine2="                                        ~~~~~~~~~~~~~">
         <location
             file="src/main/java/courseclock/timetable/schedule_import/WebViewLoginFragment.kt"
-            line="203"
+            line="248"
             column="41"/>
     </issue>
 
     <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;只服务上海工程技术大学（SUES）\n课表从教学服务中心导入&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;只服务上海工程技术大学（SUES）\n课表从教学服务中心导入&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        id="SetTextI18n"
+        message="Number formatting does not take into account locale settings. Consider using `String.format` instead."
+        errorLine1="                text = week.toString()"
+        errorLine2="                       ~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/layout/activity_about.xml"
-            line="47"
-            column="9"/>
+            file="src/main/java/courseclock/timetable/schedule/WeekPickerFragment.kt"
+            line="67"
+            column="24"/>
     </issue>
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;导入课表&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;导入课表&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~">
+        message="Hardcoded string &quot;1&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;1&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/activity_about.xml"
-            line="55"
-            column="9"/>
+            line="156"
+            column="21"/>
     </issue>
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;点「从SUES教务导入」后，在打开的页面里登录学校 WebVPN 并完成统一身份认证。登录成功后 App 自动走到课表页面，再点右下角按钮就读回本学期的课程、作息时间与学期起止日期。&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;点「从SUES教务导入」后，在打开的页面里登录学校 WebVPN 并完成统一身份认证。登录成功后 App 自动走到课表页面，再点右下角按钮就读回本学期的课程、作息时间与学期起止日期。&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        message="Hardcoded string &quot;2&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;2&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/activity_about.xml"
-            line="66"
-            column="9"/>
+            line="183"
+            column="21"/>
     </issue>
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;课表也可以从「从分享/导出文件导入」进来：选择本应用导出的 .wakeup_schedule 文件即可。&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;课表也可以从「从分享/导出文件导入」进来：选择本应用导出的 .wakeup_schedule 文件即可。&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        message="Hardcoded string &quot;3&quot;, should use `@string` resource"
+        errorLine1="                    android:text=&quot;3&quot;"
+        errorLine2="                    ~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/activity_about.xml"
-            line="76"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;导入的课表保存在本机，可以在「已添课程」里查看和修改。&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;导入的课表保存在本机，可以在「已添课程」里查看和修改。&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/activity_about.xml"
-            line="86"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;来源&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;来源&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/activity_about.xml"
-            line="94"
-            column="9"/>
+            line="210"
+            column="21"/>
     </issue>
 
     <issue
@@ -2839,17 +933,6 @@
         <location
             file="src/main/res/layout/activity_week_schedule_app_widget_config.xml"
             line="17"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;我知道啦&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;我知道啦&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/activity_week_schedule_app_widget_config.xml"
-            line="30"
             column="9"/>
     </issue>
 
@@ -2899,57 +982,79 @@
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;再点一次确定删除\n长按可以同时删除这门课程的其他时间哦&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;再点一次确定删除\n长按可以同时删除这门课程的其他时间哦&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        message="Hardcoded string &quot;课程详情&quot;, should use `@string` resource"
+        errorLine1="                android:layout_weight=&quot;1&quot; android:text=&quot;课程详情&quot;"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_course_detail.xml"
-            line="31"
-            column="9"/>
+            line="19"
+            column="43"/>
     </issue>
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;&quot;, should use `@string` resource"
-        errorLine1="            android:text=&quot;&quot;"
-        errorLine2="            ~~~~~~~~~~~~~~~~">
+        message="Hardcoded string &quot;关闭课程详情&quot;, should use `@string` resource"
+        errorLine1="                android:contentDescription=&quot;关闭课程详情&quot; android:text=&quot;@string/icon_close&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_course_detail.xml"
-            line="53"
-            column="13"/>
+            line="25"
+            column="17"/>
     </issue>
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;&quot;, should use `@string` resource"
-        errorLine1="            android:text=&quot;&quot;"
-        errorLine2="            ~~~~~~~~~~~~~~~~">
+        message="Hardcoded string &quot;上一门重叠课程&quot;, should use `@string` resource"
+        errorLine1="                android:contentDescription=&quot;上一门重叠课程&quot; android:padding=&quot;14dp&quot; android:rotation=&quot;180&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_course_detail.xml"
-            line="68"
-            column="13"/>
+            line="34"
+            column="17"/>
     </issue>
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;从上方选择或者重新输入…&quot;, should use `@string` resource"
-        errorLine1="        android:hint=&quot;从上方选择或者重新输入…&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        message="Hardcoded string &quot;下一门重叠课程&quot;, should use `@string` resource"
+        errorLine1="                android:contentDescription=&quot;下一门重叠课程&quot; android:padding=&quot;14dp&quot;"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/layout/fragment_edit_detail.xml"
+            file="src/main/res/layout/fragment_course_detail.xml"
             line="44"
-            column="9"/>
+            column="17"/>
     </issue>
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;保存&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;保存&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~">
+        message="Hardcoded string &quot;提醒设置&quot;, should use `@string` resource"
+        errorLine1="                android:text=&quot;提醒设置&quot; android:textColor=&quot;@color/text_secondary&quot; android:textSize=&quot;13sp&quot; />"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/layout/fragment_edit_detail.xml"
-            line="55"
-            column="9"/>
+            file="src/main/res/layout/fragment_course_detail.xml"
+            line="84"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;编辑课程&quot;, should use `@string` resource"
+        errorLine1="                android:background=&quot;?attr/selectableItemBackgroundBorderless&quot; android:contentDescription=&quot;编辑课程&quot;"
+        errorLine2="                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/fragment_course_detail.xml"
+            line="87"
+            column="79"/>
+    </issue>
+
+    <issue
+        id="HardcodedText"
+        message="Hardcoded string &quot;删除课程&quot;, should use `@string` resource"
+        errorLine1="                android:background=&quot;?attr/selectableItemBackgroundBorderless&quot; android:contentDescription=&quot;删除课程&quot;"
+        errorLine2="                                                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/layout/fragment_course_detail.xml"
+            line="91"
+            column="79"/>
     </issue>
 
     <issue
@@ -3038,50 +1143,6 @@
             file="src/main/res/layout/fragment_file_import.xml"
             line="68"
             column="17"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;导入课程&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;导入课程&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/fragment_import_choose.xml"
-            line="30"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;登录学校 WebVPN 后从教学服务中心导入本学期课表\n也可以用分享/导出的课表文件导入&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;登录学校 WebVPN 后从教学服务中心导入本学期课表\n也可以用分享/导出的课表文件导入&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/fragment_import_choose.xml"
-            line="41"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;从SUES教务导入&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;从SUES教务导入&quot; />"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/fragment_import_choose.xml"
-            line="48"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;从分享/导出文件导入&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;从分享/导出文件导入&quot; />"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/fragment_import_choose.xml"
-            line="54"
-            column="9"/>
     </issue>
 
     <issue
@@ -3234,7 +1295,7 @@
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_web_view_login.xml"
-            line="110"
+            line="112"
             column="17"/>
     </issue>
 
@@ -3245,7 +1306,7 @@
         errorLine2="                ~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_web_view_login.xml"
-            line="119"
+            line="121"
             column="17"/>
     </issue>
 
@@ -3256,7 +1317,7 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_web_view_login.xml"
-            line="145"
+            line="147"
             column="13"/>
     </issue>
 
@@ -3267,129 +1328,19 @@
         errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/fragment_web_view_login.xml"
-            line="153"
+            line="155"
             column="13"/>
     </issue>
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_add_course_base.xml"
-            line="11"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;课程名称&quot;, should use `@string` resource"
-        errorLine1="        android:hint=&quot;课程名称&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_add_course_base.xml"
-            line="22"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;&quot;, should use `@string` resource"
-        errorLine1="            android:text=&quot;&quot; />"
+        message="Hardcoded string &quot;✓&quot;, should use `@string` resource"
+        errorLine1="            android:text=&quot;✓&quot;"
         errorLine2="            ~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/res/layout/item_add_course_base.xml"
-            line="39"
+            file="src/main/res/layout/item_table_card.xml"
+            line="105"
             column="13"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;选取颜色&quot;, should use `@string` resource"
-        errorLine1="            android:hint=&quot;选取颜色&quot;"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_add_course_base.xml"
-            line="50"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;添加时间段&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;添加时间段&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_add_course_btn.xml"
-            line="16"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;时间段&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;时间段&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_add_course_detail.xml"
-            line="15"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;周数&quot;, should use `@string` resource"
-        errorLine1="            android:hint=&quot;周数&quot;"
-        errorLine2="            ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_add_course_detail.xml"
-            line="53"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;周一    第1 - 2节&quot;, should use `@string` resource"
-        errorLine1="            android:hint=&quot;周一    第1 - 2节&quot;"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_add_course_detail.xml"
-            line="79"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;授课老师（可不填）&quot;, should use `@string` resource"
-        errorLine1="            android:hint=&quot;授课老师（可不填）&quot;"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_add_course_detail.xml"
-            line="109"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;上课地点（可不填）&quot;, should use `@string` resource"
-        errorLine1="            android:hint=&quot;上课地点（可不填）&quot;"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_add_course_detail.xml"
-            line="137"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;高等数学&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;高等数学&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_course_list.xml"
-            line="21"
-            column="9"/>
     </issue>
 
     <issue
@@ -3570,79 +1521,13 @@
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;默认&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;默认&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_time_table.xml"
-            line="23"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;&quot;"
+        message="Hardcoded string &quot;✓&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;✓&quot;"
         errorLine2="        ~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/item_time_table.xml"
-            line="39"
+            line="56"
             column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/item_time_table.xml"
-            line="55"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;通用&quot;, should use `@string` resource"
-        errorLine1="        &lt;item android:title=&quot;通用&quot;>"
-        errorLine2="              ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/menu/main_navigation_menu.xml"
-            line="4"
-            column="15"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;已添课程&quot;, should use `@string` resource"
-        errorLine1="                    android:title=&quot;已添课程&quot; />"
-        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/menu/main_navigation_menu.xml"
-            line="9"
-            column="21"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;关于&quot;, should use `@string` resource"
-        errorLine1="                    android:title=&quot;关于&quot; />"
-        errorLine2="                    ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/menu/main_navigation_menu.xml"
-            line="13"
-            column="21"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;设置&quot;, should use `@string` resource"
-        errorLine1="                    android:title=&quot;设置&quot; />"
-        errorLine2="                    ~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/menu/main_navigation_menu.xml"
-            line="17"
-            column="21"/>
     </issue>
 
     <issue
@@ -3652,7 +1537,7 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/schedule_app_widget.xml"
-            line="12"
+            line="21"
             column="9"/>
     </issue>
 
@@ -3663,68 +1548,30 @@
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/schedule_app_widget.xml"
-            line="24"
+            line="38"
             column="9"/>
     </issue>
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;8月9日&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;8月9日&quot;"
+        message="Hardcoded string &quot;今日日程&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;今日日程&quot;"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/today_course_app_widget.xml"
-            line="44"
+            line="32"
             column="9"/>
     </issue>
 
     <issue
         id="HardcodedText"
-        message="Hardcoded string &quot;第1周    周四&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;第1周    周四&quot;"
+        message="Hardcoded string &quot;3节 · 已上1节&quot;, should use `@string` resource"
+        errorLine1="        android:text=&quot;3节 · 已上1节&quot;"
         errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~">
         <location
             file="src/main/res/layout/today_course_app_widget.xml"
-            line="54"
+            line="56"
             column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;8月9日&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;8月9日&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/today_course_app_widget_1.xml"
-            line="15"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="HardcodedText"
-        message="Hardcoded string &quot;第1周    周四&quot;, should use `@string` resource"
-        errorLine1="        android:text=&quot;第1周    周四&quot;"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="src/main/res/layout/today_course_app_widget_1.xml"
-            line="27"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="RtlCompat"
-        message="Inconsistent alignment specification between `textAlignment` and `gravity` attributes: was `center_vertical`, expected `center_horizontal`"
-        errorLine1="        android:textAlignment=&quot;center&quot;"
-        errorLine2="                               ~~~~~~">
-        <location
-            file="src/main/res/layout/item_course_list.xml"
-            line="22"
-            column="32"/>
-        <location
-            file="src/main/res/layout/item_course_list.xml"
-            line="19"
-            column="26"
-            message="Incompatible direction here"/>
     </issue>
 
     <issue

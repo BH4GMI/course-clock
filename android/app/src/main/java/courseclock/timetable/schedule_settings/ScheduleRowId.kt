@@ -35,7 +35,6 @@ object ScheduleRowId {
     const val WIDGET_ITEM_HEIGHT = "widget_item_height"
     const val WIDGET_ITEM_ALPHA = "widget_item_alpha"
     const val WIDGET_ITEM_TEXT_SIZE = "widget_item_text_size"
-    const val WIDGET_TITLE_COLOR = "widget_title_color"
     const val WIDGET_COURSE_COLOR = "widget_course_color"
     const val WIDGET_STROKE_COLOR = "widget_stroke_color"
 

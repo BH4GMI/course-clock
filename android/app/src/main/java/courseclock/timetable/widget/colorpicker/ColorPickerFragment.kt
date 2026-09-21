@@ -32,9 +32,10 @@ class ColorPickerFragment : BaseDialogFragment(), ColorPickerView.OnColorChanged
         get() = R.layout.fragment_color_picker
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        showAlphaSlider = arguments!!.getBoolean("alpha")
-        dialogId = arguments!!.getInt("id")
-        color = savedInstanceState?.getInt("color") ?: arguments!!.getInt("color")
+        val args = requireArguments()
+        showAlphaSlider = args.getBoolean("alpha")
+        dialogId = args.getInt("id")
+        color = savedInstanceState?.getInt("color") ?: args.getInt("color")
 
         return super.onCreateView(inflater, container, savedInstanceState)
     }

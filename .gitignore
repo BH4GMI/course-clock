@@ -17,6 +17,18 @@ Thumbs.db
 *.jks
 *.keystore
 keystore.properties
+*.p12
+*.pfx
+*.pem
+*.key
+.env
+.env.*
+
+# APK 仅作为发布附件，不进入源码历史
+*.apk
+*.aab
+*.apks
+*.idsig
 
 # ---- 本机临时产物（不入库） ------------------------------------------------
 # _crop/     历史调试现场（截图、logcat、数据库 dump）

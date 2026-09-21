@@ -117,9 +117,7 @@ object CourseUtils {
     fun daysBetween(date: String, sundayFirst: Boolean, basisMillis: Long? = null): Int {
         val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
         val cal = Calendar.getInstance()
-        if (basisMillis != null) {
-            cal.timeInMillis = basisMillis
-        }
+        cal.timeInMillis = basisMillis ?: CourseClock.nowMillis()
         if (sundayFirst) {
             cal.firstDayOfWeek = Calendar.SUNDAY
             cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
@@ -177,7 +175,7 @@ object CourseUtils {
     }
 
     fun getWeekdayInt(): Int {
-        val cal = Calendar.getInstance()
+        val cal = Calendar.getInstance().apply { timeInMillis = CourseClock.nowMillis() }
         return calendarDayOfWeekToAppWeekday(cal.get(Calendar.DAY_OF_WEEK))
     }
 
@@ -203,7 +201,7 @@ object CourseUtils {
 
     fun getTodayDate(): String {
         val dateFormat = SimpleDateFormat("M月d日", Locale.CHINA)
-        return dateFormat.format(Date())
+        return dateFormat.format(Date(CourseClock.nowMillis()))
     }
 
     /**
@@ -232,7 +230,7 @@ object CourseUtils {
     }
 
     fun getDateStringFromWeek(curWeek: Int, targetWeek: Int, sundayFirst: Boolean): List<String> {
-        val calendar = Calendar.getInstance()
+        val calendar = Calendar.getInstance().apply { timeInMillis = CourseClock.nowMillis() }
         if (targetWeek == curWeek)
             return getDateStringFromCalendar(calendar, sundayFirst)
         val amount = targetWeek - curWeek

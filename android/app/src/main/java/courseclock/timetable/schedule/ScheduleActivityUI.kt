@@ -24,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.GravityCompat
 import androidx.core.view.setMargins
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -577,7 +578,7 @@ class ScheduleActivityUI(override val ctx: Context) : Ui {
 
         addView(navViewStart, DrawerLayout.LayoutParams(drawerWidth,
                 DrawerLayout.LayoutParams.MATCH_PARENT).apply {
-            gravity = Gravity.START
+            gravity = GravityCompat.START
         })
     }
 

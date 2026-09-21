@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import courseclock.timetable.utils.Const
+import courseclock.timetable.utils.CourseReminderNotifier
 import courseclock.timetable.utils.CourseReminderReceiver
 import courseclock.timetable.utils.CourseReminderScheduler
 import courseclock.timetable.utils.TimetableChangeWatcher
@@ -16,6 +17,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -124,60 +126,29 @@ class CourseReminderAlarmTest {
                 TimetableChangeWatcher.TABLES.toSet())
     }
 
-    /**
-     * 通知渲染：剩余分钟**在弹出那一刻现算**，正文是「课名 · 教室」，通知 id 就是闹钟的
-     * requestCode。
-     */
     @Test
-    fun remindBroadcastPostsNotificationWithComputedRemainingMinutes() {
-        context.getPrefer().edit().putBoolean(Const.KEY_COURSE_REMIND, true).commit()
-
-        val requestCode = 0x5700
-        val targetAt = System.currentTimeMillis() + 5 * 60_000L
-        // 收件方是提醒模块自己的接收器，不再是 TodayCourseAppWidget：提醒与小部件之间没有
-        // 依赖，"桌面没放小部件"正是原先这个功能最容易被卡死的地方。
-        val intent = Intent(context, CourseReminderReceiver::class.java).apply {
-            action = CourseReminderScheduler.ACTION_REMIND_COURSE
-            putExtra(CourseReminderScheduler.EXTRA_KIND, CourseReminderScheduler.ReminderKind.START.name)
-            putExtra(CourseReminderScheduler.EXTRA_COURSE_NAME, "高等数学")
-            putExtra(CourseReminderScheduler.EXTRA_ROOM, "B210")
-            putExtra(CourseReminderScheduler.EXTRA_TARGET_AT, targetAt)
-            putExtra(CourseReminderScheduler.EXTRA_INDEX, requestCode)
-        }
-
-        CourseReminderReceiver().onReceive(context, intent)
-
-        val posted = shadowOf(notificationManager).getNotification(requestCode)
-        assertNotNull("通知 id 应当等于闹钟 requestCode $requestCode", posted)
-        assertEquals("还有 5 分钟上课", posted.extras.getString(Notification.EXTRA_TITLE))
-        assertEquals("高等数学 · B210", posted.extras.getString(Notification.EXTRA_TEXT))
-        assertEquals("标题已写明是上课还是下课，不该再有 subText",
-                null, posted.extras.getString(Notification.EXTRA_SUB_TEXT))
+    fun statusModeNeedsOnlyTheMasterNotTheEventSwitches() {
+        val prefer = context.getPrefer()
+        prefer.edit().putBoolean(Const.KEY_COURSE_REMIND, true)
+                .putBoolean(CourseReminderScheduler.KEY_REMINDER_START_ENABLED, false)
+                .putBoolean(CourseReminderScheduler.KEY_REMINDER_END_ENABLED, false)
+                .putString(courseclock.timetable.utils.CourseNotificationSettings.KEY_STATUS_MODE, "SHADE").commit()
+        assertTrue(CourseReminderScheduler.ongoingEnabled(context))
+        prefer.edit().putBoolean(Const.KEY_COURSE_REMIND, false).commit()
+        assertFalse(CourseReminderScheduler.ongoingEnabled(context))
     }
 
     /**
-     * 总闸关掉之后，即使有一枚提醒广播已经在队列里，也必须安静地什么都不做。
+     * 常驻通知的 id 必须整体落在提醒编号区段**之外**。
      *
-     * 关开关时 `reschedule` 会取消系统里已排的闹钟，但"闹钟已派发、广播还在队列中"这个
-     * 竞态窗口是消不掉的。少了这道判断，用户关掉提醒之后还会收到最后一条通知。
+     * 提醒的通知 id 直接就是闹钟的 requestCode，从 `0x5700` 起（上课、下课各占 250 枚）。
+     * 撞号会让两条通知互相覆盖，而且是静默的：不抛异常、不打日志，用户只会看到"通知没了"。
+     * 这条断言把"取更小的值"这个约定钉住，免得日后有人顺手把它改成 `0x5701` 之类。
      */
     @Test
-    fun remindBroadcastIsDroppedWhenMasterSwitchIsOff() {
-        context.getPrefer().edit().putBoolean(Const.KEY_COURSE_REMIND, false).commit()
-
-        val requestCode = 0x5701
-        val intent = Intent(context, CourseReminderReceiver::class.java).apply {
-            action = CourseReminderScheduler.ACTION_REMIND_COURSE
-            putExtra(CourseReminderScheduler.EXTRA_KIND, CourseReminderScheduler.ReminderKind.START.name)
-            putExtra(CourseReminderScheduler.EXTRA_COURSE_NAME, "高等数学")
-            putExtra(CourseReminderScheduler.EXTRA_ROOM, "B210")
-            putExtra(CourseReminderScheduler.EXTRA_TARGET_AT, System.currentTimeMillis() + 5 * 60_000L)
-            putExtra(CourseReminderScheduler.EXTRA_INDEX, requestCode)
-        }
-
-        CourseReminderReceiver().onReceive(context, intent)
-
-        assertEquals("总闸关着时不应发出任何通知",
-                null, shadowOf(notificationManager).getNotification(requestCode))
+    fun ongoingNotificationIdStaysOutsideTheReminderIdRange() {
+        val ongoing = CourseReminderNotifier.ONGOING_NOTIFICATION_ID
+        assertTrue("常驻通知 id 必须严格小于提醒编号基址 0x5700，当前是 0x${ongoing.toString(16)}",
+                ongoing < 0x5700)
     }
 }

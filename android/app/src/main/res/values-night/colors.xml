@@ -30,6 +30,5 @@
     <color name="widget_panel_text_secondary">#99FFFFFF</color><!-- 副文案 60% -->
 
     <!-- 深色下不要表头横线（与深色版设计稿一致）。 -->
-    <color name="widget_divider">@android:color/transparent</color>
 <color name="widget_panel_background">#1A1A1B</color><!-- 官方底板色：深色 #1A1A1B -->
 </resources>

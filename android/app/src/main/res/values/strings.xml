@@ -7,16 +7,13 @@
          混在一起；现在标题是这一屏的名字，日期降为副标题的一段。 -->
     <string name="schedule_title">课表</string>
 
-    <!-- 图标字形。实际使用的只有下面这六个，其余图标用 "\uExxx" 字面量写在 Kotlin 里，
-         不再占用字符串资源。留着这六条是因为它们仍被 XML 布局引用：
-         item_add_course_detail.xml（close/date/clock/person/location）与
-         fragment_list_manage.xml（add）。 -->
+    <!-- 图标字形。实际使用的只有下面这三个，其余图标用 "\uExxx" 字面量写在 Kotlin 里，
+         不再占用字符串资源。它们仍被 XML 布局引用：
+         item_add_course_detail.xml / fragment_course_detail.xml（close/location）与
+         fragment_course_manage.xml / item_course_add_cell.xml（add）。 -->
     <string name="icon_location" translatable="false"></string>
     <string name="icon_close" translatable="false"></string>
-    <string name="icon_date" translatable="false"></string>
-    <string name="icon_clock" translatable="false"></string>
     <string name="icon_add" translatable="false"></string>
-    <string name="icon_person" translatable="false"></string>
 
     <string name="error_course_data">检测到课程数据有误，请仔细核对</string>
     <string name="error_course_node">有课程的节数大于课表的最大节数</string>
@@ -66,27 +63,6 @@
     <string name="import_from_file">从备份文件导入</string>
     <string name="import_from_file_desc">换手机或重装时用</string>
 
-    <!--
-      课程详情面板（设计稿 4）。文案面向本科生：短、说人话。
-      摘要在上面（周几第几节、第几周），明细在下面（上课时间 / 授课教师 / 上课地点 / 上课提醒），
-      两处不重复。行名带上"上课"两个字：面板里同时有"上课提醒"这类行，只写"时间"会被读成当前时刻。
-    -->
-    <string name="course_detail_time">上课时间</string>
-    <string name="course_detail_teacher">授课教师</string>
-    <string name="course_detail_room">上课地点</string>
-    <string name="course_detail_reminder">上课提醒</string>
-    <string name="course_detail_edit">编辑课程</string>
-    <string name="course_detail_delete">删除</string>
-    <!-- 详情里的空值：不写"—"（用户读不出那是"没有"还是"没查到"）。 -->
-    <string name="course_detail_unknown">未填</string>
-    <!-- 提醒那一行的当前值：总开关关着 / 开着时提前几分钟。 -->
-    <string name="course_detail_remind_off">未开启</string>
-    <string name="course_detail_remind_before">上课前 %1$d 分钟</string>
-    <!--
-      删除的二次确认。原文案"再点一次确定删除\n长按可以同时删除这门课程的其他时间哦"把两件事
-      混在一句里，而且"其他时间"是数据模型的说法（同一门课在一周里的多次安排）。这里分开说清楚。
-    -->
-    <string name="course_detail_delete_tips">再点一次「删除」确认。\n长按「删除」可以一次删掉这门课一周里的其他几节。</string>
 
     <!--
       关于页的文案（设计稿 11，2026-09-18 按"更正式"重写，同日按"分栏太多"合并）。
@@ -132,7 +108,10 @@
     <string name="table_courses_subtitle">%1$d 门课程</string>
     <string name="table_current_subtitle">%1$d 门课程 · 正在使用</string>
     <string name="table_empty_subtitle">空课表 · 还没有课程</string>
-    <string name="table_manage_hint">点一下切换，进详情可改名或删除</string>
+    <string name="table_manage_hint">按学期管理课表</string>
+    <string name="table_missing">还没有课表</string>
+    <string name="table_actions">课表操作</string>
+    <string name="table_actions_description">%1$s，课表操作</string>
     <string name="table_manage_new">+ 新建课表</string>
     <string name="table_manage_footnote">各课表互不影响，可按学期分开管理。</string>
 

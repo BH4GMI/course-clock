@@ -2002,23 +2002,60 @@ success 从 4.12 降到 3.24（仍过 AA Large 3:1）。要动它们就是改 To
 "改透明度"的授权范围，**未动**；若要修，方案是把这两档 RGB 压深一档再叠加 85% alpha，
 一处文件（toasty_colors.xml）可改。
 
-### 29-4 顺带清出的死资源（深色审计的副产品）
+### 29-4 死代码与死资源清理（2026-09-21）
 
-全量扫描十六进制色时发现六个**全项目零引用**的文件（layout 与 Kotlin 都不引用，manifest
-与小部件元数据也不引用，lint baseline 里本来就躺着 "appears to be unused"）：
+全量引用扫描确认以下内容在当前 Android 源码、布局、Manifest 和测试中均无调用，已删除：
 
-- `layout/today_course_app_widget_1.xml`
-- `drawable/muticards_bg.xml`（只被上面那个布局引用）
-- `drawable/widget_panel_shape.xml`、`widget_frame_shape.xml`、`week_widget_cell_bg.xml`
-  （写死 `#ffffffff` 的旧小部件底板，若还活着就是深色白底 bug——好在全是死资源）
-- `drawable/course_item_bg_today.xml`
+- `CourseDao` 中 3 个无调用查询/删除方法；`UpdateUtils.getVersionName` 的无用 `Context` 参数。
+- 旧课程卡背景、裁剪轮廓、添加图标和上下箭头：`bg_course_card.xml`、`card_bg.xml`、
+  `course_card_clip.xml`、`ic_add.xml`、`ic_chevron_updown.xml`。
+- 旧课程管理布局：`chip_group_item_choice.xml`、`fragment_list_manage.xml`、
+  `item_course_add.xml`、`view_course_search.xml`、`view_list_add_button.xml`。
+- 未使用的 `widget_divider`、`grey`、`yellow` 颜色，旧图标文案、课程详情文案和旧课程数文案。
+- 旧 `logo.png` 栅格副本和透明度棋盘 PNG；颜色选择器当前由 `AlphaPatternDrawable` 运行时绘制，
+  不依赖这些位图。
 
-已删除。未跟踪的 WIP 预览文件（day/week_widget_preview.xml）确认没有引用它们。
+随后用 `updateLintBaselineDebug` 重建基线，`UnusedResources` 已降为 0；历史设计稿中的旧布局文字
+只作为设计记录保留，不代表运行时仍有对应资源。
 
 ### 29-5 门禁
 
-`:app:testDebugUnitTest` 51 类 / 258 项 / 0 失败；`assembleDebug` 通过；`lintDebug` 仍为
-既有 5 错（同 27 章清单），警告 57→56（死资源告警消失），无新增。
+`:app:testDebugUnitTest` 376 项 / 0 失败；`:app:testSimulationUnitTest` 392 项 / 0 失败；
+`assembleDebug`、`assembleSimulation`、`lintDebug`、`lintSimulation`、`lintRelease` 均通过。
+`coursetime/verify.ps1` 通过 52 项 / 0 失败。本轮后基线不再包含 `UseRequireInsteadOfGet`、
+`WrongConstant` 这 5 条记录。
+
+### 29-6 Lint、加载与设置入口修正（2026-09-21）
+
+这 5 条是：颜色选择器三处 `arguments!!`（`UseRequireInsteadOfGet`）、棋盘 Drawable 的
+透明度返回值及抽屉 gravity 常量（各一条 `WrongConstant`）。改为一次 `requireArguments()`、
+`PixelFormat.OPAQUE`、`GravityCompat.START`。初始化课表前取消上一项初始化任务并移除旧观察者；
+使用平台单色图标资源修复 monochrome 缺项。没有禁用规则或扩大 Lint 基线。
+
+删除额外“页面预加载”选项，固定旧版 ViewPager 最低邻页缓存 1。共享 Room LiveData 保留；
+这不是零预加载，也不代表明显提速。同机 5 次冷启动中位数 336→335 ms，翻周卡顿帧比例均约 0.49%，
+仅可说明该样本未见回归。手机充电、发热中，没有据此推算耗电降幅。
+
+删除课表入口缺失的根因在菜单层：仅长按可见，且 `table.type == 1` 时直接隐藏删除项。
+已给所有课表卡片增加 48dp 可见操作按钮（含读屏名称与 tooltip），当前及最后一张课表也可删除。
+删除仍须明确确认；复用 `TableDao.deleteTableAndFixDefault` 事务，切换至剩余课表或进入无课表状态，
+级联删除课程，不删除共享作息表。取消确认不写数据库，删除成功与显示刷新失败分别反馈。
+`TableManagementActionsTest` 覆盖真实菜单入口、取消、确认及级联删除，`TableDeletionGuardTest` 覆盖默认表转移。
+补测复现最后一张课表删除后周视图仍保留旧内容：刷新层遇到无课表直接返回，导致桌面缓存未清除。
+现将无课表作为渲染输入，清除旧表名并隐藏旧课程；全部刷新、尺寸变化和新建课表恢复共用该路径。
+
+设置文案按实际作用范围调整：左侧时间、左侧时间方案、课程格子内时间分别命名；“显示主题”改为
+“深浅模式”；日视图课程色条移除不存在的“右上角可切换”说明；通知总闸、一次性提醒与常驻状态区分。
+移除不参与当前渲染的“小组件标题颜色”入口，保留存储字段以兼容导入导出，不改 schema。
+周视图专用样式明确标注，清空课程确认说明保留课表及设置。移除要求开学日期必须选周一/周日的旧提示，
+周次计算已能处理任意开学日期。菜单机制参考 Android 官方菜单文档，复用 AppCompat/Material，无新增依赖。
+
+### 29-7 持续倒计时
+
+通知取消 99 分钟门槛，跨有效学期查找下一节课并显示小时、分钟；日视图超过 60 分钟显示一位小数小时，
+60 分钟以内显示分钟。状态计算、刷新时刻、隐藏本次与边界规则见 [实现手册](IMPLEMENTATION-MANUAL.md)。
+纯显示刷新为非唤醒 RTC，通知起止边界独立保留唤醒闹钟；两个日视图 provider 共用实例清单。
+不是通过前台服务保活，也不阻止 Android 14+ 用户主动划走状态通知。
 
 ## 30. 「回到课表就生效」一族弹窗清零（2026-09-17 夜，用户第二轮反馈）
 
@@ -2042,7 +2079,7 @@ success 从 4.12 降到 3.24（仍过 AA Large 3:1）。要动它们就是改 To
 | 虚线网格 / 显示上课时间 / 课表底部留白 | 「回到课表就生效哦」 | 删。回到课表立刻可见，无需说 |
 | 作息时间表（就地选择） | 「回到课表就生效哦」 | 删。同上（onResume 比对重建接手） |
 | 空课表插图 | 「切换页面后生效哦」 | 删；副标题补「切换页面后生效」 |
-| 页面预加载 | 「重启App后生效哦」 | 删；副标题补「重启 App 后生效」 |
+| 页面预加载 | 旧版设置项通过 `offscreenPageLimit=2` 额外缓存两侧页面 | 删除设置项；课表页固定 `offscreenPageLimit=1`，按需创建并使用共享 Room `LiveData` |
 | 课表全屏显示 | 「重启App后生效哦~」 | 删；副标题补「重启 App 后生效」 |
 | 主题颜色 | 「重启App后生效哦~」 | 删。该行副标题本来就写着"重启后生效"，弹窗纯属重复 |
 | 日视图用课程颜色 | 「请点击小部件右上角的…」 | 删；副标题补「小部件右上角可切换」 |
@@ -2055,4 +2092,5 @@ success 从 4.12 降到 3.24（仍过 AA Large 3:1）。要动它们就是改 To
 
 - 新增 `SettingsSwitchQuietApplyTest`：在真的 SettingsActivity 上连拨五个开关，断言偏好
   全部落盘（静默 ≠ 没保存）且全程无任何 toast；谁往回加弹窗它就红。
-- 门禁：52 类 / 259 项 / 0 失败；`assembleDebug` 通过；`lintDebug` 仍为既有 5 错无新增。
+- 门禁：52 类 / 259 项 / 0 失败；`assembleDebug` 通过；该历史阶段的 `lintDebug` 记录为既有 5 错，
+  后续已在本轮修复并从基线移除。

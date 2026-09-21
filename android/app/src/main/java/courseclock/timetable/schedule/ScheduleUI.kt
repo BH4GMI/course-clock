@@ -265,7 +265,7 @@ class ScheduleUI(override val ctx: Context, private val table: TableBean, privat
             }, ConstraintLayout.LayoutParams(0, itemHeight).apply {
                 topMargin = rowGap
                 endToStart = R.id.anko_ll_week_panel_0
-                horizontalWeight = 0.5f
+                horizontalWeight = if (forWidget) 1f else 0.5f
                 startToStart = ConstraintSet.PARENT_ID
                 when (i) {
                     1 -> {

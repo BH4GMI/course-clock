@@ -3,11 +3,9 @@ package courseclock.timetable
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -249,17 +247,20 @@ class WidgetPreviewImageTest {
         AppWidgetUtils.refreshScheduleWidget(context, manager, id, table)
 
         val service = Robolectric.buildService(ScheduleAppWidgetService::class.java).create().get()
-        val factory = service.onGetViewFactory(
-                Intent(context, ScheduleAppWidgetService::class.java).apply {
-                    data = Uri.fromParts("content", table.id.toString(), null)
-                })
+        val factory = service.onGetViewFactory(AppWidgetUtils.weekIntent(context, table.id, id))
         factory.onCreate()
         factory.onDataSetChanged()
         val item = factory.getViewAt(0).apply(context, null)
         val body = (item.findViewById<ImageView>(R.id.iv_schedule).drawable as BitmapDrawable).bitmap
 
         val card = shadowOf(manager).getViewFor(id)
-        return compose(card, R.id.lv_schedule, body,
+        card.measure(View.MeasureSpec.makeMeasureSpec((cellWidthDp * density).toInt(), View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec((cellHeightDp * density).toInt(), View.MeasureSpec.EXACTLY))
+        card.layout(0, 0, card.measuredWidth, card.measuredHeight)
+        val list = card.findViewById<View>(R.id.lv_schedule)
+        val visible = Bitmap.createBitmap(body.width, minOf(body.height, list.height), Bitmap.Config.ARGB_8888)
+        Canvas(visible).drawBitmap(body, 0f, 0f, null)
+        return compose(card, R.id.lv_schedule, visible,
                 (cellWidthDp * density).toInt(), (cellHeightDp * density).toInt())
     }
 

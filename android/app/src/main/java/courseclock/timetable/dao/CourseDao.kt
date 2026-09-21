@@ -45,10 +45,10 @@ interface CourseDao {
     suspend fun getCourseOfTable(tableId: Int): List<CourseBean>
 
     @Query("select * from coursebasebean natural join coursedetailbean where tableId = :tableId")
-    fun getCourseOfTableLiveData(tableId: Int): LiveData<List<CourseBean>>
+    fun getCourseOfTableSync(tableId: Int): List<CourseBean>
 
-    @Query("select * from coursebasebean natural join coursedetailbean where day = :day and tableId = :tableId")
-    fun getCourseByDayOfTableLiveData(day: Int, tableId: Int): LiveData<List<CourseBean>>
+    @Query("select * from coursebasebean natural join coursedetailbean where tableId = :tableId")
+    fun getCourseOfTableLiveData(tableId: Int): LiveData<List<CourseBean>>
 
     @Query("select * from coursebasebean natural join coursedetailbean where day = :day and tableId = :tableId")
     suspend fun getCourseByDayOfTable(day: Int, tableId: Int): List<CourseBean>
@@ -73,9 +73,6 @@ interface CourseDao {
 
     @Query("select * from coursebasebean natural join coursedetailbean where courseName = :name and tableId = :tableId")
     suspend fun checkSameNameInTable(name: String, tableId: Int): CourseBaseBean?
-
-    @Query("delete from coursebasebean where tableId = :tableId")
-    suspend fun removeCourseBaseBeanOfTable(tableId: Int)
 
     @Query("delete from coursedetailbean where id = :id and tableId = :tableId")
     suspend fun deleteDetailByIdOfTable(id: Int, tableId: Int)
@@ -103,9 +100,6 @@ interface CourseDao {
 
     @Query("SELECT COUNT(*) FROM coursedetailbean WHERE tableId=:tableId AND ((startWeek<=:week AND endWeek>=:week) AND (type=0 OR (:week % 2=0 AND type=2) OR (:week % 2=1 AND type=1)))")
     fun getShowCourseNumber(tableId: Int, week: Int): LiveData<Int>
-
-    @Query("SELECT COUNT(*) FROM coursedetailbean WHERE tableId=:tableId AND endWeek>=:week")
-    fun getShowCourseNumberWithOtherWeek(tableId: Int, week: Int): LiveData<Int>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBaseList(courseBaseList: List<CourseBaseBean>)

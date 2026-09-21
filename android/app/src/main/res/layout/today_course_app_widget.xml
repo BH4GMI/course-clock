@@ -37,14 +37,14 @@
         表头另一头铺到最右边：右上角那两个箭头（切明天 / 切回今天）已删除，它们占掉的宽度正好够
         放下课程计数（`3节 · 已上1节`）；箭头在 2×2 那一格里把表头挤到只剩约 60dp，日期都会被截断。
 
-        计数在格宽不足 180dp 时不写（见 `refreshTodayWidget`）：与其做一个用户永远看不全的截断串，
-        不如把这点宽度留给标题本身。
+        计数按实际字体测量决定是否显示（见 refreshTodayWidget），空间不足时优先保留日期。
     -->
     <TextView
         android:id="@+id/tv_summary"
         android:textColor="@color/widget_panel_text_secondary"
         android:layout_width="wrap_content"
-        android:layout_height="18dp"
+        android:layout_height="wrap_content"
+        android:minHeight="18dp"
         android:layout_alignTop="@id/tv_date"
         android:layout_marginStart="2dp"
         android:layout_alignParentEnd="true"

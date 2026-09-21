@@ -32,7 +32,7 @@ class AboutActivity : BaseBlurTitleActivity() {
 
         val binding = ActivityAboutBinding.bind(llContent.getChildAt(0))
         try {
-            binding.tvVersion.text = getString(R.string.about_version, UpdateUtils.getVersionName(this))
+            binding.tvVersion.text = getString(R.string.about_version, UpdateUtils.getVersionName())
         } catch (e: Exception) {
             // 取不到版本号不是致命问题，但不该静默：留一条日志，页面宁可不显示也不显示假信息。
             Log.w("AboutActivity", "无法取得版本号，关于页将不显示版本", e)

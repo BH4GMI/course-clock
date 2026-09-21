@@ -7,7 +7,7 @@ import android.util.Log
 import courseclock.timetable.utils.goAsync
 
 /**
- * 提醒模块的**唯一广播入口**。两条职责，来源不同，互不相干：
+ * 课程提醒、状态边界、通知交互及系统重排的广播入口。
  *
  * ## 一、系统事件 → 重排闹钟
  *
@@ -25,9 +25,15 @@ import courseclock.timetable.utils.goAsync
  *
  * ## 二、提醒闹钟 → 弹通知
  *
- * [CourseReminderScheduler.ACTION_REMIND_COURSE] 由 # 模块排出的精确闹钟在本类触发，
+ * [CourseReminderScheduler.ACTION_REMIND_COURSE] 由调度器排出的精确闹钟在本类触发，
  * 转交 [CourseReminderNotifier] 发通知；[CourseReminderScheduler.ACTION_CANCEL_REMINDER]
- * 由通知上「我知道啦」按钮触发，撤掉那条通知。
+ * 由通知上「知道了」按钮触发，撤掉那条通知。
+ *
+ * ## 三、状态与小组件独立更新
+ *
+ * [CourseReminderScheduler.ACTION_REFRESH_COUNTDOWN] 仅刷新小组件分钟倒计时；
+ * [CourseReminderScheduler.ACTION_REFRESH_STATUS] 在课前分钟刻度及课程状态边界执行。
+ * 通知划走与系统超时分开解释，过期展示的删除回调不能隐藏仍在进行的课程。
  *
  * ## 为什么接收方是它，而不是 `TodayCourseAppWidget`
  *
@@ -39,6 +45,7 @@ import courseclock.timetable.utils.goAsync
 class CourseReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (!CourseClock.accepts(intent)) return
         when (intent.action) {
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_TIME_CHANGED,
@@ -66,19 +73,45 @@ class CourseReminderReceiver : BroadcastReceiver() {
                     return
                 }
                 val payload = CourseReminderScheduler.payloadOf(intent)
-                CourseReminderNotifier.remind(
-                        context,
-                        index = payload.index,
-                        kind = payload.kind,
-                        targetAt = payload.targetAt,
-                        now = System.currentTimeMillis(),
-                        course = payload.course,
-                        next = payload.next)
+                goAsync {
+                    val now = CourseClock.nowMillis()
+                    val valid = CourseReminderScheduler.validEntries(context, payload.entries, now)
+                    CourseReminderNotifier.remind(context, valid, now)
+                    CourseReminderScheduler.refreshStatus(context)
+                }
             }
 
             CourseReminderScheduler.ACTION_CANCEL_REMINDER ->
-                CourseReminderNotifier.cancel(
-                        context, intent.getIntExtra(CourseReminderScheduler.EXTRA_INDEX, 0))
+                intent.getStringExtra(CourseReminderNotifier.EXTRA_TAG)?.let { CourseReminderNotifier.cancel(context, it) }
+
+            CourseReminderNotifier.ACTION_EXPIRE -> goAsync {
+                intent.getStringExtra(CourseReminderNotifier.EXTRA_TAG)?.let {
+                    CourseReminderNotifier.reconcileReminders(context, it)
+                }
+            }
+
+            CourseReminderScheduler.ACTION_HIDE_STATUS -> goAsync {
+                CourseReminderScheduler.hideStatus(context,
+                        intent.getStringArrayListExtra(CourseReminderScheduler.EXTRA_HIDDEN_KEYS).orEmpty().toSet())
+            }
+
+            CourseReminderScheduler.ACTION_DISMISS_STATUS -> goAsync {
+                val validUntil = intent.getLongExtra(CourseReminderScheduler.EXTRA_STATUS_VALID_UNTIL, 0)
+                CourseReminderScheduler.dismissStatus(context,
+                        intent.getStringArrayListExtra(CourseReminderScheduler.EXTRA_HIDDEN_KEYS).orEmpty().toSet(), validUntil)
+            }
+
+            CourseReminderScheduler.ACTION_REFRESH_STATUS -> goAsync {
+                CourseReminderScheduler.refreshStatus(context)
+            }
+
+            CourseReminderScheduler.ACTION_REFRESH_COUNTDOWN -> {
+                // 小组件的分钟刷新独立于通知状态链。
+                goAsync {
+                    AppWidgetUtils.refreshTodayWidgets(context)
+                    CourseReminderScheduler.armNextCountdownRefresh(context)
+                }
+            }
         }
     }
 

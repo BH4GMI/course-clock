@@ -89,8 +89,8 @@ class ScheduleFragment : BaseFragment() {
         }
         // 课程数据在**视图创建时**就挂上观察者，不等 onResume：ViewPager 的邻页（offscreen
         // 缓存里那一周）此时已经创建但不曾 resume，拖动到一半时页面内容就该是现成的，
-        // 落定后再装配就是用户看到的「滑完才出来」。preLoad 只影响 Activity 侧的
-        // offscreenPageLimit（见 initViewPage），不再延迟本页的数据装配。
+        // 落定后再装配就是用户看到的「滑完才出来」。Activity 保留 ViewPager 最低邻页缓存，
+        // 不再提供额外预加载选项，也不延迟本页的数据装配。
         for (i in 1..7) {
             viewModel.allCourseList[i - 1].observe(viewLifecycleOwner, Observer {
                 initWeekPanel(it, i, viewModel.table)

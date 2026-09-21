@@ -39,7 +39,6 @@ import java.util.Calendar
 private const val TITLE_COLOR = 1
 private const val COURSE_TEXT_COLOR = 2
 private const val STROKE_COLOR = 3
-private const val WIDGET_TITLE_COLOR = 4
 private const val WIDGET_COURSE_TEXT_COLOR = 5
 private const val WIDGET_STROKE_COLOR = 6
 
@@ -50,7 +49,6 @@ class ScheduleSettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPi
             TITLE_COLOR -> viewModel.table.textColor = color
             COURSE_TEXT_COLOR -> viewModel.table.courseTextColor = color
             STROKE_COLOR -> viewModel.table.strokeColor = color
-            WIDGET_TITLE_COLOR -> viewModel.table.widgetTextColor = color
             WIDGET_COURSE_TEXT_COLOR -> viewModel.table.widgetCourseTextColor = color
             WIDGET_STROKE_COLOR -> viewModel.table.widgetStrokeColor = color
         }
@@ -87,7 +85,7 @@ class ScheduleSettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPi
                 }
                 mRecyclerView.adapter?.notifyDataSetChanged()
                 if (showItems.size == 1) {
-                    mRecyclerView.longSnack("找不到哦，换个关键词试试看，或者请仔细找找啦，一般都能找到的。")
+                    mRecyclerView.longSnack("未找到相关设置，请更换关键词")
                 }
             }
         }
@@ -124,7 +122,7 @@ class ScheduleSettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPi
         }
         // 尚未设置开学日期（空串）时，日期选择器先落在今天
         viewModel.termStartList = viewModel.table.startDate.split("-")
-        val today = Calendar.getInstance()
+        val today = Calendar.getInstance().apply { timeInMillis = courseclock.timetable.utils.CourseClock.nowMillis() }
         viewModel.mYear = viewModel.termStartList.getOrNull(0)?.toIntOrNull() ?: today.get(Calendar.YEAR)
         viewModel.mMonth = viewModel.termStartList.getOrNull(1)?.toIntOrNull() ?: (today.get(Calendar.MONTH) + 1)
         viewModel.mDay = viewModel.termStartList.getOrNull(2)?.toIntOrNull() ?: today.get(Calendar.DATE)
@@ -158,34 +156,33 @@ class ScheduleSettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPi
     private fun onItemsCreated(items: MutableList<BaseSettingItem>) {
         items.add(CategoryItem("课程数据"))
         items.add(HorizontalItem(ScheduleRowId.TABLE_NAME, "课表名称", viewModel.table.tableName, keys = listOf("名称", "名字", "名", "课表")))
-        items.add(HorizontalItem(ScheduleRowId.CLASS_TIME, "上课时间", "点击此处更改", keys = listOf("时间")))
+        items.add(HorizontalItem(ScheduleRowId.CLASS_TIME, "上课时间", "", desc = "每节课的起止时间", keys = listOf("作息", "时间")))
         items.add(HorizontalItem(ScheduleRowId.TERM_START, "学期开始日期", viewModel.table.startDate, keys = listOf("学期", "周", "日期", "开学", "开始", "时间")))
         items.add(currentWeekItem)
-        items.add(HorizontalItem(ScheduleRowId.MANAGE_COURSE, "管理已添加课程", "", keys = listOf("课程", "课")))
-        items.add(SeekBarItem(ScheduleRowId.NODES, "一天课程节数", viewModel.table.nodes, 1, 30, "节", keys = listOf("节数", "数量", "数")))
+        items.add(HorizontalItem(ScheduleRowId.MANAGE_COURSE, "管理课程", "", keys = listOf("课程", "课")))
+        items.add(SeekBarItem(ScheduleRowId.NODES, "每天显示节数", viewModel.table.nodes, 1, 30, "节", keys = listOf("节数", "数量", "数")))
         items.add(SeekBarItem(ScheduleRowId.MAX_WEEK, "学期周数", viewModel.table.maxWeek, 1, 30, "周", keys = listOf("学期", "周", "时间")))
         items.add(SwitchItem(ScheduleRowId.SUNDAY_FIRST, "周日为每周第一天", viewModel.table.sundayFirst, keys = listOf("周日", "第一天", "起始", "星期天", "天")))
         items.add(SwitchItem(ScheduleRowId.SHOW_SAT, "显示周六", viewModel.table.showSat, keys = listOf("周六", "显示", "星期六", "六")))
         items.add(SwitchItem(ScheduleRowId.SHOW_SUN, "显示周日", viewModel.table.showSun, keys = listOf("周日", "显示", "星期日", "日", "星期天", "周天")))
 
         items.add(CategoryItem("课表外观"))
-        items.add(SwitchItem(ScheduleRowId.SHOW_TIME_IN_CELL, "在格子内显示上课时间", viewModel.table.showTime, keys = listOf("时间", "显示", "格子", "上课时间")))
-        items.add(VerticalItem(ScheduleRowId.TABLE_BACKGROUND, "课程表背景", "长按可以恢复默认哦~", keys = listOf("背景", "显示", "图片")))
-        items.add(VerticalItem(ScheduleRowId.UI_TEXT_COLOR, "界面文字颜色", "指标题等字体的颜色\n还可以调颜色的透明度哦", keys = listOf("颜色", "显示", "文字", "文字颜色")))
-        items.add(VerticalItem(ScheduleRowId.COURSE_TEXT_COLOR, "课程文字颜色", "指课程格子内的颜色\n还可以调颜色的透明度哦", keys = listOf("颜色", "显示", "文字", "文字颜色")))
-        items.add(VerticalItem(ScheduleRowId.STROKE_COLOR, "格子边框颜色", "将不透明度调到最低就可以隐藏边框了哦~", keys = listOf("边框", "显示", "边框颜色", "格子", "边")))
+        items.add(SwitchItem(ScheduleRowId.SHOW_TIME_IN_CELL, "课程格子内显示时间", viewModel.table.showTime, keys = listOf("时间", "显示", "格子", "上课时间")))
+        items.add(VerticalItem(ScheduleRowId.TABLE_BACKGROUND, "课程表背景", "长按恢复默认背景", keys = listOf("背景", "显示", "图片")))
+        items.add(VerticalItem(ScheduleRowId.UI_TEXT_COLOR, "课表标题与时间颜色", "支持透明度调整", keys = listOf("颜色", "显示", "文字", "文字颜色")))
+        items.add(VerticalItem(ScheduleRowId.COURSE_TEXT_COLOR, "课程文字颜色", "课程格子内的文字", keys = listOf("颜色", "显示", "文字", "文字颜色")))
+        items.add(VerticalItem(ScheduleRowId.STROKE_COLOR, "课程格子边框颜色", "完全透明时隐藏边框", keys = listOf("边框", "显示", "边框颜色", "格子", "边")))
         items.add(SeekBarItem(ScheduleRowId.ITEM_HEIGHT, "课程格子基准高度", viewModel.table.itemHeight, 32, 96, "dp", keys = listOf("格子", "高度", "格子高度", "显示")))
         items.add(SeekBarItem(ScheduleRowId.ITEM_ALPHA, "课程格子不透明度", viewModel.table.itemAlpha, 0, 100, "%", keys = listOf("格子", "透明", "格子高度", "显示")))
-        items.add(SeekBarItem(ScheduleRowId.ITEM_TEXT_SIZE, "课程显示文字大小", viewModel.table.itemTextSize, 8, 16, "sp", keys = listOf("文字", "大小", "文字大小")))
+        items.add(SeekBarItem(ScheduleRowId.ITEM_TEXT_SIZE, "课程字号", viewModel.table.itemTextSize, 8, 16, "sp", keys = listOf("文字", "大小", "文字大小")))
         items.add(SwitchItem(ScheduleRowId.SHOW_OTHER_WEEK, "显示非本周课程", viewModel.table.showOtherWeekCourse, keys = listOf("非本周")))
 
         items.add(CategoryItem("桌面小部件外观"))
-        items.add(SeekBarItem(ScheduleRowId.WIDGET_ITEM_HEIGHT, "小部件格子基准高度", viewModel.table.widgetItemHeight, 32, 96, "dp", keys = listOf("格子", "高度", "格子高度", "显示", "小部件", "小", "插件", "桌面")))
-        items.add(SeekBarItem(ScheduleRowId.WIDGET_ITEM_ALPHA, "小部件格子不透明度", viewModel.table.widgetItemAlpha, 0, 100, "%", keys = listOf("格子", "透明", "格子高度", "显示", "小部件", "小", "插件", "桌面")))
-        items.add(SeekBarItem(ScheduleRowId.WIDGET_ITEM_TEXT_SIZE, "小部件显示文字大小", viewModel.table.widgetItemTextSize, 8, 16, "sp", keys = listOf("文字", "大小", "文字大小", "小部件", "小", "插件", "桌面")))
-        items.add(VerticalItem(ScheduleRowId.WIDGET_TITLE_COLOR, "小部件标题颜色", "指标题等字体的颜色\n对于日视图则是全部文字的颜色\n还可以调颜色的透明度哦", keys = listOf("颜色", "显示", "文字", "文字颜色", "小部件", "小", "插件", "桌面")))
-        items.add(VerticalItem(ScheduleRowId.WIDGET_COURSE_COLOR, "小部件课程颜色", "指课程格子内的文字颜色\n还可以调颜色的透明度哦", keys = listOf("颜色", "显示", "文字", "文字颜色", "小部件", "小", "插件", "桌面")))
-        items.add(VerticalItem(ScheduleRowId.WIDGET_STROKE_COLOR, "小部件格子边框颜色", "将不透明度调到最低就可以隐藏边框了哦~", keys = listOf("边框", "显示", "边框颜色", "格子", "边", "小部件", "小", "插件", "桌面")))
+        items.add(SeekBarItem(ScheduleRowId.WIDGET_ITEM_HEIGHT, "周视图格子高度", viewModel.table.widgetItemHeight, 32, 96, "dp", keys = listOf("格子", "高度", "小部件", "桌面")))
+        items.add(SeekBarItem(ScheduleRowId.WIDGET_ITEM_ALPHA, "周视图格子不透明度", viewModel.table.widgetItemAlpha, 0, 100, "%", keys = listOf("格子", "透明", "小部件", "桌面")))
+        items.add(SeekBarItem(ScheduleRowId.WIDGET_ITEM_TEXT_SIZE, "小组件字号", viewModel.table.widgetItemTextSize, 8, 16, "sp", keys = listOf("文字", "大小", "小部件", "桌面")))
+        items.add(VerticalItem(ScheduleRowId.WIDGET_COURSE_COLOR, "周视图课程文字颜色", "课程格子内的文字", keys = listOf("颜色", "文字", "小部件", "桌面")))
+        items.add(VerticalItem(ScheduleRowId.WIDGET_STROKE_COLOR, "周视图课程边框颜色", "完全透明时隐藏边框", keys = listOf("边框", "颜色", "小部件", "桌面")))
 
         items.add(VerticalItem(ScheduleRowId.BOTTOM_SPACER, "", "\n\n\n"))
     }
@@ -235,17 +232,17 @@ class ScheduleSettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPi
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
             val value = editText?.text
             if (value.isNullOrBlank()) {
-                inputLayout?.error = "数值不能为空哦>_<"
+                inputLayout?.error = "请输入数值"
                 return@setOnClickListener
             }
             val valueInt = try {
                 value.toString().toInt()
             } catch (e: Exception) {
-                inputLayout?.error = "输入异常>_<"
+                inputLayout?.error = "请输入有效整数"
                 return@setOnClickListener
             }
             if (valueInt < item.min || valueInt > item.max) {
-                inputLayout?.error = "注意范围 ${item.min} ~ ${item.max}"
+                inputLayout?.error = "请输入 ${item.min} 至 ${item.max} 之间的整数"
                 return@setOnClickListener
             }
             when (item.id) {
@@ -299,7 +296,7 @@ class ScheduleSettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPi
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                     val value = editText?.text
                     if (value.isNullOrBlank()) {
-                        inputLayout?.error = "名称不能为空哦>_<"
+                        inputLayout?.error = "请输入课表名称"
                         return@setOnClickListener
                     }
                     viewModel.table.tableName = value.toString()
@@ -321,11 +318,6 @@ class ScheduleSettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPi
                     val weekIndex = showItems.indexOf(currentWeekItem)
                     if (weekIndex >= 0) mAdapter.notifyItemChanged(weekIndex)
                 }, viewModel.mYear, viewModel.mMonth - 1, viewModel.mDay).show()
-                if (viewModel.table.sundayFirst) {
-                    Toasty.success(this, "为了周数计算准确，建议选择周日哦", Toast.LENGTH_LONG).show()
-                } else {
-                    Toasty.success(this, "为了周数计算准确，建议选择周一哦", Toast.LENGTH_LONG).show()
-                }
             }
             ScheduleRowId.CLASS_TIME -> {
                 startActivityForResult(Intent(this, TimeSettingsActivity::class.java).apply {
@@ -372,9 +364,6 @@ class ScheduleSettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPi
             ScheduleRowId.STROKE_COLOR -> {
                 buildColorPickerDialogBuilder(viewModel.table.strokeColor, STROKE_COLOR)
             }
-            ScheduleRowId.WIDGET_TITLE_COLOR -> {
-                buildColorPickerDialogBuilder(viewModel.table.widgetTextColor, WIDGET_TITLE_COLOR)
-            }
             ScheduleRowId.WIDGET_COURSE_COLOR -> {
                 buildColorPickerDialogBuilder(viewModel.table.widgetCourseTextColor, WIDGET_COURSE_TEXT_COLOR)
             }
@@ -389,7 +378,7 @@ class ScheduleSettingsActivity : BaseListActivity(), ColorPickerFragment.ColorPi
             ScheduleRowId.TABLE_BACKGROUND -> {
                 // 文件随设置成功保存后释放，返回前仍能恢复原配置。
                 viewModel.setBackground("")
-                Toasty.success(applicationContext, "恢复默认壁纸成功~").show()
+                Toasty.success(applicationContext, "已恢复默认背景").show()
                 true
             }
             else -> false

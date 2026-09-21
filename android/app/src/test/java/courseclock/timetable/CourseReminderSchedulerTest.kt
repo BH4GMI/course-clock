@@ -405,7 +405,7 @@ class CourseReminderSchedulerTest {
         assertEquals(at(2024, 2, 13, 7, 15), startFreeze)
 
         val alarms = CourseReminderScheduler.alarmsForDay(listOf(course), day, courseTimes,
-                dayStart(2024, 2, 13), at(2024, 2, 13, 0, 0), beforeStart, beforeEnd)
+                dayStart(2024, 2, 13), at(2024, 2, 13, 0, 0), beforeStart, beforeEnd, mergeEnabled = false)
         assertEquals("同刻时必须两枚都保留", 2, alarms.size)
         assertEquals(1, alarms.count { it.kind == CourseReminderScheduler.ReminderKind.START })
         assertEquals(1, alarms.count { it.kind == CourseReminderScheduler.ReminderKind.END })
@@ -549,65 +549,6 @@ class CourseReminderSchedulerTest {
         assertEquals(1, CourseReminderScheduler.weekdayOf(at(2024, 2, 11, 12, 0))) // 周一
     }
 
-    // ---- 通知文案：纯函数，断言完整字符串 ----
-
-    private val math = CourseReminderScheduler.CourseDetail("高等数学", "B210")
-    private val noRoom = CourseReminderScheduler.CourseDetail("高等数学", "")
-    private val noName = CourseReminderScheduler.CourseDetail("", "B210")
-    private val blank = CourseReminderScheduler.CourseDetail("", "")
-
-    @Test
-    fun startNotificationTextMatchesTheCopyTable() {
-        // 上课：剩余 ≥ 1 是"还有 N 分钟上课"，已到点/被推迟到过点是"已到上课时间"。
-        assertEquals(CourseReminderScheduler.NotificationText("还有 5 分钟上课", "高等数学 · B210"),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.START, 5, math, null))
-        assertEquals(CourseReminderScheduler.NotificationText("还有 1 分钟上课", "高等数学 · B210"),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.START, 1, math, null))
-        assertEquals(CourseReminderScheduler.NotificationText("已到上课时间", "高等数学 · B210"),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.START, 0, math, null))
-        assertEquals(CourseReminderScheduler.NotificationText("已到上课时间", "高等数学 · B210"),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.START, -3, math, null))
-    }
-
-    @Test
-    fun endNotificationTextIsBodylessUnlessMerged() {
-        // 下课不合并时正文留空 —— 用户只要"还剩几分钟下课"这一个信息。
-        assertEquals(CourseReminderScheduler.NotificationText("还有 2 分钟下课", ""),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.END, 2, math, null))
-        assertEquals(CourseReminderScheduler.NotificationText("下课时间到", ""),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.END, 0, math, null))
-
-        // 合并时正文是"下一节 <课名> · <教室>"。
-        assertEquals(CourseReminderScheduler.NotificationText("还有 2 分钟下课", "下一节 线性代数 · C305", "下一节 线性代数 · C305"),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.END, 2, math,
-                        CourseReminderScheduler.CourseDetail("线性代数", "C305")))
-        assertEquals(CourseReminderScheduler.NotificationText("下课时间到", "下一节 线性代数 · C305", "下一节 线性代数 · C305"),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.END, 0, math,
-                        CourseReminderScheduler.CourseDetail("线性代数", "C305")))
-    }
-
-    @Test
-    fun widgetCountdownLineIsTheSameSentenceAsTheEndNotificationTitle() {
-        // 小部件那一行（TodayColorfulService 直接用 countdownText）与下课通知的标题
-        // 必须是逐字一致的同一句话；这条断言就是它们之间唯一的契约。
-        assertEquals("还有 20 分钟下课", CourseReminderScheduler.countdownText(20))
-        assertEquals("还有 1 分钟下课", CourseReminderScheduler.countdownText(1))
-        for (minutes in 1L..20L) {
-            assertEquals("第 $minutes 分钟时两处文案不一致",
-                    CourseReminderScheduler.countdownText(minutes),
-                    CourseReminderScheduler.notificationText(
-                            CourseReminderScheduler.ReminderKind.END, minutes, math, null).title)
-        }
-    }
-
     @Test
     fun countdownLineSpellsOutTheMinuteFromTheSameRule() {
         // 窗口内：先由 countdownMinutesLeft 现算分钟数（向上取整），再套 countdownText。
@@ -621,39 +562,6 @@ class CourseReminderSchedulerTest {
         assertNull(CourseReminderScheduler.countdownMinutesLeft(end, at(2026, 9, 15, 20, 15)))
         assertNull(CourseReminderScheduler.countdownMinutesLeft(end, at(2026, 9, 15, 19, 54)))
     }
-
-    @Test
-    fun courseNameAndRoomDegradeWithoutStraySeparator() {
-        // 教室为空只显示课名，课名为空只显示教室，两者都空则正文为空 —— 绝不留下孤零零的 "·"。
-        assertEquals(CourseReminderScheduler.NotificationText("还有 5 分钟上课", "高等数学"),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.START, 5, noRoom, null))
-        assertEquals(CourseReminderScheduler.NotificationText("还有 5 分钟上课", "B210"),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.START, 5, noName, null))
-        assertEquals(CourseReminderScheduler.NotificationText("还有 5 分钟上课", ""),
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.START, 5, blank, null))
-        // "下一节"这一段同样退化：教室空 → "下一节 线性代数"；两个都空 → 整段消失。
-        assertEquals("下一节 线性代数",
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.END, 5, math,
-                        CourseReminderScheduler.CourseDetail("线性代数", "")).body)
-        assertEquals("",
-                CourseReminderScheduler.notificationText(
-                        CourseReminderScheduler.ReminderKind.END, 5, math,
-                        CourseReminderScheduler.CourseDetail("", "")).body)
-    }
-
-    @Test
-    fun joinNeverLeavesAStraySeparator() {
-        assertEquals("高等数学 · B210", CourseReminderScheduler.join(math))
-        assertEquals("高等数学", CourseReminderScheduler.join(noRoom))
-        assertEquals("B210", CourseReminderScheduler.join(noName))
-        assertEquals("", CourseReminderScheduler.join(blank))
-    }
-
-    // ---- 剩余分钟取整：向上取整 ----
 
     @Test
     fun remainingMinutesRoundsUp() {
@@ -690,288 +598,53 @@ class CourseReminderSchedulerTest {
                 base, base - 4 * 60_000L + 1L)) // 3 分 59.999 秒
     }
 
-    // ---- 连堂判定与合并 ----
-    //
-    // 用一套自足的时刻表把"空档"这个变量单独隔离出来：T1 是基准课（08:00-08:50），
-    // 其余每个 slot 的**开始时刻**与 T1 结束之间正好构成一个要测的空档。
-    //   slot 2: 08:55 -> 空档  5 分钟
-    //   slot 3: 09:05 -> 空档 15 分钟
-    //   slot 4: 09:10 -> 空档 20 分钟  ← 阈值上界，应合并
-    //   slot 5: 09:15 -> 空档 25 分钟  ← 应不合并
-    //   slot 6: 09:20 -> 空档 30 分钟  ← 应不合并
-    //   slot 7: 12:00 -> 与 slot 8(13:20) 构成 80 分钟午休
-
     private fun row(node: Int, start: String, end: String) =
             TimeDetailBean(node = node, startTime = start, endTime = end)
 
-    private val gapTimes = CourseTimes.of(listOf(
-            row(1, "08:00", "08:50"),
-            row(2, "08:55", "09:45"),
-            row(3, "09:05", "09:55"),
-            row(4, "09:10", "10:00"),
-            row(5, "09:15", "10:05"),
-            row(6, "09:20", "10:10"),
-            row(7, "11:20", "12:00"),
-            row(8, "13:20", "14:10")
-    ))
-
-    private fun oneCourse(id: Int, name: String, node: Int) = CourseBean(
-            id = id, courseName = name, day = 3, room = "x", teacher = "x",
-            startNode = node, step = 1, startWeek = 1, endWeek = 16, type = 0,
-            color = "#000000", tableId = 1)
-
-    private fun adjacency(a: CourseBean, vararg others: CourseBean): CourseBean? =
-            CourseReminderScheduler.adjacentAfter(
-                    a, listOf(a) + others, gapTimes, CourseReminderScheduler.ADJACENT_BREAK_MAX_MINUTES)
-
-    private fun courseNamed(node: Int, name: String) = oneCourse(node, name, node)
-
     @Test
-    fun mergeThresholdIsExactlyTwentyMinutes() {
-        assertEquals(20, CourseReminderScheduler.ADJACENT_BREAK_MAX_MINUTES)
-        val a = courseNamed(1, "A")
-        // 5 / 15 / 20 分钟空档：合并（课名不同）。
-        assertEquals("B", adjacency(a, courseNamed(2, "B"))?.courseName)
-        assertEquals("B", adjacency(a, courseNamed(3, "B"))?.courseName)
-        assertEquals("B", adjacency(a, courseNamed(4, "B"))?.courseName)
-        // 25 / 30 分钟空档：不合并。
-        assertNull(adjacency(a, courseNamed(5, "B")))
-        assertNull(adjacency(a, courseNamed(6, "B")))
-    }
-
-    @Test
-    fun sameCourseNameIsNeverMerged() {
-        // 课名相同即同一门课：即便空档只有 5 分钟也不合并。
-        assertNull(adjacency(courseNamed(1, "高等数学"), courseNamed(2, "高等数学")))
-        // 空档 20 分钟也一样不合并。
-        assertNull(adjacency(courseNamed(1, "高等数学"), courseNamed(4, "高等数学")))
-    }
-
-    @Test
-    fun lunchBreakIsNeverMerged() {
-        // 12:00 → 13:20 = 80 分钟，远超阈值：上午最后一节与下午第一节不合并。
-        assertNull(adjacency(courseNamed(7, "上午最后一节"), courseNamed(8, "下午第一节")))
-    }
-
-    @Test
-    fun overlappingOrBackwardsCoursesAreNeverMerged() {
-        // 同一格（同时刻）与更早开始的课都不算"下一节"。
-        val a = courseNamed(4, "A") // 09:10-10:00
-        assertNull(adjacency(a, courseNamed(2, "更早的课")))  // 08:55 开始
-        assertNull(adjacency(a, courseNamed(4, "同格的课")))  // 同时刻
-    }
-
-    @Test
-    fun earliestCandidateWinsAfterFilteringOutSameName() {
-        // 候选里既有同名（空档 20）也有别的课（空档 25）：同名先被剔除，剩下的超阈值 → 不合并。
-        val a = courseNamed(1, "A")
-        assertNull(adjacency(a, courseNamed(4, "A"), courseNamed(5, "B")))
-        // 换成空档 5 分钟的别的课，就应当选它。
-        assertEquals("B", adjacency(a, courseNamed(4, "A"), courseNamed(2, "B"))?.courseName)
-    }
-
-    @Test
-    fun mergeSuppressesExactlyOneAlarmAndKeepsBothWhenNotMerged() {
-        val a = courseNamed(1, "A")
-        val b = courseNamed(4, "B") // 空档 20 分钟 → 合并
+    fun mergingNeverMovesAnEarlierStartReminderToThePreviousEnd() {
+        val times = CourseTimes.of(listOf(row(1, "08:00", "08:45"), row(2, "08:55", "09:40")))
+        val courses = listOf(weekly(1, "前一节", 3, 1), weekly(2, "后一节", 3, 2))
         val now = at(2024, 2, 13, 0, 0)
-        val day = CourseReminderScheduler.dayOf(startDate, false, now)
-        val courses = listOf(a, b)
-
-        val adjacency = CourseReminderScheduler.adjacencyOf(
-                courses, gapTimes, CourseReminderScheduler.ADJACENT_BREAK_MAX_MINUTES)
-        assertEquals("B", adjacency[a]?.courseName)
-        val merged = CourseReminderScheduler.alarmsForDay(
-                courses, day, gapTimes, dayStart(2024, 2, 13), now, 20, 0, true, true, true)
-        // 合并：A 上课 + A 下课 + B 下课 = 3 枚；B 的上课被抑制。不合并时是 4 枚。
-        assertEquals(3, merged.size)
-        assertEquals(1, merged.count { it.kind == CourseReminderScheduler.ReminderKind.START })
-        assertEquals(2, merged.count { it.kind == CourseReminderScheduler.ReminderKind.END })
-        assertTrue("被抑制的必须是 B 的上课提醒",
-                merged.none {
-                    it.kind == CourseReminderScheduler.ReminderKind.START && it.course.courseName == "B"
-                })
-        val aEnd = merged.first {
-            it.kind == CourseReminderScheduler.ReminderKind.END && it.course.courseName == "A"
-        }
-        assertEquals("B", aEnd.nextCourse?.courseName)
-
-        // 不合并（开关关掉）：4 枚，两条都照常发。
-        val unmerged = CourseReminderScheduler.alarmsForDay(
-                courses, day, gapTimes, dayStart(2024, 2, 13), now, 20, 0, true, true, false)
-        assertEquals(4, unmerged.size)
-        assertEquals(2, unmerged.count { it.kind == CourseReminderScheduler.ReminderKind.START })
-        assertEquals(2, unmerged.count { it.kind == CourseReminderScheduler.ReminderKind.END })
-    }
-
-    @Test
-    fun lunchBreakKeepsBothNotifications() {
-        // 跨午休那两节：四条都在，不许为了"少发一条"抑制任何一条。
-        val morning = courseNamed(7, "上午最后一节")
-        val afternoon = courseNamed(8, "下午第一节")
-        val now = at(2024, 2, 13, 0, 0)
-        val day = CourseReminderScheduler.dayOf(startDate, false, now)
-        val courses = listOf(morning, afternoon)
-        val adjacency = CourseReminderScheduler.adjacencyOf(
-                courses, gapTimes, CourseReminderScheduler.ADJACENT_BREAK_MAX_MINUTES)
-        assertNull(adjacency[morning])
-
-        val alarms = CourseReminderScheduler.alarmsForDay(
-                courses, day, gapTimes, dayStart(2024, 2, 13), now, 20, 0, true, true, true)
+        val alarms = CourseReminderScheduler.alarmsForDay(courses,
+                CourseReminderScheduler.dayOf(startDate, false, now), times,
+                dayStart(2024, 2, 13), now, 20, 0, true, true, true)
         assertEquals(4, alarms.size)
-        assertEquals(2, alarms.count { it.kind == CourseReminderScheduler.ReminderKind.START })
-        assertEquals(2, alarms.count { it.kind == CourseReminderScheduler.ReminderKind.END })
+        assertEquals(at(2024, 2, 13, 8, 35), alarms.single {
+            it.kind == CourseReminderScheduler.ReminderKind.START && it.course.id == 2
+        }.triggerAt)
     }
 
     @Test
-    fun sameNameAdjacentCoursesStillGetBothNotifications() {
-        // 同名课连堂：不合并，于是 A 下课与 B 上课两条都在。
-        val a = courseNamed(1, "高等数学")
-        val b = courseNamed(2, "高等数学") // 空档 5 分钟，但同门课
+    fun simultaneousEventsKeepEveryCourseAndKind() {
+        val times = CourseTimes.of(listOf(row(1, "08:00", "08:45"), row(2, "09:05", "09:50")))
+        val courses = listOf(weekly(1, "同名", 3, 1), weekly(2, "同名", 3, 2),
+                weekly(3, "冲突", 3, 2))
         val now = at(2024, 2, 13, 0, 0)
         val day = CourseReminderScheduler.dayOf(startDate, false, now)
-        val courses = listOf(a, b)
-        val adjacency = CourseReminderScheduler.adjacencyOf(
-                courses, gapTimes, CourseReminderScheduler.ADJACENT_BREAK_MAX_MINUTES)
-        assertNull(adjacency[a])
-
-        val alarms = CourseReminderScheduler.alarmsForDay(
-                courses, day, gapTimes, dayStart(2024, 2, 13), now, 20, 0, true, true, true)
-        assertEquals(4, alarms.size)
-        assertEquals(2, alarms.count { it.kind == CourseReminderScheduler.ReminderKind.START })
-        assertEquals(2, alarms.count { it.kind == CourseReminderScheduler.ReminderKind.END })
+        val merged = CourseReminderScheduler.alarmsForDay(courses, day, times,
+                dayStart(2024, 2, 13), now, 20, 0, true, true, true)
+        val batch = merged.single { it.triggerAt == at(2024, 2, 13, 8, 45) }
+        assertEquals(3, (listOf(batch) + batch.simultaneous).size)
+        assertEquals(setOf(1, 2, 3), (listOf(batch) + batch.simultaneous).map { it.course.id }.toSet())
+        val separate = CourseReminderScheduler.alarmsForDay(courses, day, times,
+                dayStart(2024, 2, 13), now, 20, 0, true, true, false)
+        assertEquals(6, separate.size)
+        assertEquals(6, merged.sumOf { 1 + it.simultaneous.size })
     }
 
-    // ---- 三个开关各自的效果 ----
-
     @Test
-    fun switchesDecideWhichKindsAreRegistered() {
-        // 用两节**不相邻**的课（周三 / 周五），避免合并把 B 的上课提醒抑制掉干扰本用例。
-        allCourses = listOf(
-                weekly(1, "W-0815", 3, 2),
-                weekly(2, "F-0815", 5, 2)
-        )
-        val now = at(2024, 2, 6, 12, 0)
-        // 两节都在 03-06（周三）与 03-08（周五）；12:00 时 03-06 那节两枚都已过点，
-        // 只剩 03-08 那节的两枚。
-        val both = windowAlarms(now, 20, 0, merge = false, startEnabled = true, endEnabled = true)
-        assertEquals(2, both.size)
-        // 关上课：只剩 03-08 的下课一枚。
-        val endOnly = windowAlarms(now, 20, 0, merge = false, startEnabled = false, endEnabled = true)
-        assertEquals(1, endOnly.size)
-        assertTrue(endOnly.all { it.second == CourseReminderScheduler.ReminderKind.END })
-        // 关下课：只剩 03-08 的上课一枚。
-        val startOnly = windowAlarms(now, 20, 0, merge = false, startEnabled = true, endEnabled = false)
-        assertEquals(1, startOnly.size)
-        assertTrue(startOnly.all { it.second == CourseReminderScheduler.ReminderKind.START })
-        // 两个都关：一枚提醒都没有 —— 生产代码在这个分支里直接 return 0，只留跨天闹钟。
-        assertTrue(windowAlarms(now, 20, 0, merge = false, startEnabled = false, endEnabled = false)
-                .isEmpty())
-    }
-
-    // ---- 最坏情况条数：每天 8 节连堂课 x 7 天 ----
-
-    @Test
-    fun worstCaseCountWithAndWithoutMerge() {
-        // 8 节课首尾相接、每处空档 10 分钟（≤ 20，构成连堂），课名互不相同。
-        //   合并关：8 节 x 2 枚 = 16 枚/天 x 7 天 = 112 枚。
-        //   合并开：每处连堂抑制下一节的上课提醒 = 抑制 7 枚，于是 16 - 7 = 9 枚/天 x 7 天 = 63 枚。
-        // 两者都远在 AOSP 的 MAX_ALARMS_PER_UID = 500 之内。
-        val times = CourseTimes.of((1..8).map {
-            val start = 8 * 60 + (it - 1) * 60
-            row(it, String.format("%02d:%02d", start / 60, start % 60),
-                    String.format("%02d:%02d", (start + 50) / 60, (start + 50) % 60))
-        })
-        val courses = (1..8).map { oneCourse(it, "第${it}节", it) }
+    fun endSwitchCannotSuppressStartReminders() {
+        val times = CourseTimes.of(listOf(row(1, "08:00", "08:45"), row(2, "08:55", "09:40")))
+        val courses = listOf(weekly(1, "A", 3, 1), weekly(2, "B", 3, 2))
         val now = at(2024, 2, 13, 0, 0)
         val day = CourseReminderScheduler.dayOf(startDate, false, now)
-
-        val perDayUnmerged = CourseReminderScheduler.alarmsForDay(
-                courses, day, times, dayStart(2024, 2, 13), now, 20, 0, true, true, false)
-        assertEquals(16, perDayUnmerged.size)
-        assertEquals(112, perDayUnmerged.size * CourseReminderScheduler.WINDOW_DAYS)
-
-        val adjacency = CourseReminderScheduler.adjacencyOf(
-                courses, times, CourseReminderScheduler.ADJACENT_BREAK_MAX_MINUTES)
-        val preceded = adjacency.values.filterNotNull().toSet()
-        assertEquals(7, preceded.size)
-        val perDayMerged = CourseReminderScheduler.alarmsForDay(
-                courses, day, times, dayStart(2024, 2, 13), now, 20, 0, true, true, true)
-        assertEquals(9, perDayMerged.size)
-        assertEquals(63, perDayMerged.size * CourseReminderScheduler.WINDOW_DAYS)
-        assertEquals(16 - 7, perDayUnmerged.size - preceded.size)
-        assertTrue(112 < 500 && 63 < 500)
-        // 结构性上界：本校一天最多 15 节 x 7 天 x 每节两枚 = 210 枚，够不着每类 250 的上限，
-        // 所以 requestCode "注册量 ≤ 可取消量" 这条约束永远不会被课表撑破。
-        assertEquals(210, 15 * CourseReminderScheduler.WINDOW_DAYS * 2)
-    }
-
-    // ---- 合并的前提：承载"下一节 …"的那枚下课提醒必须真的排出来 ----
-    //
-    // 抑制某节课的上课提醒，唯一依据是上一节的下课提醒会替它说话。下课提醒开关关掉、或那枚
-    // 下课提醒已经过点时，它就不存在了；此时再抑制下一节的上课提醒，那节课就彻底没人提醒。
-    // 这两条用例在改成两遍扫描之前都是**真的失败**的。
-
-    @Test
-    fun turningOffEndRemindersKeepsTheNextClassStartReminder() {
-        // 08:00-08:50 之后 08:55 接一节，空档 5 分钟 —— 本来构成连堂。
-        val a = courseNamed(1, "A")
-        val b = courseNamed(2, "B")
-        val now = at(2024, 2, 13, 0, 0)
-        val day = CourseReminderScheduler.dayOf(startDate, false, now)
-
-        // 下课提醒关掉、合并开着：两枚下课提醒都不存在，于是没有任何东西能承载"下一节"，
-        // B 的上课提醒**必须**照常排出来。
-        val alarms = CourseReminderScheduler.alarmsForDay(
-                listOf(a, b), day, gapTimes, dayStart(2024, 2, 13), now, 20, 0,
-                startEnabled = true, endEnabled = false, mergeEnabled = true)
-        assertEquals(2, alarms.size)
-        assertTrue(alarms.all { it.kind == CourseReminderScheduler.ReminderKind.START })
-        assertEquals(at(2024, 2, 13, 7, 40),
-                alarms.first { it.course.courseName == "A" }.triggerAt)
-        assertEquals(at(2024, 2, 13, 8, 35),
-                alarms.first { it.course.courseName == "B" }.triggerAt)
-    }
-
-    @Test
-    fun lateEndReminderDoesNotSwallowTheNextClassStartReminder() {
-        // 下课提前量 30 分钟 > 上课提前量 0 分钟。08:25 时：
-        //   A 上课 08:00 已过、A 下课 08:20 已过（承载者不存在）
-        //   B 上课 08:55 未到（必须排）、B 下课 09:15 未到
-        val a = courseNamed(1, "A")
-        val b = courseNamed(2, "B")
-        val now = at(2024, 2, 13, 8, 25)
-        val day = CourseReminderScheduler.dayOf(startDate, false, now)
-
-        val alarms = CourseReminderScheduler.alarmsForDay(
-                listOf(a, b), day, gapTimes, dayStart(2024, 2, 13), now, 0, 30)
-        assertEquals(2, alarms.size)
-        assertEquals(at(2024, 2, 13, 8, 55),
-                alarms.first { it.kind == CourseReminderScheduler.ReminderKind.START
-                        && it.course.courseName == "B" }.triggerAt)
-    }
-
-    @Test
-    fun carrierPresentIsWhatTriggersSuppression() {
-        // 对照组：同一对课、同一个提前量，但 A 的下课提醒还在未来 —— 承载者存在，
-        // 抑制照旧成立，B 的上课提醒被压掉。证明上面两条不是"把合并整体关掉"换来的。
-        val a = courseNamed(1, "A")
-        val b = courseNamed(2, "B")
-        val now = at(2024, 2, 13, 7, 0)
-        val day = CourseReminderScheduler.dayOf(startDate, false, now)
-
-        val alarms = CourseReminderScheduler.alarmsForDay(
-                listOf(a, b), day, gapTimes, dayStart(2024, 2, 13), now, 0, 0)
-        assertEquals(3, alarms.size)
-        assertTrue("B 的上课提醒应被抑制",
-                alarms.none {
-                    it.kind == CourseReminderScheduler.ReminderKind.START && it.course.courseName == "B"
-                })
-        // 承载者身上确实带着"下一节"。
-        val aEnd = alarms.first {
-            it.kind == CourseReminderScheduler.ReminderKind.END && it.course.courseName == "A"
+        for (merge in listOf(true, false)) {
+            val alarms = CourseReminderScheduler.alarmsForDay(courses, day, times,
+                    dayStart(2024, 2, 13), now, 20, 0, true, false, merge)
+            assertEquals(2, alarms.size)
+            assertTrue(alarms.all { it.kind == CourseReminderScheduler.ReminderKind.START })
         }
-        assertEquals("B", aEnd.nextCourse?.courseName)
     }
 
     // ---- 下课倒计时：窗口内的分钟边界 ----
@@ -1048,5 +721,99 @@ class CourseReminderSchedulerTest {
         assertNull(CourseReminderScheduler.countdownMinutesLeft("", at(2024, 2, 13, 14, 20)))
         assertNull(CourseReminderScheduler.countdownMinutesLeft("25:99", at(2024, 2, 13, 14, 20)))
         assertNull(CourseReminderScheduler.countdownMinutesLeft("14", at(2024, 2, 13, 14, 20)))
+    }
+
+    @Test fun upcomingCountdownSwitchesFromDecimalHoursAtSixtyMinutes() {
+        val boundary = at(2024, 2, 13, 12, 20)
+        assertEquals(61L, CourseReminderScheduler.startCountdownMinutesLeft("13:20", boundary - 1))
+        assertEquals(60L, CourseReminderScheduler.startCountdownMinutesLeft("13:20", boundary))
+        for ((minutes, expected) in listOf(60L to "还有60分钟上课", 61L to "约 1.0 小时",
+                90L to "约 1.5 小时", 99L to "约 1.7 小时", 120L to "约 2.0 小时")) {
+            assertEquals(expected, CourseReminderScheduler.startCountdownText(minutes))
+        }
+        assertEquals(1L, CourseReminderScheduler.startCountdownMinutesLeft("13:20", at(2024, 2, 13, 13, 20) - 1))
+        assertNull(CourseReminderScheduler.startCountdownMinutesLeft("13:20", at(2024, 2, 13, 13, 20)))
+        assertNull(CourseReminderScheduler.startCountdownMinutesLeft("25:99", boundary))
+        val instants = CourseReminderScheduler.countdownInstants(listOf(countdownCourse), courseTimes,
+                dayStart(2024, 2, 13), boundary - 1, includeStart = true)
+        assertEquals(boundary, instants.first())
+        assertTrue(instants.contains(boundary + 60_000))
+    }
+
+    // ---- 常驻状态通知：刷新时刻与显示内容 ----
+
+    @Test
+    fun countdownInstantsIncludeStartBoundariesOnlyWhenAsked() {
+        // 第 6 节 13:20-14:40。默认只给"到下课"那一串（小部件只需要它）；
+        // 常驻通知还要"到上课"那一串，否则它没法在上课前把数字一分钟一分钟降下来。
+        val now = at(2024, 2, 13, 13, 0)
+        val onlyEnd = CourseReminderScheduler.countdownInstants(
+                listOf(countdownCourse), courseTimes, dayStart(2024, 2, 13), now)
+        val withStart = CourseReminderScheduler.countdownInstants(
+                listOf(countdownCourse), courseTimes, dayStart(2024, 2, 13), now, includeStart = true)
+
+        assertEquals(21, onlyEnd.size)
+        // 到上课 13:01~13:20 共 20 枚（13:00 那一刻等于 now，按"已到"排除）；
+        // 到下课 14:20~14:40 共 21 枚。
+        assertEquals(41, withStart.size)
+        assertEquals(at(2024, 2, 13, 13, 1), withStart.first())
+        assertTrue("上课那一刻必须在链上：通知要在那一分钟从倒计时切成「正在上课」",
+                withStart.contains(at(2024, 2, 13, 13, 20)))
+        assertEquals(at(2024, 2, 13, 14, 40), withStart.last())
+    }
+
+    @Test
+    fun ongoingStateIsNullWhenNothingIsHappening() {
+        // 一门课都没有。
+        assertNull(CourseReminderScheduler.ongoingStateOf(
+                emptyList(), courseTimes, at(2024, 2, 13, 13, 30)))
+    }
+
+    @Test
+    fun ongoingStateCountsDownToClassStartInsideTheWindow() {
+        // 13:05，第 6 节 13:20 上课：还有 15 分钟，正是"临近上课"。
+        val state = CourseReminderScheduler.ongoingStateOf(
+                listOf(countdownCourse), courseTimes, at(2024, 2, 13, 13, 5))
+
+        assertEquals("即将上课", state?.status)
+        assertEquals(at(2024, 2, 13, 13, 20), state?.transitionAt)
+        assertEquals("倒计时", state?.entries?.single()?.course?.name)
+        assertEquals("x", state?.entries?.single()?.course?.room)
+    }
+
+    @Test
+    fun ongoingStateSaysInClassUntilTheCountdownWindowOpens() {
+        // 13:30 正在上课，但离 14:40 下课还有 70 分钟：窗口没开，只说"正在上课"。
+        val far = CourseReminderScheduler.ongoingStateOf(
+                listOf(countdownCourse), courseTimes, at(2024, 2, 13, 13, 30))
+        assertEquals("正在上课", far?.status)
+
+        // 14:25：距下课 15 分钟，进窗口，换成与小部件**同一句话**。
+        val near = CourseReminderScheduler.ongoingStateOf(
+                listOf(countdownCourse), courseTimes, at(2024, 2, 13, 14, 25))
+        assertEquals("正在上课", near?.status)
+        assertEquals(at(2024, 2, 13, 14, 40), near?.transitionAt)
+    }
+
+    @Test
+    fun ongoingStatePrefersTheClassInProgressOverTheNextOne() {
+        // 一节正在上（第 6 节 13:20-14:40），一节 15:00 才开始（第 8 节）。
+        // 13:30 必须报正在上的那一节，而不是"下一节"。
+        val next = weekly(9, "下一节", 3, 8)
+        val state = CourseReminderScheduler.ongoingStateOf(
+                listOf(countdownCourse, next), courseTimes, at(2024, 2, 13, 13, 30))
+
+        assertEquals("倒计时", state?.entries?.single()?.course?.name)
+        assertEquals("正在上课", state?.status)
+    }
+
+    @Test
+    fun ongoingStateGoesEmptyAfterTheLastClassEnds() {
+        // 输入中所有课程都已结束，且没有后续课程。
+        val next = weekly(9, "下一节", 3, 8)
+        val state = CourseReminderScheduler.ongoingStateOf(
+                listOf(countdownCourse, next), courseTimes, at(2024, 2, 13, 16, 30))
+
+        assertNull(state)
     }
 }

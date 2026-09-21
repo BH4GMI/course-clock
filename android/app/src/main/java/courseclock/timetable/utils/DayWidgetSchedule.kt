@@ -90,20 +90,14 @@ object DayWidgetSchedule {
     fun roomAndTeacher(course: CourseBean): String =
             listOfNotNull(course.room, course.teacher).filter { it.isNotEmpty() }.joinToString(" · ")
 
-    /**
-     * 卡片右上角那个状态词：「还有 N 分钟下课」、「正在上课」或这节课的上课时刻。
-     *
-     * 为什么是这几种：这一格原先只有「还有 N 分钟下课」，而它只在下课前 20 分钟内存在 ——
-     * 一天里绝大多数时间那里是空的，用户看不到「下一节什么时候上」这个最要紧的信息。现在下课
-     * 前 20 分钟仍然显示那句话说完整（下课倒计时没有被挤掉），其余时间分别显示「正在上课」和
-     * 上课时刻。
-     */
+    /** 课前超过 60 分钟用一位小数小时，其余用分钟；下课前 20 分钟保持原有倒计时。 */
     fun statusText(times: CourseTimes, course: CourseBean, nowMillis: () -> Long): String {
-        val countdown = countdownMinutes(times, course, nowMillis)
-        if (countdown != null) return CourseReminderScheduler.countdownText(countdown)
-        if (isOngoing(times, course, nowMillis)) return "正在上课"
-        // 上课时刻读不出来时退回整段起止时间，至少不是空着。
-        return times.startOf(course).orEmpty().ifEmpty { timeRange(times, course) }
+        if (isOngoing(times, course, nowMillis)) {
+            return countdownMinutes(times, course, nowMillis)
+                    ?.let { CourseReminderScheduler.countdownText(it) } ?: "正在上课"
+        }
+        return CourseReminderScheduler.startCountdownMinutesLeft(times.startOf(course), nowMillis())
+                ?.let { CourseReminderScheduler.startCountdownText(it) } ?: "时间未设置"
     }
 
     /**

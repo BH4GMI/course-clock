@@ -20,7 +20,7 @@ class ScheduleManageActivity : BaseTitleActivity() {
     var subButton: AppCompatTextView? = null
 
     override fun onSetupSubButton(tvButton: AppCompatTextView): AppCompatTextView? {
-        tvButton.text = "清空"
+        tvButton.text = "清空课程"
         tvButton.typeface = Typeface.DEFAULT_BOLD
         tvButton.setTextColor(color(R.color.colorAccent))
         subButton = tvButton

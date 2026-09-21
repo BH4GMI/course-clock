@@ -17,7 +17,6 @@ object SettingRowId {
     const val SCHEDULE_DETAIL_TIME = "schedule_detail_time"
     const val SCHEDULE_GRID = "schedule_grid"
     const val TIME_AXIS_SCHEME = "time_axis_scheme"
-    const val SCHEDULE_PRE_LOAD = "schedule_pre_load"
     const val SCHEDULE_BLANK_AREA = "schedule_blank_area"
     const val SHOW_EMPTY_VIEW = "show_empty_view"
 
@@ -35,6 +34,8 @@ object SettingRowId {
     const val REMINDER_ON_GOING = "reminder_on_going"
     const val REMINDER_BEFORE_START = "reminder_before_start"
     const val REMINDER_BEFORE_END = "reminder_before_end"
+    const val NOTIFICATION_HEALTH = "notification_health"
+    const val NOTIFICATION_SOUND = "notification_sound"
 
     // 课表数据 / 系统
     const val CURRENT_TABLE = "current_table"

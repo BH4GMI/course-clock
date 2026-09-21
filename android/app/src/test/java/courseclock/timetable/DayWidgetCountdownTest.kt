@@ -48,7 +48,7 @@ import org.robolectric.annotation.Config
  * 这五种情况放在同一个场景里断言 —— 它们本来就是同一个功能的不同时刻。
  */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [29])
+@Config(sdk = [29], application = android.app.Application::class)
 @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
 class DayWidgetCountdownTest {
 

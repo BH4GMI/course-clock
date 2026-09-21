@@ -38,7 +38,7 @@ class ScheduleSettingsViewModel(application: Application) : AndroidViewModel(app
     }
 
     fun setCurrentWeek(week: Int) {
-        val cal = Calendar.getInstance()
+        val cal = Calendar.getInstance().apply { timeInMillis = courseclock.timetable.utils.CourseClock.nowMillis() }
         if (table.sundayFirst) {
             cal.firstDayOfWeek = Calendar.SUNDAY
             cal.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)

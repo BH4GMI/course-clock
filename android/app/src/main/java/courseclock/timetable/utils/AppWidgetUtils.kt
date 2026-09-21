@@ -6,8 +6,12 @@ import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
+import android.text.TextPaint
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
@@ -47,7 +51,7 @@ val appScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
  * 枚举实例时两个都要列上：枚举器只有这一份，漏一个就会出现"改了课表只有大的那个刷新、
  * 小的还挂着旧课"。
  */
-private val DAY_WIDGET_PROVIDERS = listOf(
+internal val DAY_WIDGET_PROVIDERS = listOf(
         TodayCourseAppWidget::class.java,
         SmallTodayCourseAppWidget::class.java)
 
@@ -114,7 +118,7 @@ object AppWidgetUtils {
      * 重画桌面上所有的周视图小部件。
      *
      * 实例清单以平台为准（见 [refreshAllWidgets]）；`AppWidgetBean` 只提供附加信息「这个实例配的是
-     * 哪张课表」：有登记就按登记的课表画（查不到该课表时这一轮跳过，保持原样），没有登记就用默认课表。
+     * 哪张课表」：有登记就按登记的课表画，查不到则回退默认课表；全无课表时明确显示空状态。
      */
     suspend fun refreshScheduleWidgets(context: Context) {
         val dataBase = AppDatabase.getDatabase(context)
@@ -127,9 +131,7 @@ object AppWidgetUtils {
         val defaultTable = dataBase.tableDao().getDefaultTable()
         for (id in ids) {
             val table = resolveScheduleTable(dataBase, configured[id]?.info, defaultTable)
-            if (table != null) {
-                refreshScheduleWidget(context, manager, id, table)
-            }
+            refreshScheduleWidget(context, manager, id, table)
         }
     }
 
@@ -149,13 +151,13 @@ object AppWidgetUtils {
         val dataBase = AppDatabase.getDatabase(context)
         val info = dataBase.appWidgetDao().getWidgetsByTypes(0, 0)
                 .firstOrNull { it.id == appWidgetId }?.info
-        val table = resolveScheduleTable(dataBase, info, dataBase.tableDao().getDefaultTable()) ?: return
+        val table = resolveScheduleTable(dataBase, info, dataBase.tableDao().getDefaultTable())
         refreshScheduleWidget(context, AppWidgetManager.getInstance(context), appWidgetId, table)
     }
 
     /**
      * 「这个周视图实例显示哪张课表」：有登记就按登记的课表，查不到（登记为空 / 坏值 / 课表已删）
-     * 一律回退默认表；连默认表都没有（用户把课表删光了）返回 null，调用方跳过这一轮、保持原样。
+     * 一律回退默认表；连默认表都没有时返回 null，由渲染层清除旧内容并显示无课表状态。
      *
      * 与 [ScheduleAppWidgetService.onDataSetChanged] 的取表口径对齐 —— 只回退一头会造成
      * 「表头画旧表、列表画默认表」的分裂；坏值不能让 `toInt()` 把整轮刷新打断。
@@ -191,8 +193,20 @@ object AppWidgetUtils {
         }
     }
 
-    fun refreshScheduleWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, tableBean: TableBean) {
+    fun refreshScheduleWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, tableBean: TableBean?) {
         val mRemoteViews = RemoteViews(context.packageName, R.layout.schedule_app_widget)
+        WidgetTheme.color(mRemoteViews, context, R.id.tv_date, "setTextColor", R.color.widget_panel_text)
+        WidgetTheme.color(mRemoteViews, context, R.id.tv_week, "setTextColor", R.color.widget_panel_text_secondary)
+        mRemoteViews.setTextViewText(R.id.tv_date, CourseUtils.getTodayDate())
+        if (tableBean == null) {
+            mRemoteViews.setTextViewText(R.id.tv_week, context.getString(R.string.table_missing))
+            mRemoteViews.setViewVisibility(R.id.weekName, View.GONE)
+            mRemoteViews.setViewVisibility(R.id.lv_schedule, View.GONE)
+            appWidgetManager.updateAppWidget(appWidgetId, mRemoteViews)
+            return
+        }
+        mRemoteViews.setViewVisibility(R.id.weekName, View.VISIBLE)
+        mRemoteViews.setViewVisibility(R.id.lv_schedule, View.VISIBLE)
         // 表头文字必须跟底板主题（widget_panel_text），不能用 TableBean.widgetTextColor
         var week = safeCountWeek(tableBean.startDate, tableBean.sundayFirst)
         val date = CourseUtils.getTodayDate()
@@ -229,8 +243,6 @@ object AppWidgetUtils {
             mRemoteViews.setViewVisibility(R.id.tv_title6, View.GONE)
         }
 
-        WidgetTheme.color(mRemoteViews, context, R.id.tv_date, "setTextColor", R.color.widget_panel_text)
-        WidgetTheme.color(mRemoteViews, context, R.id.tv_week, "setTextColor", R.color.widget_panel_text_secondary)
         val weekDate = CourseUtils.getDateStringFromWeek(
                 maxOf(safeCountWeek(tableBean.startDate, tableBean.sundayFirst), 1),
                 week, tableBean.sundayFirst)
@@ -265,10 +277,7 @@ object AppWidgetUtils {
                 mRemoteViews.setTextViewText(R.id.tv_title1 + i, daysArray[i + 1] + "\n${weekDate[i + 1]}")
             }
         }
-        // 只看本周：右上角那两个箭头（下一周 / 回到本周）已删除，实例不再有"在看哪一周"的状态，
-        // 所以 URI 里没有 flag，只剩"这个实例要显示哪张课表"这一件事。
-        val lvIntent = Intent(context, ScheduleAppWidgetService::class.java)
-        lvIntent.data = Uri.fromParts("content", tableBean.id.toString(), null)
+        val lvIntent = weekIntent(context, tableBean.id, appWidgetId)
         mRemoteViews.setRemoteAdapter(R.id.lv_schedule, lvIntent)
         // 与日视图同一个口径：小部件是纯展示，不挂任何会打开 App 的点击入口，
         // 否则「添加小部件」选择器里点一下会被它吃掉（见 refreshTodayWidget 里的说明）。
@@ -290,7 +299,7 @@ object AppWidgetUtils {
      * 行为不变（与正文工厂的 `nowMillis` 是同一个约定）。
      */
     fun refreshTodayWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int,
-                           now: Long = System.currentTimeMillis()) {
+                           now: Long = CourseClock.nowMillis()) {
         val mRemoteViews = RemoteViews(context.packageName, R.layout.today_course_app_widget)
         val date = SimpleDateFormat("M月d日", Locale.CHINA).format(Date(now))
         val weekDay = CourseUtils.getDayStr(CourseUtils.getWeekdayIntAt(now))
@@ -307,25 +316,23 @@ object AppWidgetUtils {
         //   小正方形（focus）：正文没有日期，表头把日期给全 —— 「9月18日 · 周五」。
         // 大正方形（large，日视图被拖成大方块）这一档设计稿没有覆盖（它的大正方形是"整周课表"，
         // 属于另一个 provider），而这里仍然是某一天的日程，所以同样写「今日日程」。这是判断，不是照抄。
-        val (cardWidthPx, cardHeightPx) = TodayColorfulService.cardBoxPx(context, appWidgetId)
+        val (cardWidthPx, cardHeightPx) = cardBoxPx(context, appWidgetId)
         val form = TodayColorfulService.dayWidgetForm(cardWidthPx, cardHeightPx,
                 context.resources.displayMetrics.density)
-        mRemoteViews.setTextViewText(R.id.tv_date,
-                if (form == TodayColorfulService.DayWidgetForm.Focus) "$date · $weekDay" else "今日日程")
-        // 表头另一头：`3节 · 已上1节`。
-        //
-        // 课程数必须和正文出自**同一份装载结果**（见 TodayColorfulService.loadDay）——
-        // 表头与正文各查一次库，两处会因为"读的时刻不同"而对不上。
-        //
-        // 但 2×2 那一格放不下它：整卡只有 110dp，扣掉内边距后连左边的日期都要省着写。所以按宿主
-        // 上报的格宽决定加不加计数（官方格宽公式 70n−30：2 格 110dp、4 格 250dp，取 180dp 作分界），
-        // 而不是让 RemoteViews 去截断一个用户永远看不全的串。
-        // 也不必为不加计数那一档多查一次库：先问宽度，再决定要不要 loadDay。
-        val summary = if (cardWidthPx / context.resources.displayMetrics.density >= 180f) {
-            daySummary(TodayColorfulService.loadDay(context, now))
-        } else {
-            ""
+        val fullTitle = if (form == TodayColorfulService.DayWidgetForm.Focus) "$date · $weekDay" else "今日日程"
+        val metrics = context.resources.displayMetrics
+        val availableWidth = cardWidthPx - 2 * context.resources.getDimensionPixelSize(R.dimen.widget_edge_padding) - 4 * metrics.density
+        val paint = TextPaint().apply {
+            textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, metrics)
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
         }
+        val title = if (paint.measureText(fullTitle) <= availableWidth) fullTitle else date
+        val fullSummary = daySummary(TodayColorfulService.loadDay(context, now))
+        val summary = fullSummary.takeIf {
+            paint.measureText(title) + paint.measureText(it) + 4 * metrics.density <= availableWidth
+        }.orEmpty()
+        mRemoteViews.setTextViewText(R.id.tv_date, title)
+        mRemoteViews.setContentDescription(R.id.tv_date, "$fullTitle，$fullSummary")
         mRemoteViews.setTextViewText(R.id.tv_summary, summary)
         // 小部件上**不挂任何点击入口**（用户实测：在「添加小部件」选择器里点一下，被小部件自己
         // 的点击吃掉，结果是打开 App 而不是把这个小部件放上去）。
@@ -391,8 +398,7 @@ object AppWidgetUtils {
      * `cellSizeCache`、这一整天算好的行槽位全是别人的。桌面上看到的就是"两个日视图一大一小，
      * 小的那个一直按大的尺寸画"。
      *
-     * 周视图（[ScheduleAppWidgetService]）早就是这么写的（`"<flag>,<tableId>"`）。
-     * 日视图这一版只剩实例身份：原先还带一个"今天/明天"的标志位，右上角箭头删除后它没有意义了。
+     * 日视图只需实例身份；周视图的课表与实例身份由 [weekIntent] 一起放入 data。
      */
     internal fun dayUri(appWidgetId: Int): Uri =
             Uri.fromParts("content", appWidgetId.toString(), null)
@@ -406,4 +412,31 @@ object AppWidgetUtils {
      */
     internal fun dayIntent(context: Context, uri: Uri) =
             Intent(context, TodayColorfulService::class.java).apply { data = uri }
+
+    /** 同一课表的不同尺寸实例也必须有不同的 FilterComparison 身份。 */
+    internal fun weekIntent(context: Context, tableId: Int, widgetId: Int) =
+            Intent(context, ScheduleAppWidgetService::class.java).apply {
+                data = Uri.fromParts("content", tableId.toString(), widgetId.toString())
+            }
+
+    /** 宿主尺寸范围按当前方向取一对；周视图和日视图不能各自猜测屏幕宽度。 */
+    internal fun cardBoxPx(context: Context, widgetId: Int): Pair<Int, Int> {
+        val manager = AppWidgetManager.getInstance(context)
+        val options = if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) Bundle()
+                else manager.getAppWidgetOptions(widgetId)
+        val landscape = context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val widthKey = if (landscape) AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH else AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH
+        val heightKey = if (landscape) AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT else AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT
+        val provider = manager.getAppWidgetInfo(widgetId)
+        val density = context.resources.displayMetrics.density
+        fun px(dp: Int) = (dp * density).toInt()
+        val width = options.getInt(widthKey).takeIf { it > 0 }?.let { px(it) }
+                ?: provider?.minWidth?.takeIf { it > 0 }
+                ?: context.resources.getDimensionPixelSize(R.dimen.day_widget_default_width)
+        val height = options.getInt(heightKey).takeIf { it > 0 }?.let { px(it) }
+                ?: options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT).takeIf { it > 0 }?.let { px(it) }
+                ?: provider?.minHeight?.takeIf { it > 0 }
+                ?: context.resources.getDimensionPixelSize(R.dimen.day_widget_default_height)
+        return width to height
+    }
 }

@@ -12,6 +12,7 @@ import courseclock.timetable.settings.items.VerticalItem
 import courseclock.timetable.utils.BatteryOptimization
 import courseclock.timetable.utils.Const
 import courseclock.timetable.utils.CourseReminderScheduler
+import courseclock.timetable.utils.CourseNotificationSettings
 import courseclock.timetable.utils.getPrefer
 import splitties.resources.color
 
@@ -37,6 +38,8 @@ class SettingsList(private val context: Context) {
 
     /** 「开启上课提醒」总闸下面的行。总闸一动，这些行整体重算可用性。 */
     private val gatedRows = mutableListOf<BaseSettingItem>()
+    private var startTimeItem: SeekBarItem? = null
+    private var endTimeItem: SeekBarItem? = null
 
     /**
      * 构造整份列表。
@@ -48,37 +51,42 @@ class SettingsList(private val context: Context) {
         val items = mutableListOf<BaseSettingItem>()
         gatedRows.clear()
 
+        if (courseclock.timetable.utils.CourseClock.controlsAvailable) {
+            items += CategoryItem("测试工具")
+            items += HorizontalItem("time_lab", "时间实验室", "日期、时间与倍速", arrow = NAVIGATE)
+        }
+
         items += CategoryItem("课表显示")
-        items += HorizontalItem(SettingRowId.CURRENT_TABLE, "设置当前课表",
-                "上课时间、周数、格子样式", arrow = NAVIGATE)
-        items += SwitchItem(SettingRowId.SCHEDULE_DETAIL_TIME, "显示上课时间", detailTime(),
-                "关闭后只显示节次")
+        items += HorizontalItem(SettingRowId.CURRENT_TABLE, "当前课表设置",
+                "", desc = "课程作息、学期与格子样式", arrow = NAVIGATE)
+        items += SwitchItem(SettingRowId.SCHEDULE_DETAIL_TIME, "左侧显示时间", detailTime(),
+                "关闭后左侧仅显示节次")
         items += SwitchItem(SettingRowId.SCHEDULE_GRID, "显示虚线网格", scheduleGrid(),
-                "关闭后课表只剩留白")
-        items += HorizontalItem(SettingRowId.TIME_AXIS_SCHEME, "作息时间表",
+                "课表行列分隔线")
+        items += HorizontalItem(SettingRowId.TIME_AXIS_SCHEME, "左侧时间方案",
                 schemeLabel(prefer.getString(Const.KEY_TIME_AXIS_SCHEME, "").orEmpty()),
-                desc = "左侧时间按它显示", arrow = SELECT)
-        items += SwitchItem(SettingRowId.SCHEDULE_PRE_LOAD, "页面预加载", preLoad(),
-                "关掉更省内存，滑动课表要等一下；重启 App 后生效")
+                desc = "仅调整时间栏，各课程仍按自身作息显示", arrow = SELECT)
         items += SwitchItem(SettingRowId.SCHEDULE_BLANK_AREA, "课表底部留白", blankArea(),
-                "把最后一节课滑到屏幕中间看")
+                "允许末节课程向上滚动")
         items += SwitchItem(SettingRowId.SHOW_EMPTY_VIEW, "空课表插图", showEmptyView(),
-                "没课的日子显示一张图，切换页面后生效")
+                "无课时显示插图，切换页面后生效")
 
         items += CategoryItem("外观")
-        items += HorizontalItem(SettingRowId.DAY_NIGHT_THEME, "显示主题", dayNightLabel(),
+        items += HorizontalItem(SettingRowId.DAY_NIGHT_THEME, "深浅模式", dayNightLabel(),
                 arrow = SELECT)
         items += VerticalItem(SettingRowId.THEME_COLOR, "主题颜色",
-                "更换课表配色，重启后生效")
+                "按钮与强调色，重启后生效")
         items += SwitchItem(SettingRowId.HIDE_NAV_BAR, "课表全屏显示", hideNavBar(),
-                "隐藏状态栏，课表多一行；重启 App 后生效")
-        items += SwitchItem(SettingRowId.DAY_WIDGET_COLOR, "日视图用课程颜色", dayWidgetColor(),
-                "桌面小部件按课程色显示，小部件右上角可切换")
+                "隐藏状态栏，重启后生效")
+        items += SwitchItem(SettingRowId.DAY_WIDGET_COLOR, "日视图课程色条", dayWidgetColor(),
+                "大尺寸日视图按课程颜色显示色条")
 
-        items += CategoryItem("上课提醒")
+        CourseNotificationSettings.initialize(context)
+        items += CategoryItem("课程通知")
         // 总闸排在最前：用户先看到"开不开"，再决定"怎么开"。
-        items += SwitchItem(SettingRowId.COURSE_REMIND, "开启上课提醒", courseRemind(),
-                "上课前用通知和振动提醒")
+        items += SwitchItem(SettingRowId.COURSE_REMIND, "启用课程通知", courseRemind(),
+                "关闭后停止课程提醒和状态通知，不影响小组件")
+        items += HorizontalItem(SettingRowId.NOTIFICATION_HEALTH, "通知检查", "检查中", arrow = NAVIGATE)
         // 这一条不是提醒的开关，而是"提醒能不能真的响"的**前提**：系统省电限制会把已经排好的
         // 提醒推到很久以后。它因此不跟着总闸变灰，理由见 [refreshAvailability] 的说明。
         //
@@ -89,23 +97,25 @@ class SettingsList(private val context: Context) {
                 batteryStateText(), desc = "减少待机时提醒延迟", arrow = NAVIGATE)
         items += batteryItem!!
         items += gated(SwitchItem(SettingRowId.REMINDER_START, "上课提醒", reminderStart(),
-                "上课前提醒一次"))
-        items += gated(SwitchItem(SettingRowId.REMINDER_END, "下课提醒", reminderEnd(),
-                "下课前提醒一次"))
-        items += gated(SwitchItem(SettingRowId.REMINDER_MERGE, "连堂课只提醒一次", reminderMerge(),
-                "两节连上时，下课时顺带说下一节"))
-        items += gated(SwitchItem(SettingRowId.REMINDER_ON_GOING, "提醒通知不划走", onGoing(),
-                "通知常驻在状态栏，直到下课；对下一次提醒生效"))
-        // 提前量是"课前设好就行"的偏好，不跟着总闸灰：先定时间再开提醒是正常顺序，
-        // 而且它没有副作用，也用不着重排。
-        items += SeekBarItem(SettingRowId.REMINDER_BEFORE_START, "上课前提醒",
+                "提前或准点提醒一次"))
+        startTimeItem = SeekBarItem(SettingRowId.REMINDER_BEFORE_START, "上课前提醒",
                 prefer.getInt(CourseReminderScheduler.KEY_REMINDER_BEFORE_START,
-                        CourseReminderScheduler.DEFAULT_BEFORE_START),
-                0, 90, "分钟")
-        items += SeekBarItem(SettingRowId.REMINDER_BEFORE_END, "下课前提醒",
+                        CourseReminderScheduler.DEFAULT_BEFORE_START), 0, 90, "分钟")
+        items += gated(startTimeItem!!)
+        items += gated(SwitchItem(SettingRowId.REMINDER_END, "下课提醒", reminderEnd(),
+                "提前或准点提醒一次"))
+        endTimeItem = SeekBarItem(SettingRowId.REMINDER_BEFORE_END, "下课前提醒",
                 prefer.getInt(CourseReminderScheduler.KEY_REMINDER_BEFORE_END,
                         CourseReminderScheduler.DEFAULT_BEFORE_END),
                 0, 90, "分钟")
+        items += gated(endTimeItem!!)
+        items += gated(SwitchItem(SettingRowId.REMINDER_MERGE, "同时提醒合并", reminderMerge(),
+                "仅合并同一时刻触发的提醒"))
+        items += gated(HorizontalItem(SettingRowId.REMINDER_ON_GOING, "常驻课程状态",
+                CourseNotificationSettings.mode(context).label,
+                desc = "课前倒计时，上课中显示课程状态；始终静默", arrow = SELECT))
+        items += HorizontalItem(SettingRowId.NOTIFICATION_SOUND, "提醒声音与振动",
+                "系统设置", desc = "包括横幅，仅影响一次性提醒", arrow = NAVIGATE)
 
         refreshAvailability()
         RowCardDecoration.apply(context, items)
@@ -122,14 +132,19 @@ class SettingsList(private val context: Context) {
      * 刻意**不**跟着灰的行，理由都是"灰掉反而挡住用户"：
      * - 「后台运行不受限制」是提醒能不能响的前提，用户完全可能想提前授权；
      *   灰掉它等于把"先去系统里放行"这条路堵上，而这恰恰是最容易漏、也最要命的一步。
-     * - 两个提前量是课前偏好，没有副作用。
+     * 两个提前量分别依赖总闸和对应提醒开关，不影响已保存的数值。
      * - 「显示主题 / 主题颜色 / 全屏显示 / 日视图用课程颜色」与提醒无关。
      */
     fun refreshAvailability(): Boolean {
         val on = prefer.getBoolean(Const.KEY_COURSE_REMIND, false)
         var changed = false
         for (row in gatedRows) {
-            val wanted = if (on) SettingRowState.ENABLED else SettingRowState.DISABLED_BY_DEPENDENCY
+            val available = on && when (row) {
+                startTimeItem -> reminderStart()
+                endTimeItem -> reminderEnd()
+                else -> true
+            }
+            val wanted = if (available) SettingRowState.ENABLED else SettingRowState.DISABLED_BY_DEPENDENCY
             if (row.rowState != wanted) {
                 row.rowState = wanted
                 changed = true
@@ -145,19 +160,17 @@ class SettingsList(private val context: Context) {
 
     private fun detailTime() = prefer.getBoolean(Const.KEY_SCHEDULE_DETAIL_TIME, true)
     private fun scheduleGrid() = prefer.getBoolean(Const.KEY_SCHEDULE_GRID, true)
-    private fun preLoad() = prefer.getBoolean(Const.KEY_SCHEDULE_PRE_LOAD, true)
     private fun blankArea() = prefer.getBoolean(Const.KEY_SCHEDULE_BLANK_AREA, true)
     private fun showEmptyView() = prefer.getBoolean(Const.KEY_SHOW_EMPTY_VIEW, true)
     private fun dayWidgetColor() = prefer.getBoolean(Const.KEY_DAY_WIDGET_COLOR, true)
     private fun hideNavBar() = prefer.getBoolean(Const.KEY_HIDE_NAV_BAR, false)
     private fun courseRemind() = prefer.getBoolean(Const.KEY_COURSE_REMIND, false)
-    private fun onGoing() = prefer.getBoolean(Const.KEY_REMINDER_ON_GOING, false)
 
     private fun reminderStart() = prefer.getBoolean(CourseReminderScheduler.KEY_REMINDER_START_ENABLED,
             CourseReminderScheduler.DEFAULT_REMINDER_KIND_ENABLED)
 
     private fun reminderEnd() = prefer.getBoolean(CourseReminderScheduler.KEY_REMINDER_END_ENABLED,
-            CourseReminderScheduler.DEFAULT_REMINDER_KIND_ENABLED)
+            false)
 
     private fun reminderMerge() = prefer.getBoolean(CourseReminderScheduler.KEY_REMINDER_MERGE_ENABLED,
             CourseReminderScheduler.DEFAULT_MERGE_ENABLED)
@@ -208,7 +221,7 @@ class SettingsList(private val context: Context) {
     /**
      * 「作息时间表」的显示名（原来是「时间栏作息方案」—— 术语太多，本科生看不懂）。
      *
-     * 空串 = **自动**：用导入时按本次安排占比选出来的那一套（占比相同时是 B）。
+     * 空串 = **自动**：按当前课表的课程位置计算累计错位最小的方案。
      * 另外三套是学校公布的上午错峰作息：A = 教学楼 A、F 楼、J301 室；B = 教学楼 B、C 楼、
      * J302 室及其他楼宇；C = 教学楼 D、E 楼、J303 室。
      */

@@ -239,7 +239,7 @@ class AddCourseActivity : BaseListActivity(), ColorPickerFragment.ColorPickerDia
 
         })
         val palette = resources.getIntArray(R.array.customizedColors)
-        palette.forEachIndexed { index, colorInt ->
+        palette.forEach { colorInt ->
             val circle = AppCompatTextView(this).apply {
                 text = "✓"
                 textSize = 12f

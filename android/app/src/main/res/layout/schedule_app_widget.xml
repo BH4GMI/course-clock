@@ -32,9 +32,9 @@
         android:layout_marginEnd="8dp"
         android:layout_marginTop="2dp"
         android:layout_marginBottom="2dp"
-        android:ellipsize="end"
+        android:ellipsize="middle"
         android:fontFamily="sans-serif-medium"
-        android:maxLines="1"
+        android:singleLine="true"
         android:text="我的课表 | 第1周    周四"
         android:textSize="12sp"
         android:textStyle="bold" />
@@ -50,7 +50,7 @@
             android:id="@+id/tv_title0"
             style="@style/ScheduleHeaderStyle"
             android:layout_width="0dp"
-            android:layout_weight="0.5"
+            android:layout_weight="1"
             android:textStyle="bold" />
 
         <TextView

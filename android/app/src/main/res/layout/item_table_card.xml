@@ -4,8 +4,8 @@
 
   左边 64dp 色块写「表名首字 + 周数区间」——不再写「周一/周二」这种和课表无关的装饰。
   色块底色由代码染：当前表 = 主题强调色（实心），其他表 = 课程调色板 20% 透明度。
-  右侧表名 16sp + 「N 门课程 · 正在使用」12sp；当前表一枚强调色对勾，其他表一枚
-  「还有下一层」的箭头。整卡可点（切换）、可长按（编辑/查看课程/删除）。
+  右侧表名 16sp + 「N 门课程 · 正在使用」12sp，操作按钮始终可见。
+  整卡可点（切换）、可长按（同操作按钮菜单）。
 -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -72,7 +72,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/tv_table_subtitle"
-            app:layout_constraintEnd_toStartOf="@id/tv_current_check"
+            app:layout_constraintEnd_toStartOf="@id/btn_table_actions"
             app:layout_constraintStart_toEndOf="@id/ll_avatar"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
@@ -90,39 +90,24 @@
             android:textColor="@color/text_secondary"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/tv_current_check"
+            app:layout_constraintEnd_toStartOf="@id/btn_table_actions"
             app:layout_constraintStart_toStartOf="@id/tv_table_name"
             app:layout_constraintTop_toBottomOf="@id/tv_table_name"
             tools:text="9 门课程 · 正在使用" />
 
-        <!-- 当前表：一枚强调色对勾；非当前表换成箭头（两者互斥，可见性在适配器里切）。 -->
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_current_check"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:includeFontPadding="false"
-            android:text="✓"
-            android:textColor="@color/colorPrimary"
-            android:textSize="18sp"
-            android:textStyle="bold"
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/btn_table_actions"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/table_actions"
+            android:padding="12dp"
+            android:src="@android:drawable/ic_menu_more"
+            app:tint="@color/text_secondary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/iv_chevron"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_chevron_right"
-            android:tint="@color/text_secondary"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
